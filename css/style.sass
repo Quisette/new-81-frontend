@@ -1,0 +1,287 @@
+$DefaultBackColor: #efe
+$KeyColor: #7c3
+$DarkKeyColor: rgb(83, 134, 0)
+$AccentColor: rgb(212, 152, 0)
+$LobbyGap: 7px
+$boardGap: 7px
+$PlayerListWidth: 368px
+$GameListWidth: 574px
+$SelectedSquareColor: rgba(50, 180, 255, 0.2)
+$LastSquareColor: rgba(255, 80, 30, 0.2)
+@import url(http://fonts.googleapis.com/earlyaccess/notosansjp.css)
+
+// -------------------------------
+// General rules
+// -------------------------------
+
+html
+  height: 100%
+
+body
+  height: 100%
+  font-family: 'Noto Sans JP', sans-serif
+  color: #333
+  font-size: 12px
+  overflow-y: hidden
+a
+  color: $DarkKeyColor
+  text-decoration: none
+  &:hover
+    color: $AccentColor
+p
+  margin: 3px 0
+img.inline
+  vertical-align: middle
+
+input[type="button"]
+  font-size: 12px
+  height: 40px
+  line-height: 40px
+  padding: 0 8px
+
+div.layer
+  position: absolute
+  left: 0
+  top: 0
+  width: 100%
+  height: 100%
+  min-height: 520px
+  text-align: center
+  background-color: $DefaultBackColor
+
+div.grid-wrapper
+  background-color: white
+  border: 1px solid #ccc
+
+div.menuBar
+  background-color: $KeyColor
+  text-align: left
+  height: 35px
+  ul
+    margin: 0
+    padding: 0
+    list-style: none
+    li
+      display: inline
+      margin: 0
+      padding: 0
+      float: left
+      a.button
+        min-width: 100px
+        height: 35px
+        line-height: 35px
+        text-align: center
+        display: inline-block
+        color: white
+        font-size: 14px
+        &:hover
+          background-color: rgba(255,255,255,0.2)
+        img
+          vertical-align: -7px
+
+// -------------------------------
+// Login View
+// -------------------------------
+
+select#languageSelector
+  width: 100px
+  height: 20px
+
+div#layerLogin
+  z-index: 3
+  background-image: url(../img/login_background.jpg)
+  background-size: cover
+  background-position: center center
+
+p#loginAlert
+  font-size: 11px
+  color: rgb(181, 119, 0)
+
+table#serverGrid
+  background: white
+  width: 300px
+
+// -------------------------------
+// Lobby View
+// -------------------------------
+
+div#layerLobby
+  z-index: 2
+  background-image: url(../img/back_tile.png)
+
+div#lobbyHeader
+  display: flex
+  justify-content: flex-end
+  align-items: center
+  padding-right: 2px
+  flex: 1
+  color: white
+
+div#headerText
+  font-size: 9px
+  padding: 0 5px
+
+div#playerListBox
+  width: $PlayerListWidth
+  display: flex
+  flex-direction: column
+  padding-bottom: $LobbyGap
+
+table#playerGrid
+  background: white
+  width: 100%
+
+div#gameListBox
+  width: $GameListWidth + $LobbyGap
+  display: flex
+  flex-direction: column
+
+div#gameGridWrapper
+  width: $GameListWidth
+  margin-left: $LobbyGap
+  margin-bottom: $LobbyGap
+  height: 45%
+
+div#lobbyChatBox
+  display: flex
+  flex-direction: column
+  flex: 1
+  padding-bottom: $LobbyGap
+  margin-left: $LobbyGap
+
+div#lobbyMessageArea
+  text-align: left
+  background-color: white
+  overflow-y: scroll
+  border: 1px solid #ccc
+  word-wrap: break-word
+  flex: 1
+
+div#worldClock
+  height: 0px
+
+// -------------------------------
+// Board View
+// -------------------------------
+
+div#layerBoard
+  z-index: 1
+  background-image: url(../img/back_tile.png)
+
+div#boardLeftBottomHBox
+  flex: 1
+  margin-top: $boardGap
+
+div#boardChatBox
+  flex: 1
+  margin-bottom: $boardGap
+div#boardRightVBox
+  margin-left: $boardGap
+div#boardBox
+  position: relative
+  width: 784px
+  height: 476px
+  background-image: url(../img/tatami.jpg)
+  > div
+    position: absolute
+div#banField
+  background-size: contain
+div.square
+  position: absolute
+  background-size: contain
+div.square-selected
+  background-color: $SelectedSquareColor
+div.square-last
+  background-color: $LastSquareColor
+div.square-movable
+div.komadai
+  background-size: contain
+div.player-info
+  width: 160px
+  height: 190px
+  background-image: url(../img/paper.jpg)
+  border: solid 2px #ddd
+
+div#boardMessageArea
+  text-align: left
+  background-color: white
+  overflow-y: scroll
+  border: 1px solid #ccc
+  word-wrap: break-word
+  flex: 1
+
+div#watcherBox
+  width: 210px
+
+div#kifuBox
+  width: 170px
+
+
+
+// -------------------------------
+// Modal windows
+// -------------------------------
+
+div.modal
+  background-color: #f3f3f3
+  box-shadow: 4px 4px 10px 0px rgba(0,0,0,0.5)
+  h1
+    background-color: $KeyColor
+    color: white
+    margin: 0
+    padding: 4px 10px
+    font-size: 15px
+  div.content
+    line-height: 2em
+    padding: 12px 20px 12px 12px
+
+div#modalNewGame
+  top: 100px
+  left: 100px
+  position: fixed
+  display: none
+
+div#modalChallenger
+  display: none
+  min-width: 260px
+
+#simplemodal-overlay
+  background-color: #000
+#simplemodal-container
+
+// -------------------------------
+// Utilities
+// -------------------------------
+
+.hbox
+  display: flex
+  justify-content: center
+  align-items: stretch
+
+.vbox
+  display: flex
+  flex-direction: column
+  justify-content: flex-start
+
+ul#thanksList
+  margin: 0
+  li
+    display: inline-block
+    margin: 0 10px
+
+.left
+  text-align: left
+
+center
+  text-align: center
+
+.test
+  border: 1px solid goldenrod
+
+.thin
+  margin-top: 4px
+  margin-bottom: 4px
+.small
+  font-size: 10px
+.margin-medium
+  margin: 15px

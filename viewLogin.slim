@@ -1,0 +1,53 @@
+div.layer#layerLogin
+  div style="margin:auto;text-align:right;padding-top:5px;width:700px"
+    p
+      select#languageSelector onchange="_languageSelected()"
+        option value="ja" 日本語
+        option value="en" English
+  p.margin-medium
+    img src="img/entrance_ja.jpg"
+  div.hbox
+    div.left style="width:250px"
+      p
+        input type="radio" name="loginType" value="0" checked="true" onchange="_loginTypeChange()"
+        span data-i18n="login.registered"
+        input type="radio" name="loginType" value="1" onchange="_loginTypeChange()"
+        span data-i18n="login.guest"
+      p
+        span.small data-i18n="login.loginname"
+        br
+        input type="text" id="usernameInput"
+      p
+        span.small data-i18n="login.password"
+        br
+        input type="password" id="passwordInput"
+      p
+        input type="checkbox" id="loginSave"
+        span data-i18n="login.save"
+      p
+        input id="loginButton" data-i18n-value="login.login" type="button" onclick="_loginButtonClick()"
+      p#loginAlert &nbsp;
+    div style="padding-top:10px"
+      table.stripe.hover#serverGrid
+        tr
+          thead
+            th data-i18n="login.server"
+            th data-i18n="login.description"
+            th data-i18n="login.players"
+          tbody
+  p ver.2017/08/06
+  p
+    |(c) Hidetchi
+  p powered by shogi-server, and
+  p
+    ul#thanksList
+      li
+        a href="http://shineleckoma.web.fc2.com/" target="_blank" shineleckoma - しんえれ外部駒
+      li
+        a href="http://piecodesign.jp/" target="_blank" piecodesign
+      li
+        a href="http://www.hmix.net/" target="_blank" H/MIX GALLERY
+      li
+        a href="http://www.otosozai.com/" target="_blank" otosozai.com
+      li
+        a href="http://nflagrsign.xrea.jp/" target="_blank" National flag & Road sign Mt.

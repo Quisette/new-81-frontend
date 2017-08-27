@@ -1,0 +1,12 @@
+div.modal#modalChallenger
+  h1 data-i18n="challenger.title"
+  div.content
+    p#challengerName style="font-size:15px;font-weight:bold"
+    p
+      span data-i18n="lobby.rate"
+      span#challengerRate
+    div.hbox style="justify-content: space-around; margin-top:10px"
+      input id="challengerAcceptButton" type="button" onclick="_handleAcceptChallenge()" data-i18n-value="challenger.accept" style="min-width: 70px" class="simplemodal-close"
+      input id="challengerRejectButton" type="button" data-i18n-value="challenger.reject" style="min-width: 70px" class="simplemodal-close"
+    
+script src="js/viewModalChallenger.js"

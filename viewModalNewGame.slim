@@ -1,0 +1,51 @@
+div.modal#modalNewGame
+  h1 data-i18n="new_game.title"
+  div.content
+    p
+      input type="radio" name="newGameType" value="1"
+      |15<span data-i18n="min"></span> - 60<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.21)
+    p
+      input type="radio" name="newGameType" value="2" checked="true"
+      |10<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.11)
+    p
+      input type="radio" name="newGameType" value="3"
+      |&ensp;5<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.00)
+    p
+      input type="radio" name="newGameType" value="4"
+      |&ensp;0<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x0.85)
+    p
+      input type="radio" name="newGameType" value="5"
+      span data-i18n="new_game.nonrated"
+    p style="margin-left:25px"
+      select#newGameRuleSelect disabled="true"
+    p style="margin-left:25px"
+      select#newGameTotalSelect disabled="true"
+        option 0
+        option 5
+        option 10
+        option selected="true" 15
+        option 20
+        option 30
+        option 40
+        option 60
+      span data-i18n="min"
+      select#newGameByoyomiSelect disabled="true"
+        option 10
+        option 20
+        option selected="true" 30
+        option 60
+      span data-i18n="sec"
+    p
+      input type="radio" name="newGameType" value="6" disabled="true"
+      span data-i18n="new_game.tournament"
+    p
+      input type="radio" name="newGameType" value="7" disabled="true"
+      span data-i18n="new_game.study_room"
+    p
+      input type="radio" name="newGameType" value="8"
+      span data-i18n="new_game.stop"
+    div.hbox style="justify-content: space-around; margin-top:10px"
+      input id="newGameOKButton" class="simplemodal-close" type="button" onclick="_handleNewGame()" value="OK" style="min-width: 70px"
+      input id="newGameCancelButton" class="simplemodal-close" data-i18n-value="cancel" type="button"
+    
+script src="js/viewModalNewGame.js"

@@ -1,0 +1,73 @@
+div.layer#layerLobby
+  div.vbox style="width:100%;height:100%"
+    div.hbox.menuBar#lobbyMenu
+      ul
+        li
+          a.button href="#" onclick="_refreshButtonClick()" data-i18n-title="lobby.refresh"
+            img src="img/icon_refresh.png"
+        li
+          a.button href="#" data-i18n="lobby.wait" onclick="_waitButtonClick()"
+        li
+          a.button href="#" onclick="_optionButtonClick()" data-i18n-title="lobby.options"
+            img src="img/icon_gear.png"
+        li
+          a.button href="#" onclick="_webSystemButtonClick()" data-i18n-title="lobby.websystem"
+            img src="img/icon_web2.png"
+        li
+          a.button href="#" onclick="client.close()" data-i18n="lobby.logout"
+      div#lobbyHeader
+        img#serverLogo
+        div#headerText
+          span#header-serverName
+          span data-i18n="lobby.lobby"
+          span#header-playersNum
+          br
+          span#header-playerName
+          span#header-rate
+          span#header-mile
+          span#header-premium
+        img src="img/favicon.gif"
+    div.hbox#lobbyHBox style="flex:1;padding-top:7px"
+      div#playerListBox
+        div.grid-wrapper style="height: 70%"
+          table.stripe.hover#playerGrid
+            tr
+              thead
+                th data-i18n="lobby.status_short"
+                th data-i18n="lobby.title"
+                th data-i18n="lobby.rank"
+                th data-i18n="lobby.name"
+                th data-i18n="lobby.country"
+                th data-i18n="lobby.rate"
+              tbody
+        div.grid-wrapper style="flex:1"
+          table.stripe.hover#waiterGrid
+            tr
+              thead
+                th data-i18n="lobby.waiter"
+                th data-i18n="lobby.rate"
+                th data-i18n="lobby.rule"
+                th data-i18n="lobby.thinking_time"
+              tbody
+      div#gameListBox
+        div.grid-wrapper#gameGridWrapper
+          table.stripe.hover#gameGrid
+            tr
+              thead
+                th
+                  |▲
+                  span data-i18n="lobby.black"
+                th
+                  |△
+                  span data-i18n="lobby.white"
+                th data-i18n="lobby.rule"
+                th data-i18n="lobby.game_status"
+                th data-i18n="lobby.monitor"
+                th data-i18n="lobby.opening_short"
+              tbody
+        div#lobbyChatBox style="flex:1"
+          div#lobbyMessageArea style="flex:1"
+          div.hbox style="margin-top:7px"
+            span data-i18n="lobby.chat" style="margin-right:5px;white-space:nowrap"
+            input type="text" id="lobbyChatInput" style="flex: 1"
+    div#worldClock
