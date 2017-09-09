@@ -41,8 +41,8 @@ class Piece{
     return str + (this._promoted ? this.promotedCSA : this.CSA)
   }
 
-  toImagePath(){
-    return (this.owner ? "S" : "G") + (this._promoted ? this._promotedImg : this._img) + ".png"
+  toImagePath(reverse = false){
+    return (this.owner == !reverse ? "S" : "G") + (this._promoted ? this._promotedImg : this._img) + ".png"
   }
 
   getType(){

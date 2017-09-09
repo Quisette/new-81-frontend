@@ -10,6 +10,8 @@ var playerGrid;
 var waiterGrid;
 var gameGrid;
 var watcherGrid;
+var kifuGrid;
+var modalChallengerWindow
 var users = new Object();
 var playerInfoWindows = new Object();
 var me;
@@ -17,10 +19,23 @@ var premium;
 var countries = new Object();
 var board;
 var hidden_prm;
+var testMode = true
 
 /* ====================================
     On document.ready
 ===================================== */
+
+function _testFunction(phase){
+  //phase:integer
+  if (phase == 0) { // After creation
+    //_switchLayer(2)
+  } else if (phase == 1) { // After servers are loaded
+    serverGrid.row("#MERCURY").select()
+    _loginButtonClick()
+  } else if (phase == 2) { // After logged in
+    client.send("%%GAME hc2pd_test2-900-30 -")
+  }
+}
 
 $(function(){
   // Generate board
@@ -65,7 +80,7 @@ $(function(){
     rowId: "name",
     searching: false, paging: false, info: false,
     order: false,
-    select: true,
+    select: "single",
     oLanguage: {sEmptyTable: "Loading..."}
   })
   serverGrid.clear()
@@ -82,7 +97,7 @@ $(function(){
     ],
     rowId: "name",
     searching: false, paging: false, info: false,
-    select: true,
+    select: "single",
     order: [[5, 'desc']],
     oLanguage: {sEmptyTable: EJ("Loading...", "読込中...")}
   })
@@ -98,7 +113,7 @@ $(function(){
     ],
     rowId: "name",
     searching: false, paging: false, info: false,
-    select: true,
+    select: "single",
     order: [[1, 'desc']],
     oLanguage: {sEmptyTable: EJ("No player is waiting", "対局待プレーヤがいません")}
   })
@@ -115,11 +130,39 @@ $(function(){
       {data: "opening", width: "12%", bSortable: false}
     ],
     searching: false, paging: false, info: false,
-    select: true,
+    select: "single",
     order: false,
     oLanguage: {sEmptyTable: EJ("No game room found.", "対局がありません")}
   })
   gameGrid.clear()
+
+  watcherGrid = $('#watcherGrid').DataTable({
+    data: [],
+    columns: [
+      {data: "name", width: "55%", className: "dt-body-left"},
+      {data: "country", width: "25%", className: "dt-body-left"},
+      {data: "rate", width: "20%", className: "dt-body-right"}
+    ],
+    rowId: "name",
+    searching: false, paging: false, info: false,
+    select: "single",
+    order: [[2, 'desc']],
+    oLanguage: {sEmptyTable: EJ("No watcher", "観戦者なし")}
+  })
+  watcherGrid.clear()
+
+  kifuGrid = $('#kifuGrid').DataTable({
+    data: [],
+    columns: [
+      {data: "numStr", width: "15%", bSortable: false},
+      {data: "moveStr", width: "60%", className: "dt-body-left", bSortable: false},
+      {data: "timeStr", width: "25%", className: "dt-body-right", bSortable: false}
+    ],
+    searching: false, paging: false, info: false,
+    select: "api",
+    order: false
+  })
+  kifuGrid.clear()
 
   // Load localStorage
   if (localStorage.login) $('#usernameInput').val(localStorage.login)
@@ -135,6 +178,14 @@ $(function(){
       }
     }
   })
+  $("#boardChatInput").on('keyup', function(e){
+    if (e.keyCode == 13){
+      if ($(this).val().length > 0) {
+        client.gameChat($(this).val())
+        $(this).val('')
+      }
+    }
+  })
 
   // Do in every relogin
 
@@ -143,7 +194,7 @@ $(function(){
   apiClient.setCallbackFunctions("SERVERS", _handleServers)
   apiClient.getServers()
 
-//  _switchLayer(2)
+  if (testMode) _testFunction(0)
 });
 
 /* ====================================
@@ -151,6 +202,7 @@ $(function(){
 ===================================== */
 
 window.onresize = function () {
+  $("div.menuBar").find("a.button").css('min-width', window.innerWidth / 12.)
 };
 
 /* ====================================
@@ -201,12 +253,16 @@ function _loginButtonClick(){
   client.setCallbackFunctions("LOBBY_IN", _handleLobbyIn)
   client.setCallbackFunctions("LOBBY_OUT", _handleLobbyOut)
   client.setCallbackFunctions("CHAT", _handleChat)
+  client.setCallbackFunctions("GAMECHAT", _handleGameChat)
+  client.setCallbackFunctions("MOVE", _handleMove)
+  client.setCallbackFunctions("GAME_END", _handleGameEnd)
   client.setCallbackFunctions("ERROR", _handleGeneralResponse)
   client.setCallbackFunctions("CLOSED", _handleClosed)
   client.setCallbackFunctions("WHO", _handleWho)
   client.setCallbackFunctions("LIST", _handleList)
   client.setCallbackFunctions("GAME", _handleGame)
   client.setCallbackFunctions("CHALLENGE", _handleChallenger)
+  client.setCallbackFunctions("GAME_SUMMARY", _handleGameSummary)
   client.setCallbackFunctions("START", _handleStart)
   client.connect();
 }
@@ -250,8 +306,64 @@ function writeUserMessage(str, layer, clr = null, bold = false, lineChange = tru
     Board View functions
 ===================================== */
 
+function _resignButtonClick(){
+  if (board.myRoleType == 0 && board.position.turn == true || board.myRoleType == 1 && board.position.turn == false) client.resign()
+}
+
 function _rematchButtonClick(){
-  board.loadNewPosition()
+  if (board.isPlayer()) {
+  	//if (_game_name && !board.rematch[board.my_turn]) {
+      /*
+  		if (_isGuest && _guestGamesExpired()) {
+  			Alert.show(LanguageSelector.lan.msg_guest_expire, LanguageSelector.lan.error, 4);
+  			return;
+  		} */
+  		client.gameChat("[##REMATCH]")
+  } /*else {
+		var match:Array = _game_name.split("+")[1].match(/^([0-9a-z]+?)_(.*)$/);
+		var found:Boolean = false;
+		for each (var game:Object in _game_list) {
+			if (game.id.split("+")[1] == match[1] + "_@" + match[2] && game.status == "game") {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			_writeUserMessage(LanguageSelector.EJ("The rematch game is already finished.\n", "再戦の対局が既に終了しています\n"), 2, "#008800");
+		} else {
+			_clearAllTags();
+			_client.monitorOff(_game_name);
+			board.closeGame();
+			_monitoring = false;
+			_watch_game = game;
+			_execute_watch();
+		} */
+}
+
+function _closeBoard(){
+  client.closeGame()
+  client.who()
+  client.list()
+  board.myRoleType = null
+  board.game = null
+  _switchLayer(1)
+  $('boardMessageArea').empty()
+}
+
+function makeMoveAsPlayer(move){
+  client.move(move)
+  board.moves.push(move)
+  board.addMoveToKifuGrid(move)
+  /*
+  if (board.since_last_move > 0) {
+	  board.timers[board.my_turn == board.last_pos.turn ? 0 : 1].accumulateTime( - board.since_last_move);
+	  board.since_last_move = 0;
+  }
+  board.makeMove(str + ",T0", true, true);
+  _myMoveSent = true;
+  _myMoveSentTimer.reset();
+  _myMoveSentTimer.start();
+  */
 }
 
 /* ====================================
@@ -270,7 +382,7 @@ function _handleNewGame(){
     client.wait("r", 0, 30)
   } else if (val == 5) {
     let ruleType = $("#newGameRuleSelect option:selected").val()
-    client.wait(ruleType, 60 * $("#newGameTotalSelect option:selected").val(), $("#newGameByoyomiSelect option:selected").val(), ruleType.match(/^hc_/) ? -1 : 0)
+    client.wait(ruleType, 60 * $("#newGameTotalSelect option:selected").val(), $("#newGameByoyomiSelect option:selected").val(), ruleType.match(/^hc/) ? -1 : 0)
   } else if (val == 6) {
 
   } else if (val == 7) {
@@ -328,6 +440,7 @@ function _handleLoggedIn(str){
   $('#header-premium').text(makePremiumName(premium) + EJ(" class", " クラス"))
   client.who(true)
   client.list()
+  if (testMode) _testFunction(2)
 }
 
 function _handleLoginFailed(code){
@@ -456,7 +569,7 @@ function _handleGame(line) {
 }
 
 function _handleChallenger(name){
-  $("#modalChallenger").modal({
+  modalChallengerWindow = $("#modalChallenger").modal({
     onOpen: function(dialog){
       dialog.overlay.fadeIn(300)
       dialog.container.fadeIn(300)
@@ -464,6 +577,242 @@ function _handleChallenger(name){
       _initModalChallenger(users[name])
     }
   })
+}
+
+function _handleGameSummary(str){
+//  _gameAccepted = false;
+//  _acceptedCancelTimer.stop();
+  let black
+  let white
+  let myTurn
+  let initialPosition = ""
+  let gameId
+  let kid
+  str.split("\n").forEach(function(line){
+    if (line.match(/^Name\+\:(.+)$/)){
+      black = users[RegExp.$1]
+    } else if (line.match(/^Name\-\:(.+)$/)){
+      white = users[RegExp.$1]
+    } else if (line.match(/^Your_Turn\:(.)$/)){
+      myTurn = RegExp.$1 == "+"
+    } else if (line.match(/^To_Move\:(.)$/)){
+      initialPosition = "P0" + RegExp.$1 + "\n"
+	  } else if (line.match(/^P[0-9\+\-]/)){
+      initialPosition += line + "\n"
+    } else if (line.match(/^START:(.+):(\d+)$/)){
+      gameId = RegExp.$1
+      kid = RegExp.$2
+    }
+  })
+//	  _waiting = false;
+//	  _challenging = false;
+//	  _rematching = false;
+	  /*if(_game_name && _monitoring){
+        _client.monitorOff(_game_name);
+        _monitoring = false;
+  		board.closeGame();
+	  }*/
+    //  var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
+	  board.setGame(new Game(0, gameId, black, white))
+    board.setDirection(myTurn)
+    board.loadNewPosition(initialPosition)
+	  //if (_end_sound_play) _sound_start.play();
+	  //board.superior = game.superior;
+    board.startGame(myTurn)
+	  //userMessage2.htmlText = "";
+    setBoardConditions()
+    _switchLayer(2)
+    return
+	  //watcherListGrid.dataProvider = _watcher_list;
+    if (myTurn) writeUserMessage(EJ("You are Black " + (board.gameType == "hc" ? "(Handicap taker).\n" : "(Sente).\n"), "あなた" + (board.gameType == "hc" ? "は下手(したて)" : "が先手") + "です。\n"), 2, "#008800")
+    else writeUserMessage(EJ("You are White " + (board.gameType == "hc" ? "(Handicap giver).\n" : "(Gote).\n"), "あなた" + (board.gameType == "hc" ? "が上手(うわて)" : "は後手") + "です。\n"), 2, "#008800")
+	  //if (match[2].match(/\-\-\d+$/) && board.gameType != "r") writeUserMessage(LanguageSelector.EJ("To mute watcher's chat, switch off the checkbox above the watcher list.\n", "観戦者のチャットをミュートするには観戦者リスト上部のチェックボックスをOFFにして下さい。\n"), 2, "#FF3388")
+    closeButton.enabled = false;
+	  greetButton.state = GreetButton.STATE_BEFORE_GAME;
+    rewindAllButton.enabled = false;
+    rewindOneButton.enabled = false;
+    forwardOneButton.enabled = false;
+    forwardAllButton.enabled = false;
+    kifuDataGrid.selectable = false;
+	  radioKifuListen.selected = true;
+	  radioKifuListen.enabled = false;
+	  radioKifuReplay.enabled = false;
+	  board.onListen = true;
+	  _switchListenColor(true);
+	  //_nOpponentDisconnect = 0;
+	  //_study_notified = false;
+    /*
+	  var oppo:Object = login_name == game.black.name ? game.white : game.black;
+	  if (board.gameType == "r" && !_users[login_name].isProvisional) {
+		  if (InfoFetcher.beforeUpgrade(_myRate)) {
+			  if (!oppo.isProvisional && oppo.rating > _myRate - 200) _sendAutoChat("#G020");
+		  } else if (InfoFetcher.beforeDowngrade(_myRate)) {
+			  if (!oppo.isProvisional && oppo.rating < _myRate + 200) _sendAutoChat("#G021");
+		  }
+	  }*/
+//	  _client.privateChat(oppo.name, "[##FITNESS]" + _levelStudy + "," + _levelEnglish);
+//	  if (parseInt(match[4]) == 0) greetButton.autoGreet(GreetButton.STATE_BEFORE_GAME);
+}
+
+function _handleMove(csa, time){
+  //string, integer
+  if (board.isPlaying()){
+    let owner = csa.substr(0, 1) == "+"
+    if (owner && board.myRoleType == 0 || !owner && board.myRoleType == 1) {
+      board.moves[board.moves.length - 1].time = time
+    } else {
+      let move = new Movement(board.getFinalMove().num + 1)
+      move.setFromCSA(csa)
+      move.time = time
+      board.handleReceivedMove(move)
+    }
+  }
+}
+
+function _handleGameEnd(lines){
+  let gameEndType = lines.split("\n")[0]
+  let result = lines.split("\n")[1]
+  //var adviseIllegal:Boolean = false;
+  /*
+  if (_disconnectAlertWindow) {
+	  _disconnectAlertWindow.terminate();
+	  _disconnectAlertWindow = null;
+	  var opponent_disconnected:Boolean = true;
+  }
+  */
+  board.isPostGame = true
+  let move = new Movement(board.getFinalMove().num + 1)
+  move.setGameEnd(gameEndType) //turn too?
+  board.moves.push(move) //refresh list too
+  writeUserMessage(move.toGameEndMessage(), 2, "#DD0088")
+	//if (GameTimer.soundType >= 2) Byoyomi.sayTimeUp();
+  //board.timeout();
+  switch (result) {
+    case "LOSE":
+    	board.studyHostType = 2
+    	//_openGameResultWindow(-1);
+    	board.playerInfos[1 - board.myRoleType].addClass("player-info-winner")
+      writeUserMessage(EJ("### You Lose ###", "### あなたの負けです ###"), 2, "#DD0088", true)
+    	//if (adviseIllegal) _writeUserMessage(LanguageSelector.EJ("( For details of illegal moves in shogi, see: http://81dojo.com/documents/Illegal_Move )\n", "( 将棋の反則手についてはこちらでご確認下さい: http://81dojo.com/documents/反則手 )\n"), 2, "#DD0088");
+      //if (_end_sound_play) _sound_lose.play();
+      /*
+    	if (board.gameType == "r") _losses_session += 1;
+    	var history = "  ●";
+    	_losersCloseButtonTimer.reset();
+    	_losersCloseButtonTimer.start();
+      */
+      break
+    case "WIN":
+      board.studyHostType = 1
+    	//_openGameResultWindow(1);
+    	board.playerInfos[board.myRoleType].addClass("player-info-winner")
+      writeUserMessage(EJ("### You Win ###\n", "### あなたの勝ちです ###\n"), 2, "#DD0088", true)
+      //if (_end_sound_play) _sound_win.play();
+      /*
+    	if (board.gameType == "r") _wins_session += 1;
+    	history = "  ◯";
+    	if (board.gameType == "r" && board.kifu_list.length >= 6 && ((_users[login_name].wins + 1) % 100 == 0)) _client.chat("[##WINS]" + (_users[login_name].wins + 1));
+    	closeButton.enabled = true;
+      */
+      break
+    case "DRAW":
+    	if (board.myRoleType == 1) board.studyHostType = 2
+    	else board.studyHostType = 1
+    	//_openGameResultWindow(0);
+      writeUserMessage(EJ("### Draw ###\n", "### 引き分け ###\n"), 2, "#DD0088", true)
+      //if (_end_sound_play) _sound_win.play();
+    	//history = "  引";
+    	//closeButton.enabled = true;
+      break
+  }
+  /*
+  if (board.gameType == "hc") {
+	  if (board.my_turn == Kyokumen.GOTE) {
+		  board.isStudyHost = true;
+		  board.isSubHost = false;
+	  } else {
+		  board.isStudyHost = false;
+		  board.isSubHost = true;
+	  }
+  }
+  if (opponent_disconnected && board.isSubHost) {
+	  board.isStudyHost = true;
+	  board.isSubHost = false;
+  }
+  */
+  /*
+  if (_pmGameLog != "") {
+	  _writeUserMessage(LanguageSelector.EJ("PM received during the game:\n", "対局中にPMが届いています\n"), 2, "#FF0000", true);
+	  _writeUserMessage(_pmGameLog, 2, "#FF0000");
+	  _pmGameLog = "";
+  }
+  history += board.my_turn == 0 ? LanguageSelector.EJ("  Black:   ", "  ☗先手:  ") : LanguageSelector.EJ("  White:  ", "  ☖後手:  ");
+  for each (var game:Object in _game_list) {
+	  if (game.id == _game_name) {
+		  var openingName:String = LanguageSelector.EJ(game.openingEn, game.openingTip);
+		  break;
+	  }
+  }
+  if (board.my_turn == 0) {
+	  openingName = LanguageSelector.EJ(openingName.replace(/Opposition, Black's /, ""), openingName.replace(/対抗形 ☗/, ""));
+	  openingName = LanguageSelector.EJ(openingName.replace(/Opposition, White's/, "Static Rook vs"), openingName.replace(/対抗形 ☖/, "居飛車　(対"));
+  } else {
+	  openingName = LanguageSelector.EJ(openingName.replace(/Opposition, White's /, ""), openingName.replace(/対抗形 ☖/, ""));
+	  openingName = LanguageSelector.EJ(openingName.replace(/Opposition, Black's/, "Static Rook vs"), openingName.replace(/対抗形 ☗/, "居飛車　(対"));
+  }
+  if (openingName.match(/\(/)) openingName += ")";
+  history += openingName;
+  if (board.gameType == "r") _games_session.push(history);
+  _notifyOnCloseGame = true;
+  if (board.gameType == "r") _client.mileage(10);
+  else _client.mileage(5);
+  */
+  setBoardConditions()
+  /*
+  if (greetButton.state != GreetButton.STATE_POSTGAME) greetButton.state = GreetButton.STATE_AFTER_GAME;
+  voiceButton.postGame = true;
+  _shareKifuEnabled = true;
+  if (board.isStudyHost) _toggleHostStatus(true);
+  if (board.isSubHost) _writeUserMessage(LanguageSelector.lan.msg_subhost + "\n", 2, "#008800", true);
+  board.endGame();
+  _status_disconnected = false;
+  _myMoveSent = false;
+  _myMoveSentTimer.stop();
+  if (_isGuest) {
+	  var date:Date = new Date();
+	  if (_so.data.guest_game_period && _so.data.guest_game_period == date.toDateString()) _so.data.guest_game_num += 1;
+	  else {
+		  _so.data.guest_game_period = date.toDateString();
+		  _so.data.guest_game_num = 1;
+	  }
+  }
+  */
+}
+
+function setBoardConditions(){
+  board.setBoardConditions()
+  if (board.isPlayer()) {
+    kifuGrid.select.style('api')
+    $("#resignButton").removeClass("button-disabled")
+    $("#flipButton").addClass("button-disabled")
+    if (board.isPostGame) {
+      $("#positionMenuButton, #kifuMenuButton, #giveHostButton, #rematchButton, #closeGameButton").removeClass("button-disabled")
+      $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: true})
+    } else {
+      $("input[name=kifuModeRadio]").val(1).prop("disabled", true)
+      $("#positionMenuButton, #kifuMenuButton, #giveHostButton, #rematchButton, #closeGameButton").addClass("button-disabled")
+      if (board.game.gameType != "r") {
+        $("#receiveWatcherChatCheckBox").prop({disabled: false, checked: true})
+      } else {
+        $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: false})
+      }
+    }
+  } else {
+    kifuGrid.select.style('single')
+    $("#resignButton").addClass("button-disabled")
+    $("#flipButton, #positionMenuButton, #kifuMenuButton, #giveHostButton, #rematchButton").removeClass("button-disabled")
+    $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: true})
+  }
 }
 
 function _handleStart(game_id){
@@ -548,6 +897,111 @@ function _handleChat(sender, message){
 //	if (mainViewStack.selectedIndex == 1 && _chat_sound1_play) _sound_chat1.play();
 }
 
+function _handleGameChat(sender, message){
+	if (!board.game) return
+	// if (_isDuringMyGame() && (e.message.substr(12).match(/^\[(.+?)\]\s\[comment\]/))) return;
+	if (message.match(/\[\#\#HOVER\](\d+),(\d+)$/)) {
+  /*
+		if (sender != login_name && board.onListen) board.handleHover(match[1], match[2]);
+	} else if ((match = e.message.match(/\[\#\#GRAB\](\d+),(\d+)$/))) {
+		if (sender != login_name && board.onListen) board.handleGrab(match[1], match[2]);
+	} else if (e.message.match(/\[\#\#TYPE\]$/)) {
+		if (sender != login_name) {
+			if (sender == board.name_labels[0].text) {
+				board.typingIndicatorStart(0);
+			} else if (sender == board.name_labels[1].text) {
+				board.typingIndicatorStart(1);
+			}
+		}
+	} else if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
+		_handleStudy(sender, match[1], match[2]);
+	} else if (e.message.match(/\[\#\#EXPORT\]$/)) {
+		if (sender != login_name) _writeUserMessage(LanguageSelector.EJ("Kifu exported by " + sender + ".\n", sender + "さんが棋譜をエクスポートしました。\n"), 2, "#008800");
+	} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\]CLEAR$/))) {
+		if (sender != login_name) board.clearArrows(Board.ARROWS_PUBLIC, sender);
+	} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\](.+),(.+),(.+),(.+),(.+),(.+)$/))) {
+		if (_ignore_list.indexOf(sender.toLowerCase()) >= 0) return;
+		if (!_accept_arrows && sender != login_name) return;
+		if (_isDuringMyGame()) return; // (board.isPlayer && !board.post_game) return;
+		if (board.post_game && !board.studyOn) return;
+		if (sender == login_name) sender = "";
+		if (board.isStudyHost || board.onListen) {
+			board.addArrow(parseInt(match[1]), new Point(Number(match[2]), Number(match[3])), new Point(Number(match[4]), Number(match[5])), uint(match[6]), sender,Board.ARROWS_PUBLIC, true);
+		} else {
+			board.addArrow(parseInt(match[1]), new Point(Number(match[2]), Number(match[3])), new Point(Number(match[4]), Number(match[5])), uint(match[6]), sender,Board.ARROWS_PUBLIC);
+		}
+	} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##M_(IN|OUT)\](\d+),(\d+)$/))) {
+		if (sender != login_name) {
+			if (sender == board.name_labels[0].text) {
+				if (match[1] == "OUT") {
+					board.name_labels[0].setStyle("color", 0x777777);
+				} else {
+					board.name_labels[0].setStyle("color", undefined);
+				}
+			} else if (sender == board.name_labels[1].text) {
+				if (match[1] == "OUT") {
+					board.name_labels[1].setStyle("color", 0x777777);
+				} else {
+					board.name_labels[1].setStyle("color", undefined);
+				}
+			}
+		}
+	} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##GIVEHOST\](.+)$/))) {
+		if (match[1] == login_name) _toggleHostStatus(true);
+		else _writeUserMessage(LanguageSelector.EJ("Study Host status given to " + match[1] + "\n", "感想戦ホストは、" + match[1] + "さんに引き継がれました。\n"), 2, "#008800", false);
+		if (_users[match[1]]) {
+			for each (var user:Object in _users) user.isHost = false;
+			_users[match[1]].isHost = true;
+			_updateStatusMarks();
+		}
+	} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##SUBHOST_ON\](.+)$/))) {
+		if (match[1] == login_name) {
+			_writeUserMessage(LanguageSelector.lan.msg_subhost_given + "\n", 2, "#008800", true);
+			board.isSubHost = true;
+		} else {
+			_writeUserMessage(LanguageSelector.EJ("Study Sub-host status given to " + _name2link(match[1]) + "\n", _name2link(match[1]) + "さんに、感想戦サブ・ホスト権限が付与されました。\n"), 2, "#008800", false);
+		}
+	} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##TEMPLATE\]([A-Z]\d{3})/))) {
+		_handleGameChat(new ServerMessageEvent("template", "##[GAMECHAT][" + sender + LanguageSelector.EJ("] <Template> ", "] <定型> ") + LanguageSelector.lan[match[1]]));
+    */
+	} else if (message.match(/^\[##.+\]/)) {
+	} else if (message.match(/^\[auto\-chat\]\s#([A-Z]\d{3})$/)) {
+//		_interpretCommunicationCode(match[1], match[2], 2, false, true);
+	} else {
+    /*
+		if (_losersCloseButtonTimer.running && sender != login_name) {
+			if (sender == board.playerInfos[0].name || sender == board.playerInfos[1].name) {
+				_losersCloseButtonTimer.stop();
+				closeButton.enabled = true;
+			}
+		}
+    */
+//		if (_ignore_list.indexOf(sender.toLowerCase()) >= 0) return;
+		if (sender == board.game.black.name) {
+//			board.typingIndicatorStop(0);
+			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#000000")
+      //if (_chat_sound2_play) _sound_chat2.play();
+		} else if (sender == board.game.white.name) {
+//			board.typingIndicatorStop(1);
+			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#666666")
+      //if (_chat_sound2_play) _sound_chat2.play();
+		} else if (sender == me.name) {
+			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#0033DD")
+      //if (_chat_sound2_play) _sound_chat2.play();
+      /*
+		} else if (_isDuringMyGame() && !_allowWatcherChat) {
+		} else if (_favorite_list.indexOf(sender) >= 0) {
+			_writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#DD7700"); if (_chat_sound2_play) _sound_chat2.play();
+		} else if (_colleague_list.indexOf(sender) >= 0) {
+			_writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#550066"); if (_chat_sound2_play) _sound_chat2.play();
+      */
+		} else {
+			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#660000")
+      //if (_chat_sound2_play) _sound_chat2.play();
+		}
+	}
+}
+
 function _handleClosed(){
   $('#loginAlert').text(i18next.t("login.closed"))
   $('#loginButton').attr('disabled', false)
@@ -567,7 +1021,8 @@ function _handleServers(data){
   serverGrid.clear()
   serverGrid.rows.add(data)
   serverGrid.draw()
-  serverGrid.row("#MOON").select()
+  serverGrid.row("#EARTH").select()
+  if (testMode) _testFunction(1)
 }
 
 /* ====================================

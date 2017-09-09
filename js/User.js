@@ -116,6 +116,10 @@ class User{
 		}
   }
 
+  avatarURL(){
+    return "http://system.81dojo.com/players/" + this.name + "/avatar"
+  }
+
   set countryCode(v){
     this._countryCode = v
   }

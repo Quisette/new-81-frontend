@@ -10,6 +10,9 @@ class WebSocketClient {
     this._callbackFunctions = new Object();
     this._buffer = new Object();
     this.serverName = serverName;
+    this._readingGameSummary = false
+    this.status = null // 0:connected, 1:challenging, 2:now-playing-my-game
+    this.resignTime = 0
   }
 
   setCallbackFunctions(key, func){
@@ -28,7 +31,7 @@ class WebSocketClient {
       lines.forEach(function(line){
         if (currentLayer == 0) {
           if (line.match(/^##\[HANDSHAKE\](.+)$/)) {
-            thisInstance._login(CybozuLabs.MD5.calc('shogijapan' + RegExp.$1));
+            thisInstance._login(CybozuLabs.MD5.calc('html5' + RegExp.$1));
           } else if (line.match(/^LOGIN:(.+)\sOK$/)){
             thisInstance._password = "";
             thisInstance._callbackFunctions["LOGGED_IN"](RegExp.$1);
@@ -37,43 +40,78 @@ class WebSocketClient {
           } else if (line.match(/LOGIN:incorrect/)){
             thisInstance._callbackFunctions["LOGIN_FAILED"]("L003");
           }
+        } else if (thisInstance._readingGameSummary) {
+          if (line == "END Game_Summary") thisInstance._readingGameSummary = false
+          else thisInstance._storeBuffer("GAME_SUMMARY", line)
         } else {
+          if (thisInstance.status == 2) { // when during my game
+            if (line.match(/^%TORYO,T(\d+)$/)) {
+              thisInstance.resignTime = parseInt(RegExp.$1)
+              return
+            } else if (line.match(/^([-+][0-9]{4}[A-Z]{2}),T(\d+)$/)) {
+              thisInstance._callbackFunctions["MOVE"](RegExp.$1, parseInt(RegExp.$2))
+              return
+            } else if (line.match(/^#(WIN|LOSE|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|OUTE_SENNICHITE|JISHOGI|DISCONNECT|CATCH|TRY)/)) {
+              thisInstance._storeBuffer("GAME_END",RegExp.$1)
+              if (RegExp.$1 == "WIN" || RegExp.$1 == "LOSE" || RegExp.$1 == "DRAW") {
+                thisInstance.status = 0
+                thisInstance._callbackWithBuffer("GAME_END")
+              }
+              return
+            }
+          } else { // when not playing game
+            if (line == "BEGIN Game_Summary") {
+              thisInstance._readingGameSummary = true
+              return
+            } else if (line.match(/^START\:/)) {
+              thisInstance.status = 2
+              thisInstance._storeBuffer("GAME_SUMMARY", line)
+              thisInstance._callbackWithBuffer("GAME_SUMMARY")
+              return
+    			  } else if (line.match(/^##\[CHALLENGE\]\[(.+)\]$/)) {
+    				  thisInstance._callbackFunctions["CHALLENGE"](RegExp.$1)
+              return
+    			  } else if (line.match(/^##\[ACCEPT\](.*)$/)) {
+    				  thisInstance._callbackFunctions["ACCEPT"](RegExp.$1)
+              return
+    			  } else if (line.match(/^##\[DECLINE\](.*)$/)) {
+    				  thisInstance._callbackFunctions["DECLINE"](RegExp.$1)
+              return
+            }
+          }
+          // all timing
           if (line.match(/^##\[CHAT\]\[(.+)\]\s(.+)$/)) {
-            thisInstance._callbackFunctions["CHAT"](RegExp.$1, RegExp.$2);
+            thisInstance._callbackFunctions["CHAT"](RegExp.$1, RegExp.$2)
+          } else if (line.match(/^##\[GAMECHAT\]\[(.+)\]\s(.+)$/)) {
+            thisInstance._callbackFunctions["GAMECHAT"](RegExp.$1, RegExp.$2)
           } else if (line.match(/^##\[MILE\](.+)$/)) {
-            thisInstance._callbackFunctions["MILE"](RegExp.$1);
+            thisInstance._callbackFunctions["MILE"](RegExp.$1)
           } else if (line.match(/^##\[EXP\](.+)$/)) {
-            thisInstance._callbackFunctions["EXP"](RegExp.$1);
+            thisInstance._callbackFunctions["EXP"](RegExp.$1)
           } else if (line.match(/^##\[LOBBY_IN\](.+)$/)) {
-            thisInstance._callbackFunctions["LOBBY_IN"](RegExp.$1);
+            thisInstance._callbackFunctions["LOBBY_IN"](RegExp.$1)
           } else if (line.match(/^##\[LOBBY_OUT\]\[(.+)\]$/)) {
-            thisInstance._callbackFunctions["LOBBY_OUT"](RegExp.$1);
+            thisInstance._callbackFunctions["LOBBY_OUT"](RegExp.$1)
           } else if (line.match(/^##\[ENTER\]\[(.+)\]$/)) {
             thisInstance._callbackFunctions["ENTER"](RegExp.$1);
           } else if (line.match(/^##\[LEAVE\]\[(.+)\]$/)) {
-            thisInstance._callbackFunctions["LEAVE"](RegExp.$1);
+            thisInstance._callbackFunctions["LEAVE"](RegExp.$1)
           } else if (line.match(/^##\[DISCONNECT\]\[(.+)\]$/)) {
-            thisInstance._callbackFunctions["DISCONNECT"](RegExp.$1);
+            thisInstance._callbackFunctions["DISCONNECT"](RegExp.$1)
           } else if (line.match(/^##\[WHO2\]\s(.+)$/)){
-            if (RegExp.$1 == "+OK") thisInstance._callbackWithBuffer("WHO");
+            if (RegExp.$1 == "+OK") thisInstance._callbackWithBuffer("WHO")
             else thisInstance._storeBuffer("WHO", RegExp.$1)
           } else if (line.match(/^##\[LIST\]\s(.+)$/)){
-            if (RegExp.$1 == "+OK") thisInstance._callbackWithBuffer("LIST");
+            if (RegExp.$1 == "+OK") thisInstance._callbackWithBuffer("LIST")
             else thisInstance._storeBuffer("LIST", RegExp.$1)
   			  } else if (line.match(/^##\[GAME\](.*)$/)) {
   				  thisInstance._callbackFunctions["GAME"](RegExp.$1)
   			  } else if (line.match(/^##\[START\]\[(.*)\]$/)) {
   				  thisInstance._callbackFunctions["START"](RegExp.$1)
-  			  } else if (line.match(/^##\[CHALLENGE\]\[(.+)\]$/)) {
-  				  thisInstance._callbackFunctions["CHALLENGE"](RegExp.$1)
-  			  } else if (line.match(/^##\[ACCEPT\](.*)$/)) {
-  				  thisInstance._callbackFunctions["ACCEPT"](RegExp.$1)
-  			  } else if (line.match(/^##\[DECLINE\](.*)$/)) {
-  				  thisInstance._callbackFunctions["DECLINE"](RegExp.$1)
   			  } else if (line.match(/^##\[RESULT\](.*)$/)) {
   				  thisInstance._callbackFunctions["RESULT"](RegExp.$1)
           } else if (line.match(/^##\[ERROR\](.+)$/)) {
-            thisInstance._callbackFunctions["ERROR"](RegExp.$1);
+            thisInstance._callbackFunctions["ERROR"](RegExp.$1)
           }
         }
       });
@@ -104,19 +142,27 @@ class WebSocketClient {
 
   _login(clientPass){
     $('#loginAlert').text(i18next.t("login.logging"))
-    this._socket.send("LOGIN  " + this.username + " " + this._password + " x2 " + clientPass);
+    this.send("LOGIN  " + this.username + " " + this._password + " x2 " + clientPass);
   }
 
   who(first = false){
-    this._socket.send("%%WHO2" + (first ? "FIRST" : ""));
+    this.send("%%WHO2" + (first ? "FIRST" : ""));
   }
 
   list(){
-    this._socket.send("%%LIST");
+    this.send("%%LIST");
   }
 
   chat(str){
-    this._socket.send("%%CHAT " + str)
+    this.send("%%CHAT " + str)
+  }
+
+  gameChat(message, game_id = null) {
+    if (game_id == null) {
+      this.send("%%GAMECHAT : " + message)
+    } else {
+      this.send("%%GAMECHAT " + game_id + " " + message)
+    }
   }
 
   wait(rule, total, byoyomi, side=0, tournament="", comment="", password="") {
@@ -147,6 +193,18 @@ class WebSocketClient {
 	stopWaiting() {
 		this.send("%%GAME")
 	}
+
+  move(move){
+    this.send(move.toCSA())
+  }
+
+  resign(){
+    this.send("%TORYO")
+  }
+
+  closeGame(){
+    this.send("CLOSE")
+  }
 
   send(str){
     this._socket.send(str);

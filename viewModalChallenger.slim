@@ -6,7 +6,8 @@ div.modal#modalChallenger
       span data-i18n="lobby.rate"
       span#challengerRate
     div.hbox style="justify-content: space-around; margin-top:10px"
-      input id="challengerAcceptButton" type="button" onclick="_handleAcceptChallenge()" data-i18n-value="challenger.accept" style="min-width: 70px" class="simplemodal-close"
+      span#challengerTimerText style="font-size: 30px;line-height: 40px;width:50px"
+      input id="challengerAcceptButton" type="button" data-i18n-value="challenger.accept" style="min-width: 70px" class="simplemodal-close"
       input id="challengerRejectButton" type="button" data-i18n-value="challenger.reject" style="min-width: 70px" class="simplemodal-close"
     
 script src="js/viewModalChallenger.js"

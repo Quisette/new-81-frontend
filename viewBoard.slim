@@ -1,41 +1,76 @@
 div.layer#layerBoard
   div.vbox style="width:100%;height:100%"
     div.hbox.menuBar#boardMenu
-      ul
+      ul style="flex:1"
         li
           a.button href="#" onclick=""
             img src="img/icon_left.png"
             span data-i18n="board.check_lobby"
         li
-          a.button href="#" data-i18n="board.resign" onclick="_rematchButtonClick()"
+          a.button.button-disabled#resignButton href="#" data-i18n="board.resign" onclick="_resignButtonClick()"
         li
-          a.button href="#" data-i18n="board.impasse" onclick=""
+          a.button#impasseButton href="#" data-i18n="board.impasse" onclick=""
         li
-          a.button href="#" onclick="" data-i18n-title="board.flip"
+          a.button#flipButton href="#" onclick="" data-i18n-title="board.flip"
             img src="img/icon_flip.png"
         li
-          a.button href="#" onclick="" data-i18n-title="board.clear_arrows"
+          a.button.button-disabled#clearArrowsButton href="#" onclick="" data-i18n-title="board.clear_arrows"
             img src="img/icon_eraser.png"
         li
-          a.button href="#" data-i18n="board.position" onclick=""
+          a.button#positionMenuButton href="#" data-i18n="board.position" onclick=""
         li
-          a.button href="#" data-i18n="board.kifu" onclick=""
+          a.button#kifuMenuButton href="#" data-i18n="board.kifu" onclick=""
         li
-          a.button href="#" onclick="" data-i18n-title="board.give_host"
+          a.button#giveHostButton href="#" onclick="" data-i18n-title="board.give_host"
             img src="img/icon_hat2.png"
         li
-          a.button href="#" onclick="_rematchButtonClick()" data-i18n-title="board.rematch"
+          a.button#rematchButton href="#" onclick="_rematchButtonClick()" data-i18n-title="board.rematch"
             img src="img/icon_one.png"
+      ul
+        li
+          a.button href="#" onclick="_optionButtonClick()" data-i18n-title="lobby.options"
+            img src="img/icon_gear.png"
+        li
+          a.button#closeGameButton href="#" onclick="_closeBoard()"
+            img src="img/icon_door.png"
+            span data-i18n="board.close_game"
     div.hbox style="flex:1"
       div#boardLeftVBox.vbox
         div#boardBox
         div#boardLeftBottomHBox.hbox
-          div#watcherBox.test
+          div#watcherBox.vbox
+            div style="text-align:left"
+              input#receiveWatcherChatCheckBox type="checkbox"
+              span data-i18n="board.allow_chat"
+            div.grid-wrapper style="flex:1"
+              table.stripe.hover#watcherGrid
+                tr
+                  thead
+                    th data-i18n="board.watchers"
+                    th data-i18n="lobby.country"
+                    th data-i18n="lobby.rate"
+                  tbody
           div#boardChatBox.vbox
             div#boardMessageArea style="flex:1"
             div.hbox style="margin-top:7px"
               span data-i18n="lobby.chat" style="margin-right:5px;white-space:nowrap"
               input type="text" id="boardChatInput" style="flex: 1"
+              input id="greetButton" style="height:22px;margin-left:5px" value="Auto" type="button" onclick=""
       div#boardRightVBox.vbox
         div#boardRightBottomHBox.hbox style="flex:1"
-          div#kifuBox.vbox.test
+          div#kifuBox.vbox
+            div style="text-align:left"
+              p
+                input type="radio" name="kifuModeRadio" value="0" onchange=""
+                span data-i18n="board.replay"
+              p
+                input type="radio" name="kifuModeRadio" value="1" checked="true" onchange=""
+                span data-i18n="board.listen"
+            div.grid-wrapper style="flex:1"
+              table.stripe.hover#kifuGrid
+                tr
+                  thead
+                    th #
+                    th data-i18n="board.move"
+                    th data-i18n="board.move_time"
+                  tbody

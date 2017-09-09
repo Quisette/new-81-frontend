@@ -5,7 +5,6 @@ class Game{
     //integer, string, User, User
     this.num = num
 		this.gameId = id
-    console.log(this.gameId)
 		this.gameName = this.gameId.split("+")[1]
 		let game_info = this.gameName.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/)
 		this.gameType = game_info[1]
@@ -39,7 +38,7 @@ class Game{
     let ruleStr
     if (this.gameType == "r") {
       ruleStr = "R: "
-    } else if (this.gameType.math(/^hc/)) {
+    } else if (this.gameType.match(/^hc/)) {
       ruleStr = "HC: "
     } else {
       ruleStr = "NR: "

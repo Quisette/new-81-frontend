@@ -65,9 +65,9 @@ class Position{
   loadFromString(position_str){
     let lines = position_str.split("\n")
     if (lines[0].substr(2) == "+") {
-  	  this._turn = Position.CONST.SENTE;
+  	  this.turn = Position.CONST.SENTE;
     } else {
-  	  this._turn = Position.CONST.GOTE;
+  	  this.turn = Position.CONST.GOTE;
     }
     for(let y = 0; y < 9; y++){
       let line = lines[y+1].substr(2);
@@ -86,13 +86,13 @@ class Position{
     if(lines.length > 10){
       for(let i = 9; i < lines.length; i++){
         if (lines[i].match(/P([+-])00(.*)/)){
-          owner = RegExp.$1 == "+"
+          let owner = RegExp.$1 == "+"
           let komas = lines[i].split("00")
           komas.shift(); //P[+-]
           komas.forEach(function(koma_name){
-            koma = createPiece(koma_name, owner, 0, 0)
+            let koma = this.createPiece(koma_name, owner, 0, 0)
             this.komadais[owner ? 0 : 1].push(koma)
-          })
+          }, this)
         }
       }
     }
@@ -100,14 +100,14 @@ class Position{
 
 	toString() {
 		let str = ""
-		if (this._turn == Position.CONST.SENTE) {
+		if (this.turn == Position.CONST.SENTE) {
 			str += "P0+\n";
 		} else {
 			str += "P0-\n";
 		}
 		for (let y = 0; y < 9; y++) {
 			let line = "P" + (y + 1);
-			for (let x = 0; x < 9; x++) {
+			for (let x = 8; x >= 0; x--) {
 				if (this._squares[x][y]) {
 					line += this._squares[x][y].toString()
 				} else {
@@ -209,12 +209,14 @@ class Position{
     if (move.fromX > 0){
       koma1 = this._squares[move.fromX - 1][move.fromY - 1]
       move.pieceType = koma1.getType()
+      if (move.pieceType >= 8) move.promote = false //'promote' might have been set to true temporarily
       this._squares[move.fromX - 1][move.fromY - 1] = null
       koma2 = this._squares[move.toX - 1][move.toY - 1]
       if (koma2) {
         koma2.owner = move.owner
         koma2.depromote()
         this.komadais[move.owner ? 0 : 1].push(koma2)
+        move.capture = true
       }
       this._squares[move.toX - 1][move.toY - 1] = koma1
     } else {
