@@ -16,8 +16,8 @@ class Position{
     this.xmax = this.xN
     this.ymin = 1
     this.ymax = this.yN
-    this.promoteY0 = 3 //for sente
-    this.promoteY1 = 7 //for gote
+    this._promoteY0 = 3 //for sente
+    this._promoteY1 = 7 //for gote
 
     this._squares = new Array(9)
     for (let i = 0; i < 9; i++) {
@@ -218,6 +218,7 @@ class Position{
         this.komadais[move.owner ? 0 : 1].push(koma2)
         move.capture = true
       }
+      if (move.promote) koma1.promote()
       this._squares[move.toX - 1][move.toY - 1] = koma1
     } else {
       koma1 = this._getPieceFromKomadai(move.owner, move.pieceType)
@@ -226,6 +227,17 @@ class Position{
     }
     this.turn = !this.turn
     return move
+  }
+
+  canPromote(sqFrom, sqTo){
+    if (sqFrom.data('x') <= 0) return false
+    let koma = this.getPieceFromSquare(sqFrom)
+    if (!koma || koma.isPromoted()) return false
+    if (koma.owner) {
+      return sqFrom.data('y') <= this._promoteY0 || sqTo.data('y') <= this._promoteY0
+    } else {
+      return sqFrom.data('y') >= this._promoteY1 || sqTo.data('y') >= this._promoteY1
+    }
   }
 
   handCoordinateHash(i){

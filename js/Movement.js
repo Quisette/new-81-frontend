@@ -93,6 +93,10 @@ class Movement{
     }
   }
 
+  replayable(){
+    return this.num != 0 && this.endTypeKey == null
+  }
+
   get numStr(){
     return this.num.toString()
   }

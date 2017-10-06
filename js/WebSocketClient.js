@@ -84,6 +84,8 @@ class WebSocketClient {
             thisInstance._callbackFunctions["CHAT"](RegExp.$1, RegExp.$2)
           } else if (line.match(/^##\[GAMECHAT\]\[(.+)\]\s(.+)$/)) {
             thisInstance._callbackFunctions["GAMECHAT"](RegExp.$1, RegExp.$2)
+      		} else if (line.match(/^##\[PRIVATECHAT\]\[(.+)\]\s(.+)$/)) {
+            thisInstance._callbackFunctions["PRIVATECHAT"](RegExp.$1, RegExp.$2)
           } else if (line.match(/^##\[MILE\](.+)$/)) {
             thisInstance._callbackFunctions["MILE"](RegExp.$1)
           } else if (line.match(/^##\[EXP\](.+)$/)) {
@@ -165,6 +167,11 @@ class WebSocketClient {
     }
   }
 
+  privateChat(sendTo, message){
+    //string, string
+    this.send("%%PRIVATECHAT " + sendTo + " " + message)
+  }
+
   wait(rule, total, byoyomi, side=0, tournament="", comment="", password="") {
     //string, int, int
     //if (password != "") password = "." + generateMD5Hex(Config.PRIVATE_ROOM_SALT + password).substr(0,6);
@@ -180,6 +187,10 @@ class WebSocketClient {
       side_code = "-"
     }
     this.send("%%GAME " + wait_gamename + ' ' + side_code)
+  }
+
+  challenge(user){
+    this.send("%%CHALLENGE " + user.name)
   }
 
   accept(){
@@ -204,6 +215,10 @@ class WebSocketClient {
 
   closeGame(){
     this.send("CLOSE")
+  }
+
+  timeout(){
+    this.send("%%%TIMEOUT")
   }
 
   send(str){

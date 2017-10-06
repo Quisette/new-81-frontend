@@ -34,12 +34,12 @@ class Board{
     this._komadais[1] = $('<div></div>', {id: 'goteKomadai', class: 'komadai'}).appendTo(this._div)
     this.playerInfos[0] = $('<div></div>', {id: 'senteInfo', class: 'player-info'}).appendTo(this._div)
     this.playerInfos[1] = $('<div></div>', {id: 'goteInfo', class: 'player-info'}).appendTo(this._div)
-    this._timers[0] = $('<div></div>', {id: 'senteTimer', class: 'game-timer'}).appendTo(this._div)
-    this._timers[1] = $('<div></div>', {id: 'goteTimer', class: 'game-timer'}).appendTo(this._div)
+    this._timers[0] = new GameTimer($('<div></div>', {id: 'senteTimer', class: 'game-timer'}).appendTo(this._div))
+    this._timers[1] = new GameTimer($('<div></div>', {id: 'goteTimer', class: 'game-timer'}).appendTo(this._div))
     this._flags[0] = $('<div></div>', {id: 'senteFlag', class: 'board-flag'}).appendTo(this._div)
     this._flags[1] = $('<div></div>', {id: 'goteFlag', class: 'board-flag'}).appendTo(this._div)
     for (let i = 0; i < 2; i++){
-      this.playerInfos[i].append('<div class="avatar-wrapper"><img class="avatar"/></div><span id="player-info-mark" style="font-size:15px">' + (i == 0 ? '☗' : '☖') + '</span><span id="player-info-name"></span><br><span id="player-info-rate"></span>')
+      this.playerInfos[i].append('<div class="avatar-wrapper" style="margin:5px 15px;"><img class="avatar"/></div><span id="player-info-mark" style="font-size:15px">' + (i == 0 ? '☗' : '☖') + '</span><span id="player-info-name"></span><br><span id="player-info-rate"></span>')
     }
   }
 
@@ -54,14 +54,18 @@ class Board{
     this._hisKomadaiY = 10
     this._myKomadaiX = 605
     this._myKomadaiY = 264
-    this._hisInfoX = 7
-    this._hisInfoY = 267
     this._myInfoX = 615
     this._myInfoY = 16
+    this._hisInfoX = 7
+    this._hisInfoY = 267
     this._myFlagX = 718
     this._myFlagY = 215
     this._hisFlagX = 10
     this._hisFlagY = 215
+    this._myTimerX = 615
+    this._myTimerY = 220
+    this._hisTimerX = 80
+    this._hisTimerY = 220
     this._komaW = 43
     this._komaH = 48
     this._banEdgeX = 11
@@ -93,6 +97,8 @@ class Board{
     this.playerInfos[hisTurnIndex].css({left: this._hisInfoX + 'px', top: this._hisInfoY + 'px'})
     this._flags[myTurnIndex].css({left: this._myFlagX + 'px', top: this._myFlagY + 'px'})
     this._flags[hisTurnIndex].css({left: this._hisFlagX + 'px', top: this._hisFlagY + 'px'})
+    this._timers[myTurnIndex].setPosition(this._myTimerX, this._myTimerY)
+    this._timers[hisTurnIndex].setPosition(this._hisTimerX, this._hisTimerY)
   }
 
   _generateSquares(){
@@ -203,12 +209,13 @@ class Board{
     this.isPostGame = false
     this.studyHostType = 0
     this.onListen = true
+    this._timers[0].initialize(this.game.total, this.game.byoyomi)
+    this._timers[1].initialize(this.game.total, this.game.byoyomi)
+    this._timers[this.myRoleType].myPlayingTimer = true
     /*
     rematch[0] = false;
     rematch[1] = false;
     _board_coord_image.visible = false;
-    timers[0].reset(_game.total, _game.byoyomi);
-    timers[1].reset(_game.total, _game.byoyomi);
     timers[_my_turn == _position.turn ? 0 : 1].start();
     if (moves) {
   	  if (moves.length > 0) {
@@ -227,6 +234,8 @@ class Board{
     _client_timeout = false;
     studyOrigin = 0;
     */
+    this.runningTimer.run()
+    this.updateTurnHighlight()
   }
 
   _handleSquareClick(sq){
@@ -241,20 +250,66 @@ class Board{
       }
     } else {
       if (sq.hasClass("square-movable")) {
-        let move = new Movement(kifuGrid.row({selected: true}).data().num + 1)
-        move.setFromManualMove(this._position.turn, this._selectedSquare, sq)
-        this._executeManualMove(move)
+        if (this._position.canPromote(this._selectedSquare, sq)) this._openPromotionDialog(sq)
+        else this._manualMoveCommandComplete(sq, false)
+      } else {
+        this._cancelSelect()
       }
-      this._cancelSelect()
     }
   }
 
+  _openPromotionDialog(sq){
+    //square
+    let element = $("<div></div>",{
+      title: 'Promote?',
+      html: '<div id="promotion-window">\
+        <button type=button id="promote-yes" class="promotion-button"><img class="promotion-image" id="promote-yes-image"></button>\
+        <button type=button id="promote-no" class="promotion-button"><img class="promotion-image" id="promote-no-image"></button>\
+        </div>'
+    }).dialog({
+      dialogClass: 'no-close',
+      modal: true,
+      autoOpen: false,
+      width: 100,
+      minHeight: 0,
+      position: {at:'left+'+mouseX+' top+'+mouseY},
+      close: function(e){
+        element.dialog('destroy').remove()
+      }
+    })
+    let koma = this._position.getPieceFromSquare(this._selectedSquare)
+    element.find('#promote-yes-image').attr('src', 'img/themes/' + this._theme + '/' + koma.toImagePath(!this._direction, true))
+    element.find('#promote-no-image').attr('src', 'img/themes/' + this._theme + '/' + koma.toImagePath(!this._direction))
+    let thisInstance = this
+    $('#promote-yes').click(function(){
+      thisInstance._manualMoveCommandComplete(sq, true)
+      element.dialog('close')
+    })
+    $('#promote-no').click(function(){
+      thisInstance._manualMoveCommandComplete(sq, false)
+      element.dialog('close')
+    })
+    element.dialog('open')
+  }
+
+  _manualMoveCommandComplete(destinationSquare, promote){
+    //sqaure, boolean
+    let move = new Movement(kifuGrid.row({selected: true}).data().num + 1)
+    move.setFromManualMove(this._position.turn, this._selectedSquare, destinationSquare, promote)
+    this._cancelSelect()
+    this._executeManualMove(move)
+  }
+
   _executeManualMove(move){
+    if (this.isPlaying()) {
+      this.runningTimer.stop()
+    }
     move = this._position.makeMove(move)
     this._refreshPosition()
     if (this.isPlaying()) {
-      makeMoveAsPlayer(move)
+      sendMoveAsPlayer(move)
       this._publicPosition.loadFromString(this._position.toString())
+      this.updateTurnHighlight()
     }
   }
 
@@ -267,9 +322,31 @@ class Board{
     }
   }
 
+  replayMoves(moves){
+    this._cancelSelect()
+	  //_last_to_square = null;
+    this._position.loadFromString(this._initialPositionStr)
+    for (let i = 0; i < moves.length; i++) {
+      if (moves[i].replayable()) this._position.makeMove(moves[i])
+    }
+    /*
+		  if (mv.replayable()) {
+			  _last_to_square = _cells[mv.to.y][mv.to.x];
+			  _last_to_square.setStyle('backgroundColor', '0xCC3333');
+			  if (mv.from.x < Kyokumen.HAND) {
+				_last_from_square = _cells[mv.from.y][mv.from.x];
+				_last_from_square.setStyle('backgroundColor', '0xFF5555');
+			  }
+		  }
+      */
+    this._refreshPosition()
+  }
+
   setBoardConditions(){
     if (this.isPlayer()) {
       if (this.isPostGame){
+        this._canMoveMyPiece = false
+        this._canMoveHisPiece = false
       } else {
         this._canMoveMyPiece = true
         this._canMoveHisPiece = false
@@ -282,9 +359,34 @@ class Board{
   }
 
   _cancelSelect(){
-    $(".square").removeClass("square-movable")
-    this._selectedSquare.removeClass("square-selected")
-    this._selectedSquare = null
+    if (this._selectedSquare != null){
+      $(".square").removeClass("square-movable")
+      this._selectedSquare.removeClass("square-selected")
+      this._selectedSquare = null
+    }
+    //if (this.isPlaying()) grabPiece(0,0)
+		//_endGrab();
+		//if (highlight_movable) _hideMovableSquares();
+		//_pieceGrab = false;
+  }
+
+  updateTurnHighlight(){
+    this.playerInfos[this._publicPosition.turn ? 1 : 0].removeClass('player-info-has-turn')
+    this.playerInfos[this._publicPosition.turn ? 0 : 1].addClass('player-info-has-turn')
+  }
+
+  pauseAllTimers(){
+    this._timers[0].stop(true)
+    this._timers[0].myPlayingTimer = false
+    this._timers[1].stop(true)
+    this._timers[1].myPlayingTimer = false
+  }
+
+  close(){
+    this.myRoleType = null
+    this.game = null
+    this.playerInfos[0].find("#player-info-name").removeClass("name-winner")
+    this.playerInfos[1].find("#player-info-name").removeClass("name-winner")
   }
 
   isPlayer(){
@@ -297,6 +399,14 @@ class Board{
 
   getFinalMove(){
     return this.moves[this.moves.length - 1]
+  }
+
+  getPlayersTimer(sente){
+    return this._timers[sente ? 0 : 1]
+  }
+
+  get runningTimer(){
+    return this._timers[this._publicPosition.turn ? 0 : 1]
   }
 
   get position(){

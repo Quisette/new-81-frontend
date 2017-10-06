@@ -5,12 +5,12 @@ class User{
     this.name = name
     this.rate = 0
     this._countryCode = 0
-    this._status = 0
+    this.status = 0
     // 0:connected, 1:game_waiting, 2:agree_wating, 3:start_waiting, 4:game, 5:post_game, 6:finished
-    this._idle = false
+    this.idle = false
     this._isMobile = false
     this._monitorGame = "*"
-    this._provisional = true
+    this.provisional = true
     this._waitingGameName = ""
     this._waitingTurn = "*"
     this._waitingComment = ""
@@ -18,14 +18,14 @@ class User{
 
   setFromWho(tokens){
     if (tokens.shift() == "x2|81AR") this._isMobile = true
-    this._status = parseInt(tokens.shift())
+    this.status = parseInt(tokens.shift())
     this.rate = parseInt(tokens.shift())
-    this._provisional = tokens.shift() == "1"
+    this.provisional = tokens.shift() == "1"
     let token = tokens.shift()
     if (token != "0") this._countryCode = parseInt(token)
     this._monitorGame = tokens.shift()
-    this._idle = tokens.shift() == "1"
-    if (this._status == 1){
+    this.idle = tokens.shift() == "1"
+    if (this.status == 1){
       let waiting_token = tokens.join(",").split("|")
       this._waitingGameName = waiting_token.shift()
       this._waitingTurn = waiting_token.shift()
@@ -52,15 +52,15 @@ class User{
 		this._waitingGameName = game_name
 		this._waitingTurn = turn;
 		this._waitingComment = comment;
-		if (game_name == "*") this._status = 0
-		else this._status = 1
+		if (game_name == "*") this.status = 0
+		else this.status = 1
 	}
 
 	setFromStart(game_name, turn){
     //string, string
 		this.game_name = game_name;
 		//this.turn = turn;
-		this._status = 4
+		this.status = 4
 		//this.moves = 0
 	}
 
@@ -80,16 +80,20 @@ class User{
   }
 
   listAsWaiter(){
-		return this._status == 1 && !this._waitingGameName.match(/_@/)
+		return this.status == 1 && !this._waitingGameName.match(/_@/)
+  }
+
+  inGameRoom(){
+    return this.status == 4 || this.status == 5
   }
 
   gridObject(){
 		let statStr =  (this._monitorGame != "*") ? EJ("M ", "観") : ""
 		if (this.listAsWaiter()) {
 		  statStr += EJ("W", "待")
-		} else if (this._status == 5) {
+		} else if (this.status == 5) {
 			statStr = EJ("P ", "感想 ")
-		} else if (this._status == 4) {
+		} else if (this.status == 4) {
 			statStr = EJ("G ", "対")
 		}
 
@@ -108,9 +112,10 @@ class User{
       title: "",
       rank: coloredSpan(makeRankFromRating(this.rate), makeColorFromRating(this.rate)),
       name: this.name,
+      nameStr: this.idle ? coloredSpan(this.name, '#00f') : this.name,
       country: this.country.flagImgTag16() + ' ' + this.country.name3Tag(),
       rate: this.rate,
-      waiter: this.country.flagImgTag27() + ' ' + coloredSpan('■', makeColorFromRating(this.rate)) + ' ' + this.name,
+      waiter: this.country.flagImgTag27() + ' ' + coloredSpan('■', makeColorFromRating(this.rate)) + ' ' + (this.idle ? coloredSpan(this.name, '#00f') : this.name),
       ruleStr: ruleStr,
       timeStr: timeStr
 		}
@@ -126,6 +131,10 @@ class User{
 
   get country(){
     return countries[this._countryCode]
+  }
+
+  get waitingGameName(){
+    return this._waitingGameName
   }
 
 }

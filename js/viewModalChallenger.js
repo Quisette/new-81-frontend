@@ -1,13 +1,15 @@
 function _initModalChallenger(user){
   $('p#challengerName').html(coloredSpan('■', makeColorFromRating(user.rate)) + ' ' + user.name + '&emsp;' + user.country.flagImgTagMovie())
   $('span#challengerRate').html(': ' + user.rate + ' (' + makeRankFromRating(user.rate) + ')')
-  $('#challengerAcceptButton').click(function(){
+  $('#challengerAcceptButton').unbind().click(function(){
+    clearInterval(timer)
     _handleAcceptChallenge()
-    clearInterval(timer)
+    $('#modalChallenger').dialog('close')
   })
-  $('#challengerRejectButton').click(function(){
-    _handleRejectChallenge(user, "C004")
+  $('#challengerRejectButton').unbind().click(function(){
     clearInterval(timer)
+    _handleRejectChallenge(user, "C004")
+    $('#modalChallenger').dialog('close')
   })
   let count = 20
   $('#challengerTimerText').html(count)
@@ -17,7 +19,7 @@ function _initModalChallenger(user){
     if (count <= 0) {
       clearInterval(timer)
       _handleRejectChallenge(user, "C003")
-      modalChallengerWindow.close()
+      $('#modalChallenger').dialog('close')
     }
   }, 1000)
 }

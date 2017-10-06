@@ -4,6 +4,8 @@ function _jsinclude(path){
 _jsinclude("js/Piece.js")
 _jsinclude("js/Movement.js")
 _jsinclude("js/Position.js")
+_jsinclude("js/GameTimer.js")
+_jsinclude("js/SoundPlayer.js")
 _jsinclude("js/Board.js")
 _jsinclude("js/Country.js")
 _jsinclude("js/User.js")

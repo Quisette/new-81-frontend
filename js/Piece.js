@@ -41,12 +41,16 @@ class Piece{
     return str + (this._promoted ? this.promotedCSA : this.CSA)
   }
 
-  toImagePath(reverse = false){
-    return (this.owner == !reverse ? "S" : "G") + (this._promoted ? this._promotedImg : this._img) + ".png"
+  toImagePath(reverse = false, showPromotedSide = false){
+    return (this.owner == !reverse ? "S" : "G") + ((this._promoted || showPromotedSide) ? this._promotedImg : this._img) + ".png"
   }
 
   getType(){
     return this.type + (this._promoted ? 8 : 0)
+  }
+
+  isPromoted(){
+    return this._promoted
   }
 
 //  kyotoConvert(){

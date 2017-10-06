@@ -2,6 +2,7 @@
 const IMAGE_DIRECTORY = "http://81dojo.com/dojo/images/"
 var client = null;
 var apiClient = null;
+var sp;
 var currentLayer = 0;
 var isGuest = false;
 var mileage;
@@ -11,14 +12,17 @@ var waiterGrid;
 var gameGrid;
 var watcherGrid;
 var kifuGrid;
-var modalChallengerWindow
 var users = new Object();
 var playerInfoWindows = new Object();
 var me;
+var _challengeUser = null
+var _gameAccepted = false
 var premium;
 var countries = new Object();
 var board;
 var hidden_prm;
+var mouseX
+var mouseY
 var testMode = true
 
 /* ====================================
@@ -28,7 +32,13 @@ var testMode = true
 function _testFunction(phase){
   //phase:integer
   if (phase == 0) { // After creation
-    //_switchLayer(2)
+//    board.loadNewPosition()
+ //   _switchLayer(2)
+//    return
+    _handleServers([
+      {id:1, name:'MERCURY', description_en: 'test', description_ja: 'テスト', enabled: true, population: 0, host: 'shogihub.com', port: 4084},
+      {id:2, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.47.133', port: 4081}
+    ])
   } else if (phase == 1) { // After servers are loaded
     serverGrid.row("#MERCURY").select()
     _loginButtonClick()
@@ -51,6 +61,7 @@ $(function(){
   })
   xhr.open("get", "dat/countries.txt")
   xhr.send()
+  sp = new SoundPlayer()
 
   // Internationalization
   i18next.language = "ja"
@@ -69,6 +80,7 @@ $(function(){
     _updateLanguage()
   })
 
+  // Prepare Datatables
   serverGrid = $('#serverGrid').DataTable({
     data: [],
     columns: [
@@ -91,7 +103,7 @@ $(function(){
       {data: "statStr", width: "10%"},
       {data: "title", width: "14%"},
       {data: "rank", width: "14%", bSortable: false},
-      {data: "name", width: "40%", className: "dt-body-left"},
+      {data: "nameStr", width: "40%", className: "dt-body-left"},
       {data: "country", width: "12%", className: "dt-body-left"},
       {data: "rate", width: "10%", className: "dt-body-right"}
     ],
@@ -102,6 +114,9 @@ $(function(){
     oLanguage: {sEmptyTable: EJ("Loading...", "読込中...")}
   })
   playerGrid.clear()
+  $('#playerGrid tbody').on('dblclick', 'tr', function () {
+    _openPlayerInfo(users[playerGrid.row(this).id()])
+  })
 
   waiterGrid = $('#waiterGrid').DataTable({
     data: [],
@@ -118,6 +133,9 @@ $(function(){
     oLanguage: {sEmptyTable: EJ("No player is waiting", "対局待プレーヤがいません")}
   })
   waiterGrid.clear()
+  $('#waiterGrid tbody').on('dblclick', 'tr', function () {
+    _openPlayerInfo(users[waiterGrid.row(this).id()])
+  })
 
   gameGrid = $('#gameGrid').DataTable({
     data: [],
@@ -163,6 +181,40 @@ $(function(){
     order: false
   })
   kifuGrid.clear()
+  kifuGrid.on('user-select', function(e, dt, type, cell, originalEvent){
+    if ($(cell.node()).parent().hasClass('selected')) {
+      e.preventDefault()
+    } else {
+      _kifuSelected(cell.index().row)
+    }
+  })
+
+  // Prepare modal windows
+  $('#modalNewGame').dialog({
+    modal: true,
+    dialogClass: 'no-close',
+    autoOpen: false,
+    position: {my: 'left top', at:'left+100 top+100'},
+    open: function(e, ui){
+      $('.ui-widget-overlay').hide().fadeIn()
+    },
+    show: 'fade',
+    buttons: [
+      {text: "OK", click: function(){_handleNewGame()}},
+      {id: "i18n-cancel", click: function(){$(this).dialog('close')}}
+    ]
+  })
+
+  $('#modalChallenger').dialog({
+    modal: true,
+    dialogClass: 'no-close',
+    autoOpen: false,
+    position: {my: 'center bottom'},
+    open: function(e, ui){
+      $('.ui-widget-overlay').hide().fadeIn()
+    },
+    show: 'fade'
+  })
 
   // Load localStorage
   if (localStorage.login) $('#usernameInput').val(localStorage.login)
@@ -186,13 +238,18 @@ $(function(){
       }
     }
   })
+  window.onmousemove = function(event) {
+      event = event || window.event
+      mouseX = event.clientX
+      mouseY = event.clientY
+  }
 
   // Do in every relogin
 
   //  apiClient = new WebSystemApiClient("192.168.220.131", 3000)
   apiClient = new WebSystemApiClient("system.81dojo.com", 80)
   apiClient.setCallbackFunctions("SERVERS", _handleServers)
-  apiClient.getServers()
+  if (!testMode) apiClient.getServers()
 
   if (testMode) _testFunction(0)
 });
@@ -230,6 +287,11 @@ function _updateLanguage(){
       $('#newGameRuleSelect').append($("<option />").val(key).text(HANDICAPS_JA[key]))
     })
   }
+  $('#modalNewGame').dialog('option', 'title', i18next.t("new_game.title"))
+  $('#modalChallenger').dialog('option', 'title', i18next.t("challenger.title"))
+  $('[id^=i18n-]').each(function(){
+    $(this).button('option', 'label', i18next.t($(this).attr('id').split("-")[1]))
+  })
 }
 
 function _loginTypeChange(){
@@ -254,6 +316,7 @@ function _loginButtonClick(){
   client.setCallbackFunctions("LOBBY_OUT", _handleLobbyOut)
   client.setCallbackFunctions("CHAT", _handleChat)
   client.setCallbackFunctions("GAMECHAT", _handleGameChat)
+  client.setCallbackFunctions("PRIVATECHAT", _handlePrivateChat)
   client.setCallbackFunctions("MOVE", _handleMove)
   client.setCallbackFunctions("GAME_END", _handleGameEnd)
   client.setCallbackFunctions("ERROR", _handleGeneralResponse)
@@ -262,6 +325,8 @@ function _loginButtonClick(){
   client.setCallbackFunctions("LIST", _handleList)
   client.setCallbackFunctions("GAME", _handleGame)
   client.setCallbackFunctions("CHALLENGE", _handleChallenger)
+  client.setCallbackFunctions("ACCEPT", _handleAccept)
+  client.setCallbackFunctions("DECLINE", _handleDecline)
   client.setCallbackFunctions("GAME_SUMMARY", _handleGameSummary)
   client.setCallbackFunctions("START", _handleStart)
   client.connect();
@@ -277,15 +342,7 @@ function _refreshButtonClick(){
 }
 
 function _waitButtonClick(){
-  $('#modalNewGame').modal({
-    focus: false,
-    persist: true,
-    onOpen: function(dialog){
-      dialog.overlay.fadeIn(300)
-      dialog.container.fadeIn(300)
-      dialog.data.fadeIn(300)
-    }
-  })
+  $('#modalNewGame').dialog('open')
 }
 
 function writeUserMessage(str, layer, clr = null, bold = false, lineChange = true){
@@ -295,12 +352,25 @@ function writeUserMessage(str, layer, clr = null, bold = false, lineChange = tru
   } else if (layer == 2) {
     area = $('#boardMessageArea')
   }
+	str = str.replace(/</g, "&lt;")
+	str = str.replace(/&lt;sPAn/g, "<span");
+	str = str.replace(/&lt;\/SpaN>/g, "</span>");
+	str = str.replace(/(https?\:\/\/[^\"^\s^\\]+)/g, '<a href="$1" target="_blank">$1</a>')
+	str = str.replace(/\\n/g, "<br>&emsp;&emsp;&emsp;")
   $('<span></span>',{}).css({
     'color': (clr ? clr : ''),
     'font-weight': (bold ? 'bold' : '')
-  }).text(str).appendTo(area)
+  }).html(str).appendTo(area)
   if (lineChange) area.append('<br>')
+  area.animate({scrollTop: area[0].scrollHeight}, 'fast')
 }
+
+function _interpretCommunicationCode(name, code, n, bold, sound) {
+  //string, string, integer, boolean, boolean
+	writeUserMessage(name + i18next.t("code." + code), n, "#008800", bold)
+//	if (sound && _chat_sound2_play) _sound_chat2.play();
+}
+
 
 /* ====================================
     Board View functions
@@ -318,7 +388,7 @@ function _rematchButtonClick(){
   			Alert.show(LanguageSelector.lan.msg_guest_expire, LanguageSelector.lan.error, 4);
   			return;
   		} */
-  		client.gameChat("[##REMATCH]")
+//  		client.gameChat("[##REMATCH]")
   } /*else {
 		var match:Array = _game_name.split("+")[1].match(/^([0-9a-z]+?)_(.*)$/);
 		var found:Boolean = false;
@@ -344,13 +414,12 @@ function _closeBoard(){
   client.closeGame()
   client.who()
   client.list()
-  board.myRoleType = null
-  board.game = null
+  board.close()
   _switchLayer(1)
   $('boardMessageArea').empty()
 }
 
-function makeMoveAsPlayer(move){
+function sendMoveAsPlayer(move){
   client.move(move)
   board.moves.push(move)
   board.addMoveToKifuGrid(move)
@@ -364,6 +433,49 @@ function makeMoveAsPlayer(move){
   _myMoveSentTimer.reset();
   _myMoveSentTimer.start();
   */
+}
+
+function _kifuSelected(index){
+  board.replayMoves(kifuGrid.rows(Array.from(Array(index+1).keys())).data())
+}
+
+function sendTimeout(){
+  console.log('OK')
+  client.timeout()
+  board.pauseAllTimers()
+}
+
+function setBoardConditions(){
+  board.setBoardConditions()
+  let kifuSelectable = false
+  if (board.isPlayer()) {
+    $("#flipButton").addClass("button-disabled")
+    if (board.isPostGame) {
+      kifuSelectable = true
+      $("#resignButton").addClass("button-disabled")
+      $("#positionMenuButton, #kifuMenuButton, #giveHostButton, #rematchButton, #closeGameButton").removeClass("button-disabled")
+      $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: true})
+    } else {
+      $("#resignButton").removeClass("button-disabled")
+      $("input[name=kifuModeRadio]").val(1).prop("disabled", true)
+      $("#positionMenuButton, #kifuMenuButton, #giveHostButton, #rematchButton, #closeGameButton").addClass("button-disabled")
+      if (board.game.gameType != "r") {
+        $("#receiveWatcherChatCheckBox").prop({disabled: false, checked: true})
+      } else {
+        $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: false})
+      }
+    }
+  } else {
+    kifuSelectable = true
+    $("#resignButton").addClass("button-disabled")
+    $("#flipButton, #positionMenuButton, #kifuMenuButton, #giveHostButton, #rematchButton").removeClass("button-disabled")
+    $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: true})
+  }
+  if (kifuSelectable){
+    kifuGrid.select.style('single')
+  } else {
+    kifuGrid.select.style('api')
+  }
 }
 
 /* ====================================
@@ -390,11 +502,12 @@ function _handleNewGame(){
   } else if (val == 8) {
     client.stopWaiting()
   }
+  $('#modalNewGame').dialog('close')
 }
 
 function _handleAcceptChallenge(){
-	client.accept();
-//	_gameAccepted = true;
+	client.accept()
+	_gameAccepted = true
 //	_acceptedCancelTimer.reset();
 //	_acceptedCancelTimer.start();
 //	if (_mileForFix > 0) {
@@ -406,6 +519,105 @@ function _handleAcceptChallenge(){
 function _handleRejectChallenge(challenger, declineCode = null){
 	client.decline(declineCode)
 	writeUserMessage(EJ("Rejected the challenge from " + challenger.name + ".", challenger.name + "さんからの挑戦をパスしました。"), 1, "#008800", true)
+}
+
+function _openPlayerInfo(user, doOpen = true){
+  let element = $("#player-info-window-" + user.name)
+  if (!element[0]) {
+    element = $("<div></div>",{
+      id: 'player-info-window-' + user.name,
+      title: user.name,
+      html: '<div id="player-info-layer-1" class="hbox" style="pointer-events:none">\
+        <div class="avatar-wrapper"><img class="avatar"/></div>\
+        <div style="flex:1;margin-left:10px"><p id="p1"></p><p id="p2"></p><p id="p3"></p><p id="p4"></p></div>\
+        </div>\
+        <div id="player-info-layer-2" style="margin-top:-128px;opacity:0">\
+        <div id="privateMessageArea"></div>\
+        <div class="hbox" style="margin-top:5px"><span style="margin-right:5px;white-space:nowrap">PM:</span><input id="privateChatInput" style="flex:1"></div>\
+        </div>'
+    }).dialog({
+      autoOpen: false,
+      position: {at:'left+'+mouseX+' top+'+mouseY},
+      close: function(e){
+        if (element.find("#privateMessageArea").html() == "") element.dialog('destroy').remove()
+      },
+      buttons: [
+        {text: i18next.t("player_info.challenge"), click: function(){_playerChallengeClick(user)}},
+        {text: i18next.t("player_info.detail"), click: function(){_playerDetailClick(user)}},
+        {text: "PM", click: function(){_playerPMClick(this)}}
+      ]
+    })
+    element.find("#privateChatInput").on('keyup', function(e){
+      if (e.keyCode == 13){
+        if ($(this).val().length > 0) {
+          client.privateChat(user.name, $(this).val())
+          let area = element.find("#privateMessageArea")
+          $('<span></span>',{}).css('color', '#33f').text($(this).val()).appendTo(area)
+          area.append('<br>')
+          area.animate({scrollTop: area[0].scrollHeight}, 'fast')
+          $(this).val('')
+        }
+      }
+    })
+  }
+  if (doOpen) element.dialog('open')
+  element.find("img.avatar").attr("src", user.avatarURL())
+  element.find("p#p1").html(user.country.flagImgTag27() + ' ' + user.country.toString())
+  element.find("p#p2").html('R: ' + user.rate + ' (' + makeRankFromRating(user.rate) + ')')
+  return element
+}
+
+function _playerChallengeClick(user){
+  if (user == me) return
+  if (_challengeUser) {
+	  writeUserMessage(EJ("You can only challenge one player at a time.", "挑戦は一度に一人に対してしか行えません。"), 1, "#008800")
+  } else if (user.listAsWaiter()) {
+    if (user.rate >= RANK_THRESHOLDS[2] && me.provisional && user.waitingGameName.match(/^r_/)) {
+  	  writeUserMessage(EJ("New player with a provisional rating cannot challenge 6-Dan or higher for rated games.", "レート未確定の新鋭棋士は六段以上とのレーティング対局には挑戦出来ません。"), 1, "#008800")
+    } else if (user.waitingGameName.match(/_automatch\-/)) {
+		  client.seek(user)
+	  } else {
+		  _challengeUser = user
+		  writeUserMessage(EJ("Challenging " + _challengeUser.name + "..... (Must wait for 20 seconds max)\n", _challengeUser.name + "さんに挑戦中..... (待ち時間 最大で20秒)\n"), 1, "#008800", true)
+		  client.challenge(_challengeUser)
+//		  _challengeCancelTimer.reset();
+//		  _challengeCancelTimer.start();
+	  }
+  } else if (!me.listAsWaiter()) {
+		writeUserMessage(EJ("The opponent is not waiting with own game rule. You can invite him if you wait with your own game rule.", "相手は対局待をしていません。自分が対局待にすることで招待メッセージを送ることが可能です。"), 1, "#008800")
+	} else if (user.idle) {
+		writeUserMessage(user.name + EJ(" is not accepting challenge or invitations right now.", "さんは現在 挑戦・招待を受け付けていません。"), 1, "#008800", true)
+	} else if (user.inGameRoom()) {
+		writeUserMessage(user.name + EJ(" is in another game right now.", "さんは対局中です。"), 1, "#008800", true)
+	} else {
+		me.waitingGameName.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/)
+		client.privateChat(user.name, "[##INVITE]" + RegExp.$3 + "," + RegExp.$4 + "," + RegExp.$1)
+		writeUserMessage(EJ("The opponent is not waiting with own game rule. Instead, an invitation to your game has been sent to him.", "相手は対局待をしていません。代わりに自分の対局への招待メッセージを" + user.name + "さんに送信しました。(拒否された場合は連続送信しないで下さい)"), 1, "#008800")
+	}
+      /*
+		  if (_isGuest && _guestGamesExpired()) {
+			  Alert.show(LanguageSelector.lan.msg_guest_expire, LanguageSelector.lan.error, 4);
+			  return;
+		  if (!(_challengeUser.statusMark.match(/[待W]/))) {
+			  if (_isGuest || _users[name].isMobile) {
+			if (_isGuest && (match[1] == "r" || match[2].match(/\-\-..$/))) {
+				Alert.show(LanguageSelector.EJ("Guests cannot play rated games.", "ゲストはレーティング対局に参加できません"), LanguageSelector.lan.error, 4);
+		  }
+      */
+}
+
+function _playerDetailClick(user){
+  window.open("http://system.81dojo.com/" + EJ('en', 'ja') + "/players/show/" + user.name)
+}
+
+function _playerPMClick(e, forcePM = false){
+  if (forcePM || $(e).find("div#player-info-layer-1").css('opacity') == 1) {
+    $(e).find("div#player-info-layer-1").css('opacity', 0)
+    $(e).find("div#player-info-layer-2").css('opacity', 1)
+  } else {
+    $(e).find("div#player-info-layer-1").css('opacity', 1)
+    $(e).find("div#player-info-layer-2").css('opacity', 0)
+  }
 }
 
 /* ====================================
@@ -569,18 +781,40 @@ function _handleGame(line) {
 }
 
 function _handleChallenger(name){
-  modalChallengerWindow = $("#modalChallenger").modal({
-    onOpen: function(dialog){
-      dialog.overlay.fadeIn(300)
-      dialog.container.fadeIn(300)
-      dialog.data.fadeIn(300)
-      _initModalChallenger(users[name])
-    }
-  })
+  sp.play("CHALLENGER")
+  $('#modalChallenger').dialog('open')
+  _initModalChallenger(users[name])
+}
+
+function _handleAccept(str){
+	//_challengeCancelTimer.stop();
+	_gameAccepted = true
+	//_acceptedCancelTimer.reset();
+	//_acceptedCancelTimer.start();
+	_interpretCommunicationCode("", "C005", 1, true, false)
+	if (_challengeUser) client.seek(_challengeUser)
+}
+
+function _handleDecline(str){
+//	_challengeCancelTimer.stop();
+//	_acceptedCancelTimer.stop();
+	if (str.match(/^([A-Z]\d{3})/)) {
+		_interpretCommunicationCode("", RegExp.$1, 1, true, false)
+	} else {
+		writeUserMessage(str, 1, "#008800", true)
+	}
+	_challengeUser = null
+	_gameAccepted = false
+  /*
+	if (_challengerAlertWindow) {
+		_challengerAlertWindow.terminate();
+		_challengerAlertWindow = null;
+	}
+  */
 }
 
 function _handleGameSummary(str){
-//  _gameAccepted = false;
+  _gameAccepted = false
 //  _acceptedCancelTimer.stop();
   let black
   let white
@@ -627,6 +861,7 @@ function _handleGameSummary(str){
     if (myTurn) writeUserMessage(EJ("You are Black " + (board.gameType == "hc" ? "(Handicap taker).\n" : "(Sente).\n"), "あなた" + (board.gameType == "hc" ? "は下手(したて)" : "が先手") + "です。\n"), 2, "#008800")
     else writeUserMessage(EJ("You are White " + (board.gameType == "hc" ? "(Handicap giver).\n" : "(Gote).\n"), "あなた" + (board.gameType == "hc" ? "が上手(うわて)" : "は後手") + "です。\n"), 2, "#008800")
 	  //if (match[2].match(/\-\-\d+$/) && board.gameType != "r") writeUserMessage(LanguageSelector.EJ("To mute watcher's chat, switch off the checkbox above the watcher list.\n", "観戦者のチャットをミュートするには観戦者リスト上部のチェックボックスをOFFにして下さい。\n"), 2, "#FF3388")
+    /*
     closeButton.enabled = false;
 	  greetButton.state = GreetButton.STATE_BEFORE_GAME;
     rewindAllButton.enabled = false;
@@ -639,6 +874,7 @@ function _handleGameSummary(str){
 	  radioKifuReplay.enabled = false;
 	  board.onListen = true;
 	  _switchListenColor(true);
+    */
 	  //_nOpponentDisconnect = 0;
 	  //_study_notified = false;
     /*
@@ -658,6 +894,7 @@ function _handleMove(csa, time){
   //string, integer
   if (board.isPlaying()){
     let owner = csa.substr(0, 1) == "+"
+    board.getPlayersTimer(owner).useTime(time)
     if (owner && board.myRoleType == 0 || !owner && board.myRoleType == 1) {
       board.moves[board.moves.length - 1].time = time
     } else {
@@ -665,11 +902,14 @@ function _handleMove(csa, time){
       move.setFromCSA(csa)
       move.time = time
       board.handleReceivedMove(move)
+      board.updateTurnHighlight()
     }
+    board.runningTimer.run()
   }
 }
 
 function _handleGameEnd(lines){
+  board.pauseAllTimers()
   let gameEndType = lines.split("\n")[0]
   let result = lines.split("\n")[1]
   //var adviseIllegal:Boolean = false;
@@ -691,10 +931,10 @@ function _handleGameEnd(lines){
     case "LOSE":
     	board.studyHostType = 2
     	//_openGameResultWindow(-1);
-    	board.playerInfos[1 - board.myRoleType].addClass("player-info-winner")
+    	board.playerInfos[1 - board.myRoleType].find("#player-info-name").addClass("name-winner")
       writeUserMessage(EJ("### You Lose ###", "### あなたの負けです ###"), 2, "#DD0088", true)
     	//if (adviseIllegal) _writeUserMessage(LanguageSelector.EJ("( For details of illegal moves in shogi, see: http://81dojo.com/documents/Illegal_Move )\n", "( 将棋の反則手についてはこちらでご確認下さい: http://81dojo.com/documents/反則手 )\n"), 2, "#DD0088");
-      //if (_end_sound_play) _sound_lose.play();
+      sp.gameEnd(false)
       /*
     	if (board.gameType == "r") _losses_session += 1;
     	var history = "  ●";
@@ -705,14 +945,13 @@ function _handleGameEnd(lines){
     case "WIN":
       board.studyHostType = 1
     	//_openGameResultWindow(1);
-    	board.playerInfos[board.myRoleType].addClass("player-info-winner")
+    	board.playerInfos[board.myRoleType].find("#player-info-winner").addClass("name-winner")
       writeUserMessage(EJ("### You Win ###\n", "### あなたの勝ちです ###\n"), 2, "#DD0088", true)
-      //if (_end_sound_play) _sound_win.play();
+      sp.gameEnd(true)
       /*
     	if (board.gameType == "r") _wins_session += 1;
     	history = "  ◯";
     	if (board.gameType == "r" && board.kifu_list.length >= 6 && ((_users[login_name].wins + 1) % 100 == 0)) _client.chat("[##WINS]" + (_users[login_name].wins + 1));
-    	closeButton.enabled = true;
       */
       break
     case "DRAW":
@@ -720,9 +959,8 @@ function _handleGameEnd(lines){
     	else board.studyHostType = 1
     	//_openGameResultWindow(0);
       writeUserMessage(EJ("### Draw ###\n", "### 引き分け ###\n"), 2, "#DD0088", true)
-      //if (_end_sound_play) _sound_win.play();
+      sp.gameEnd(true)
     	//history = "  引";
-    	//closeButton.enabled = true;
       break
   }
   /*
@@ -770,14 +1008,10 @@ function _handleGameEnd(lines){
   setBoardConditions()
   /*
   if (greetButton.state != GreetButton.STATE_POSTGAME) greetButton.state = GreetButton.STATE_AFTER_GAME;
-  voiceButton.postGame = true;
   _shareKifuEnabled = true;
   if (board.isStudyHost) _toggleHostStatus(true);
   if (board.isSubHost) _writeUserMessage(LanguageSelector.lan.msg_subhost + "\n", 2, "#008800", true);
-  board.endGame();
   _status_disconnected = false;
-  _myMoveSent = false;
-  _myMoveSentTimer.stop();
   if (_isGuest) {
 	  var date:Date = new Date();
 	  if (_so.data.guest_game_period && _so.data.guest_game_period == date.toDateString()) _so.data.guest_game_num += 1;
@@ -787,32 +1021,6 @@ function _handleGameEnd(lines){
 	  }
   }
   */
-}
-
-function setBoardConditions(){
-  board.setBoardConditions()
-  if (board.isPlayer()) {
-    kifuGrid.select.style('api')
-    $("#resignButton").removeClass("button-disabled")
-    $("#flipButton").addClass("button-disabled")
-    if (board.isPostGame) {
-      $("#positionMenuButton, #kifuMenuButton, #giveHostButton, #rematchButton, #closeGameButton").removeClass("button-disabled")
-      $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: true})
-    } else {
-      $("input[name=kifuModeRadio]").val(1).prop("disabled", true)
-      $("#positionMenuButton, #kifuMenuButton, #giveHostButton, #rematchButton, #closeGameButton").addClass("button-disabled")
-      if (board.game.gameType != "r") {
-        $("#receiveWatcherChatCheckBox").prop({disabled: false, checked: true})
-      } else {
-        $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: false})
-      }
-    }
-  } else {
-    kifuGrid.select.style('single')
-    $("#resignButton").addClass("button-disabled")
-    $("#flipButton, #positionMenuButton, #kifuMenuButton, #giveHostButton, #rematchButton").removeClass("button-disabled")
-    $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: true})
-  }
 }
 
 function _handleStart(game_id){
@@ -915,8 +1123,6 @@ function _handleGameChat(sender, message){
 		}
 	} else if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
 		_handleStudy(sender, match[1], match[2]);
-	} else if (e.message.match(/\[\#\#EXPORT\]$/)) {
-		if (sender != login_name) _writeUserMessage(LanguageSelector.EJ("Kifu exported by " + sender + ".\n", sender + "さんが棋譜をエクスポートしました。\n"), 2, "#008800");
 	} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\]CLEAR$/))) {
 		if (sender != login_name) board.clearArrows(Board.ARROWS_PUBLIC, sender);
 	} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\](.+),(.+),(.+),(.+),(.+),(.+)$/))) {
@@ -966,7 +1172,7 @@ function _handleGameChat(sender, message){
     */
 	} else if (message.match(/^\[##.+\]/)) {
 	} else if (message.match(/^\[auto\-chat\]\s#([A-Z]\d{3})$/)) {
-//		_interpretCommunicationCode(match[1], match[2], 2, false, true);
+		_interpretCommunicationCode(sender, RegExp.$1, 2, false, true)
 	} else {
     /*
 		if (_losersCloseButtonTimer.running && sender != login_name) {
@@ -980,25 +1186,60 @@ function _handleGameChat(sender, message){
 		if (sender == board.game.black.name) {
 //			board.typingIndicatorStop(0);
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#000000")
-      //if (_chat_sound2_play) _sound_chat2.play();
 		} else if (sender == board.game.white.name) {
 //			board.typingIndicatorStop(1);
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#666666")
-      //if (_chat_sound2_play) _sound_chat2.play();
 		} else if (sender == me.name) {
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#0033DD")
-      //if (_chat_sound2_play) _sound_chat2.play();
       /*
 		} else if (_isDuringMyGame() && !_allowWatcherChat) {
+      return
 		} else if (_favorite_list.indexOf(sender) >= 0) {
-			_writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#DD7700"); if (_chat_sound2_play) _sound_chat2.play();
+			_writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#DD7700")
 		} else if (_colleague_list.indexOf(sender) >= 0) {
-			_writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#550066"); if (_chat_sound2_play) _sound_chat2.play();
+			_writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#550066")
       */
 		} else {
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#660000")
-      //if (_chat_sound2_play) _sound_chat2.play();
 		}
+    //if (_chat_sound2_play) _sound_chat2.play();
+	}
+}
+
+function _handlePrivateChat(sender, message){
+	if (message.match(/^\[\#\#STUDY\](\d+)\/(.+)$/)) {
+//		_handleStudy(name, match[1], match[2]);
+		return
+	} else if (message.match(/^\[\#\#FITNESS\](\d),(\d)$/)) {
+//		let str = EJ("Opponent's ", "対局相手の") + LanguageSelector.lan.study_level + ": " + (match[1] == 0 ? ("<" + LanguageSelector.lan.not_defined + ">") : (LanguageSelector.EJ("Level ", "レベル") + (parseInt(match[1]) - 1)));
+//		if (board.playerInfos[0].country_code != 392 || board.playerInfos[1].country_code != 392) str += LanguageSelector.EJ(" \ ", "、　") + LanguageSelector.lan.english_level + ": " + (match[2] == 0 ? ("<" + LanguageSelector.lan.not_defined + ">") : (LanguageSelector.EJ("Level ", "レベル") + (parseInt(match[2]) - 1)));
+//		_writeUserMessage(str + "\n", 2, "#0000AA");
+		return
+	} else if (message.match(/^\[\#\#INVITE\](\d+),(\d+),(.+)$/)) {
+//		_handleInvitation(name, parseInt(match[1]), parseInt(match[2]), match[3]);
+		return
+	} else if (message.match(/^\[\#\#REJECT\]/)) {
+    /*
+		if ((match = message.match(/^\[\#\#REJECT\]([A-Z]\d{3})/))) _interpretCommunicationCode(name, match[1], 1, true, false);
+		else _writeUserMessage(name + LanguageSelector.EJ(" did not accept your invitation.\n", "さんに招待メッセージが送信出来ませんでした。\n"), 1, "#008800", true);
+    */
+		return
+	} else if (message.match(/^\[auto\-PM\]/)) {
+//		if (message.match(/^\[auto\-PM\]\s#([A-Z]\d{3})/)) _interpretCommunicationCode(name, match[1], 2, false, true);
+		return
+	}
+//	if (_ignore_list.indexOf(name.toLowerCase()) >= 0) return;
+//	if (_isGuest) return;
+  let playerWindow = $("div#player-info-window-" + sender)
+  if (!playerWindow[0] && users[sender]) playerWindow = _openPlayerInfo(users[sender], false)
+  let area = playerWindow.find("#privateMessageArea")
+  $('<span></span>',{}).css('color', '#f35').text(message).appendTo(area)
+  area.append('<br>')
+  area.animate({scrollTop: area[0].scrollHeight}, 'fast')
+  _playerPMClick(playerWindow, true)
+  if (!playerWindow.dialog('isOpen') && !board.isPlaying()) {
+		writeUserMessage("PM: [" + _name2link(sender) + "] " + message.replace(/^\[\#\#URGENT\]/, ""), 1, "#FF0000")
+		if (currentLayer == 2) writeUserMessage("PM: [" + _name2link(name) + "] " + message.replace(/^\[\#\#URGENT\]/, ""), 2, "#FF0000")
 	}
 }
 
@@ -1044,7 +1285,7 @@ function _switchLayer(n){
 }
 
 function _name2link(name){
-  return name
+  return '<sPAn onclick="_openPlayerInfo(users[\'' + name + '\'])" class="name-link">' + name + '</SpaN>'
 }
 
 function _isFavorite(name){
