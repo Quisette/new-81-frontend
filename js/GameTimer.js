@@ -16,6 +16,8 @@ class GameTimer {
     this._tickTimer = false
 		this.myPlayingTimer = false
 
+		this._preCountedUsedTime = 0
+
     this._generateParts()
     this._display()
 	}
@@ -32,6 +34,7 @@ class GameTimer {
     this._timeLeft = this._isByoyomi ? this._byoyomi : this._total
     this._totalUsedTime = 0
     this._disconnected = false
+		this.myPlayingTimer = false
 		this._display()
   }
 
@@ -59,10 +62,14 @@ class GameTimer {
     this._display()
 	}
 
-	useTime(time){
+	useTime(time, preCount = false){
     //integer
     this.stop()
     if (this._isByoyomi) return
+		if (this._preCountedUsedTime > 0) {
+			time -= this._preCountedUsedTime
+			this._preCountedUsedTime = 0
+		}
     this._totalUsedTime += time
 		if(this._totalUsedTime < this._total){
       this._timeLeft = this._total - this._totalUsedTime
@@ -70,6 +77,7 @@ class GameTimer {
       this._isByoyomi = true
       this._timeLeft = this._byoyomi
 		}
+		if (preCount) this._preCountedUsedTime = time
 		this._display()
 	}
 

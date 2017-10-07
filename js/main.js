@@ -24,6 +24,7 @@ var hidden_prm;
 var mouseX
 var mouseY
 var testMode = true
+var config = null
 
 /* ====================================
     On document.ready
@@ -37,7 +38,7 @@ function _testFunction(phase){
 //    return
     _handleServers([
       {id:1, name:'MERCURY', description_en: 'test', description_ja: 'テスト', enabled: true, population: 0, host: 'shogihub.com', port: 4084},
-      {id:2, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.47.133', port: 4081}
+      {id:2, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.220.131', port: 4081}
     ])
   } else if (phase == 1) { // After servers are loaded
     serverGrid.row("#MERCURY").select()
@@ -62,6 +63,10 @@ $(function(){
   xhr.open("get", "dat/countries.txt")
   xhr.send()
   sp = new SoundPlayer()
+
+  $.getJSON("dat/config.json", function(data){
+    config = data
+  })
 
   // Internationalization
   i18next.language = "ja"
@@ -147,12 +152,16 @@ $(function(){
       {data: "watchers", width: "7%", bSortable: false},
       {data: "opening", width: "12%", bSortable: false}
     ],
+    rowId: "gameId",
     searching: false, paging: false, info: false,
     select: "single",
     order: false,
     oLanguage: {sEmptyTable: EJ("No game room found.", "対局がありません")}
   })
   gameGrid.clear()
+  $('#gameGrid tbody').on('dblclick', 'tr', function () {
+    _enterGame(gameGrid.row(this).data())
+  })
 
   watcherGrid = $('#watcherGrid').DataTable({
     data: [],
@@ -329,6 +338,8 @@ function _loginButtonClick(){
   client.setCallbackFunctions("DECLINE", _handleDecline)
   client.setCallbackFunctions("GAME_SUMMARY", _handleGameSummary)
   client.setCallbackFunctions("START", _handleStart)
+  client.setCallbackFunctions("MONITOR", _handleMonitor)
+  client.setCallbackFunctions("ENTER", _handleEnter)
   client.connect();
 }
 
@@ -343,6 +354,12 @@ function _refreshButtonClick(){
 
 function _waitButtonClick(){
   $('#modalNewGame').dialog('open')
+}
+
+function _enterGame(game){
+  if (board.game) return
+  board.setGame(game)
+  client.monitor(game.gameId, true)
 }
 
 function writeUserMessage(str, layer, clr = null, bold = false, lineChange = true){
@@ -411,7 +428,8 @@ function _rematchButtonClick(){
 }
 
 function _closeBoard(){
-  client.closeGame()
+  if (board.isPlayer()) client.closeGame()
+  else if (board.isWatcher()) client.monitor(board.game.gameId, false)
   client.who()
   client.list()
   board.close()
@@ -450,26 +468,33 @@ function setBoardConditions(){
   let kifuSelectable = false
   if (board.isPlayer()) {
     $("#flipButton").addClass("button-disabled")
+    $("#greetButton").prop('disabled', 'false')
     if (board.isPostGame) {
       kifuSelectable = true
+      $("input[name=kifuModeRadio]").val(1).prop("disabled", true)
       $("#resignButton").addClass("button-disabled")
-      $("#positionMenuButton, #kifuMenuButton, #giveHostButton, #rematchButton, #closeGameButton").removeClass("button-disabled")
+      $("#positionMenuButton, #kifuMenuButton, #rematchButton, #closeGameButton").removeClass("button-disabled")
       $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: true})
     } else {
-      $("#resignButton").removeClass("button-disabled")
       $("input[name=kifuModeRadio]").val(1).prop("disabled", true)
-      $("#positionMenuButton, #kifuMenuButton, #giveHostButton, #rematchButton, #closeGameButton").addClass("button-disabled")
+      $("#resignButton").removeClass("button-disabled")
+      $("#positionMenuButton, #kifuMenuButton, #rematchButton, #closeGameButton").addClass("button-disabled")
       if (board.game.gameType != "r") {
         $("#receiveWatcherChatCheckBox").prop({disabled: false, checked: true})
       } else {
         $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: false})
       }
     }
-  } else {
-    kifuSelectable = true
+  } else if (board.isWatcher()){
+    $("input[name=kifuModeRadio]").val(1).prop("disabled", true)
+    $("#greetButton").prop('disabled', 'true')
     $("#resignButton").addClass("button-disabled")
-    $("#flipButton, #positionMenuButton, #kifuMenuButton, #giveHostButton, #rematchButton").removeClass("button-disabled")
+    $("#flipButton, #positionMenuButton, #kifuMenuButton, #rematchButton").removeClass("button-disabled")
     $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: true})
+    if (board.isPostGame) {
+      kifuSelectable = true
+    } else {
+    }
   }
   if (kifuSelectable){
     kifuGrid.select.style('single')
@@ -681,7 +706,7 @@ function _handleWho(str){
 function _handleList(str){
   let n = 0
   let lines = str.trim().split("\n")
-  let games = []
+  gameGrid.clear()
   lines.forEach(function(line){
     n += 1
     let tokens = line.split(" ")
@@ -699,11 +724,7 @@ function _handleList(str){
 		}
 		let game = new Game(n, tokens[0], black, white);
 		game.setFromList(parseInt(tokens[1]), tokens[6], tokens[7] == "true", tokens[8] == "true", parseInt(tokens[9]), tokens[10])
-    games.push(game)
-  })
-  gameGrid.clear()
-  games.forEach(function(g){
-    gameGrid.row.add(g.gridObject())
+    gameGrid.row.add(game)
   })
   gameGrid.draw()
 }
@@ -862,16 +883,7 @@ function _handleGameSummary(str){
     else writeUserMessage(EJ("You are White " + (board.gameType == "hc" ? "(Handicap giver).\n" : "(Gote).\n"), "あなた" + (board.gameType == "hc" ? "が上手(うわて)" : "は後手") + "です。\n"), 2, "#008800")
 	  //if (match[2].match(/\-\-\d+$/) && board.gameType != "r") writeUserMessage(LanguageSelector.EJ("To mute watcher's chat, switch off the checkbox above the watcher list.\n", "観戦者のチャットをミュートするには観戦者リスト上部のチェックボックスをOFFにして下さい。\n"), 2, "#FF3388")
     /*
-    closeButton.enabled = false;
 	  greetButton.state = GreetButton.STATE_BEFORE_GAME;
-    rewindAllButton.enabled = false;
-    rewindOneButton.enabled = false;
-    forwardOneButton.enabled = false;
-    forwardAllButton.enabled = false;
-    kifuDataGrid.selectable = false;
-	  radioKifuListen.selected = true;
-	  radioKifuListen.enabled = false;
-	  radioKifuReplay.enabled = false;
 	  board.onListen = true;
 	  _switchListenColor(true);
     */
@@ -945,7 +957,7 @@ function _handleGameEnd(lines){
     case "WIN":
       board.studyHostType = 1
     	//_openGameResultWindow(1);
-    	board.playerInfos[board.myRoleType].find("#player-info-winner").addClass("name-winner")
+    	board.playerInfos[board.myRoleType].find("#player-info-name").addClass("name-winner")
       writeUserMessage(EJ("### You Win ###\n", "### あなたの勝ちです ###\n"), 2, "#DD0088", true)
       sp.gameEnd(true)
       /*
@@ -956,11 +968,21 @@ function _handleGameEnd(lines){
       break
     case "DRAW":
     	if (board.myRoleType == 1) board.studyHostType = 2
-    	else board.studyHostType = 1
+    	else if (board.myRoleType == 0) board.studyHostType = 1
     	//_openGameResultWindow(0);
       writeUserMessage(EJ("### Draw ###\n", "### 引き分け ###\n"), 2, "#DD0088", true)
       sp.gameEnd(true)
     	//history = "  引";
+      break
+    case "SENTE_WIN":
+    	board.playerInfos[0].find("#player-info-name").addClass("name-winner")
+      writeUserMessage(EJ("### Sente (or Shitate) Wins ###\n", "### 先手(または下手)の勝ち ###\n"), 2, "#DD0088", true)
+      sp.gameEnd(true)
+      break
+    case "GOTE_WIN":
+    	board.playerInfos[1].find("#player-info-name").addClass("name-winner")
+      writeUserMessage(EJ("### Gote (or Uwate) Wins ###\n", "### 後手(または上手)の勝ち ###\n"), 2, "#DD0088", true)
+      sp.gameEnd(true)
       break
   }
   /*
@@ -1006,6 +1028,7 @@ function _handleGameEnd(lines){
   else _client.mileage(5);
   */
   setBoardConditions()
+  board.updateTurnHighlight()
   /*
   if (greetButton.state != GreetButton.STATE_POSTGAME) greetButton.state = GreetButton.STATE_AFTER_GAME;
   _shareKifuEnabled = true;
@@ -1021,6 +1044,49 @@ function _handleGameEnd(lines){
 	  }
   }
   */
+}
+
+function _handleMonitor(str){
+  let kifu_id = null
+  let lines = str.split("\n")
+  let move_strings = []
+  let since_last_move = 0
+  let positionStr = ""
+  let gameEndStr = ""
+  lines.forEach(function(line){
+    if(line.match(/^([-+][0-9]{4}[A-Z]{2}|%TORYO)$/)) {
+      move_strings.push(RegExp.$1)
+    } else if (line.match(/^T(\d+)$/)){
+      move_strings[move_strings.length - 1] += "," + RegExp.$1
+    } else if (line.match(/^kifu_id:(.+)$/)) {
+      kifu_id = RegExp.$1
+    } else if (line.match(/^\$SINCE_LAST_MOVE:(\d+)$/)) {
+      since_last_move = parseInt(RegExp.$1)
+    } else if (line.match(/^To_Move:([\+\-])$/)){
+			positionStr += "P0" + RegExp.$1 + "\n"
+    } else if (line.match(/^P[0-9+-].*/)) {
+      positionStr += line + "\n"
+    } else if (line.match(/^#(SENTE_WIN|GOTE_WIN|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|OUTE_SENNICHITE|JISHOGI|DISCONNECT|CATCH|TRY)/)) {
+      gameEndStr += RegExp.$1 + "\n"
+    }
+  })
+  if (kifu_id) {
+    board.startMonitor(kifu_id, positionStr, move_strings, since_last_move)
+    setBoardConditions()
+    _switchLayer(2)
+  } else {
+    move_strings.forEach(function(move_str){
+      let move = new Movement(board.getFinalMove().num + 1)
+      move.setFromCSA(move_str.split(",")[0])
+      move.time = parseInt(move_str.split(",")[1])
+      board.handleMonitorMove(move)
+    })
+  }
+  if (gameEndStr != "") _handleGameEnd(gameEndStr)
+}
+
+function _handleEnter(){
+
 }
 
 function _handleStart(game_id){

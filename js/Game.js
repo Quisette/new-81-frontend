@@ -28,31 +28,35 @@ class Game{
 		this.opening = opening;
   }
 
-  gridObject(){
-    let senteStr = coloredSpan(makeRankFromRating(this.black.rate), makeColorFromRating(this.black.rate), 25)
-    senteStr += this.black.country.flagImgTag27()
-    senteStr += '&nbsp;' + this.black.name
-    let goteStr = this.white.name + '&nbsp;'
-    goteStr += this.white.country.flagImgTag27()
-    goteStr += coloredSpan(makeRankFromRating(this.white.rate), makeColorFromRating(this.white.rate), 25)
-    let ruleStr
-    if (this.gameType == "r") {
-      ruleStr = "R: "
-    } else if (this.gameType.match(/^hc/)) {
-      ruleStr = "HC: "
-    } else {
-      ruleStr = "NR: "
-    }
-    ruleStr += this.total/60 + ' - ' + this.byoyomi
+  senteStr(){
+    let str = coloredSpan(makeRankFromRating(this.black.rate), makeColorFromRating(this.black.rate), 25)
+    str += this.black.country.flagImgTag27()
+    str += '&nbsp;' + this.black.name
+    return str
+  }
 
-    return {
-      senteStr: senteStr,
-      goteStr: goteStr,
-      ruleShort: ruleStr,
-      moves: this.moves,
-      watchers: this.watchers,
-      opening: ""
-		}
+  goteStr(){
+    let str = this.white.name + '&nbsp;'
+    str += this.white.country.flagImgTag27()
+    str += coloredSpan(makeRankFromRating(this.white.rate), makeColorFromRating(this.white.rate), 25)
+    return str
+  }
+
+  ruleShort(){
+    let str
+    if (this.gameType == "r") {
+      str = "R: "
+    } else if (this.gameType.match(/^hc/)) {
+      str = "HC: "
+    } else {
+      str = "NR: "
+    }
+    str += this.total/60 + ' - ' + this.byoyomi
+    return str
+  }
+
+  opening(){
+    return ""
   }
 
 }

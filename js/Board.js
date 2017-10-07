@@ -238,6 +238,56 @@ class Board{
     this.updateTurnHighlight()
   }
 
+  startMonitor(kifu_id, positionStr, move_strings, since_last_move){
+    this.setDirection(true)
+    this.loadNewPosition(positionStr)
+    this.myRoleType = 2
+    this.isPostGame = false
+    this.studyHostType = 0
+    this.onListen = true
+    this._timers[0].initialize(this.game.total, this.game.byoyomi)
+    this._timers[1].initialize(this.game.total, this.game.byoyomi)
+    move_strings.forEach(function(move_str){
+      if (move_str.match(/^%TORYO/)) return
+      let move = new Movement(board.getFinalMove().num + 1)
+      move.setFromCSA(move_str.split(",")[0])
+      move.time = parseInt(move_str.split(",")[1])
+      this.runningTimer.useTime(move.time)
+      move = this._publicPosition.makeMove(move)
+      this.moves.push(move)
+      kifuGrid.row.add(move)
+    }, this)
+    this._position.loadFromString(this._publicPosition.toString())
+    this._refreshPosition()
+    kifuGrid.draw()
+    kifuGrid.rows().deselect()
+    kifuGrid.row(":last").select()
+		if (since_last_move > 0) {
+      this.runningTimer.useTime(since_last_move, true)
+		}
+    this.runningTimer.run()
+    this.updateTurnHighlight()
+  }
+
+  handleMonitorMove(move){
+    this.runningTimer.useTime(move.time)
+    move = this._publicPosition.makeMove(move)
+    this.moves.push(move)
+    if (this.onListen) {
+      kifuGrid.row.add(move)
+      kifuGrid.draw()
+      kifuGrid.rows().deselect()
+      kifuGrid.row(":last").select()
+      this._position.loadFromString(this._publicPosition.toString())
+      this._refreshPosition()
+    }
+    this.updateTurnHighlight()
+    this.runningTimer.run()
+  }
+
+  refreshKifuGrid(){
+  }
+
   _handleSquareClick(sq){
     if (!this._selectedSquare) {
       let koma = this._position.getPieceFromSquare(sq)
@@ -371,15 +421,18 @@ class Board{
   }
 
   updateTurnHighlight(){
-    this.playerInfos[this._publicPosition.turn ? 1 : 0].removeClass('player-info-has-turn')
-    this.playerInfos[this._publicPosition.turn ? 0 : 1].addClass('player-info-has-turn')
+    if (this.isPostGame) {
+      this.playerInfos[0].removeClass('player-info-has-turn')
+      this.playerInfos[1].removeClass('player-info-has-turn')
+    } else {
+      this.playerInfos[this._publicPosition.turn ? 1 : 0].removeClass('player-info-has-turn')
+      this.playerInfos[this._publicPosition.turn ? 0 : 1].addClass('player-info-has-turn')
+    }
   }
 
   pauseAllTimers(){
     this._timers[0].stop(true)
-    this._timers[0].myPlayingTimer = false
     this._timers[1].stop(true)
-    this._timers[1].myPlayingTimer = false
   }
 
   close(){
@@ -395,6 +448,10 @@ class Board{
 
   isPlaying(){
     return this.isPlayer() && !this.isPostGame
+  }
+
+  isWatcher(){
+    return this.myRoleType == 2
   }
 
   getFinalMove(){

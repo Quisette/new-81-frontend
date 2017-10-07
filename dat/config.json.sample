@@ -1,0 +1,5 @@
+{
+  "clientPass": "client login password",
+  "mileagePass": "mile command password",
+  "allowConsole": "true/false"
+}

@@ -31,7 +31,7 @@ class WebSocketClient {
       lines.forEach(function(line){
         if (currentLayer == 0) {
           if (line.match(/^##\[HANDSHAKE\](.+)$/)) {
-            thisInstance._login(CybozuLabs.MD5.calc('html5' + RegExp.$1));
+            thisInstance._login(CybozuLabs.MD5.calc(config.clientPass + RegExp.$1));
           } else if (line.match(/^LOGIN:(.+)\sOK$/)){
             thisInstance._password = "";
             thisInstance._callbackFunctions["LOGGED_IN"](RegExp.$1);
@@ -76,6 +76,11 @@ class WebSocketClient {
               return
     			  } else if (line.match(/^##\[DECLINE\](.*)$/)) {
     				  thisInstance._callbackFunctions["DECLINE"](RegExp.$1)
+              return
+            } else if (line.match(/^##\[MONITOR2\]\[(.*)\]\s(.+)$/)) {
+              if (RegExp.$2 == "+OK") thisInstance._callbackWithBuffer("MONITOR")
+              else if (RegExp.$2 == "V2") thisInstance._storeBuffer("MONITOR", "kifu_id:" + RegExp.$1)
+              else thisInstance._storeBuffer("MONITOR", RegExp.$2)
               return
             }
           }
@@ -219,6 +224,11 @@ class WebSocketClient {
 
   timeout(){
     this.send("%%%TIMEOUT")
+  }
+
+  monitor(game_name, onoff){
+    //string, Boolean(on: true, off: false)
+    this.send("%%MONITOR2" + (onoff ? "ON " : "OFF ") + game_name)
   }
 
   send(str){

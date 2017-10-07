@@ -15,8 +15,12 @@ html
     script src="js/i18next.min.js"
     script src="js/i18nextXHRBackend.min.js"
     script src="js/jquery-ui.min.js"
+    / change this to include.min.js to obfuscate
     script src="js/include.js"
-    script src="js/main.js"
+    script src="js/devtools-detect.js"
+    / remove 'return' for debug protection
+    javascript:
+      window.addEventListener('devtoolschange', function(){return;while(true) debugger})
   body
     include viewLogin
     include viewLobby
