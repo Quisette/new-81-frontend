@@ -25,7 +25,7 @@ var board;
 var hidden_prm;
 var mouseX
 var mouseY
-var testMode = true
+var testMode = false
 var config = null
 
 /* ====================================
@@ -346,8 +346,10 @@ function _loginButtonClick(){
   client.setCallbackFunctions("GAME_SUMMARY", _handleGameSummary)
   client.setCallbackFunctions("START", _handleStart)
   client.setCallbackFunctions("MONITOR", _handleMonitor)
+  client.setCallbackFunctions("RECONNECT", _handleReconnect)
   client.setCallbackFunctions("ENTER", _handleEnter)
   client.setCallbackFunctions("LEAVE", _handleLeave)
+  client.setCallbackFunctions("DISCONNECT", _handleDisconnect)
   client.connect();
 }
 
@@ -368,8 +370,20 @@ function _enterGame(game){
   if (board.game) return
   board.setGame(game)
   //TODO watching or reconnecting ?
-  client.watchers(game.gameId)
-  client.monitor(game.gameId, true)
+	if (!game.gameId.match(/^STUDY/) && board.getPlayerRoleFromName(me.name) != null) { // Reconnect
+    console.log(board.getPlayerRoleFromName(me.name))
+		if (me.status == 1) {
+      writeUserMessage(EJ("Stop waiting for game before you reconnect.", "対局に再接続するには、対局待状態を解除して下さい。"), 1, "#008800", true)
+      board.close()
+    } else {
+      client.watchers(game.gameId)
+      client.reconnect(game.gameId)
+    }
+  } else { // Monitor
+  	//if (_watch_game.password != "" && !_watch_game.isStudyHost(login_name) && !InfoFetcher.isAdminLv1(login_name)) _openInputDialog(LanguageSelector.lan.private_room, LanguageSelector.lan.enter_pass, _enterPrivateRoom, gameListGrid);
+    client.watchers(game.gameId)
+    client.monitor(game.gameId, true)
+  }
 }
 
 function writeUserMessage(str, layer, clr = null, bold = false, lineChange = true){
@@ -904,19 +918,11 @@ function _handleGameSummary(str){
   _challengeUser = null
 //	  _waiting = false;
 //	  _rematching = false;
-	  /*if(_game_name && _monitoring){
-        _client.monitorOff(_game_name);
-        _monitoring = false;
-  		board.closeGame();
-	  }*/
     //  var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
     if (board.game) _closeBoard()
 	  board.setGame(new Game(0, gameId, black, white))
-    board.setDirection(myTurn)
-    board.loadNewPosition(initialPosition)
-	  //if (_end_sound_play) _sound_start.play();
 	  //board.superior = game.superior;
-    board.startGame(myTurn)
+    board.startGame(initialPosition, myTurn ? 0 : 1)
     setBoardConditions()
     _switchLayer(2)
     sp.gameStart()
@@ -964,7 +970,7 @@ function _handleMove(csa, time){
   }
 }
 
-function _handleGameEnd(lines){
+function _handleGameEnd(lines, atReconnection = false){
   board.pauseAllTimers()
   let gameEndType = lines.split("\n")[0]
   let result = lines.split("\n")[1]
@@ -987,7 +993,7 @@ function _handleGameEnd(lines){
     case "LOSE":
     	board.studyHostType = 2
     	//_openGameResultWindow(-1);
-    	board.playerInfos[1 - board.myRoleType].find("#player-info-name").addClass("name-winner")
+    	board.playerNameClassChange(1 - board.myRoleType, "name-winner", true)
       writeUserMessage(EJ("### You Lose ###", "### あなたの負けです ###"), 2, "#DD0088", true)
     	//if (adviseIllegal) _writeUserMessage(LanguageSelector.EJ("( For details of illegal moves in shogi, see: http://81dojo.com/documents/Illegal_Move )\n", "( 将棋の反則手についてはこちらでご確認下さい: http://81dojo.com/documents/反則手 )\n"), 2, "#DD0088");
       sp.gameEnd(false)
@@ -1001,7 +1007,7 @@ function _handleGameEnd(lines){
     case "WIN":
       board.studyHostType = 1
     	//_openGameResultWindow(1);
-    	board.playerInfos[board.myRoleType].find("#player-info-name").addClass("name-winner")
+    	board.playerNameClassChange(board.myRoleType, "name-winner", true)
       writeUserMessage(EJ("### You Win ###\n", "### あなたの勝ちです ###\n"), 2, "#DD0088", true)
       sp.gameEnd(true)
       /*
@@ -1019,12 +1025,12 @@ function _handleGameEnd(lines){
     	//history = "  引";
       break
     case "SENTE_WIN":
-    	board.playerInfos[0].find("#player-info-name").addClass("name-winner")
+    	board.playerNameClassChange(0, "name-winner", true)
       writeUserMessage(EJ("### Sente (or Shitate) Wins ###\n", "### 先手(または下手)の勝ち ###\n"), 2, "#DD0088", true)
       sp.gameEnd(true)
       break
     case "GOTE_WIN":
-    	board.playerInfos[1].find("#player-info-name").addClass("name-winner")
+    	board.playerNameClassChange(1, "name-winner", true)
       writeUserMessage(EJ("### Gote (or Uwate) Wins ###\n", "### 後手(または上手)の勝ち ###\n"), 2, "#DD0088", true)
       sp.gameEnd(true)
       break
@@ -1073,7 +1079,7 @@ function _handleGameEnd(lines){
   */
   setBoardConditions()
   board.updateTurnHighlight()
-  if (_greetState <= 2) _greetState = 3
+  if (_greetState <= 2) _greetState = atReconnection ? 4 : 3
   /*
   _shareKifuEnabled = true;
   if (board.isStudyHost) _toggleHostStatus(true);
@@ -1115,7 +1121,7 @@ function _handleMonitor(str){
     }
   })
   if (kifu_id) { // Start of watching game
-    board.startMonitor(kifu_id, positionStr, move_strings, since_last_move)
+    board.startGame(positionStr, 2, move_strings, since_last_move)
     setBoardConditions()
     _switchLayer(2)
     /*
@@ -1146,16 +1152,52 @@ function _handleMonitor(str){
   if (gameEndStr != "") _handleGameEnd(gameEndStr)
 }
 
+function _handleReconnect(str){
+  let kifu_id = null
+  let lines = str.split("\n")
+  let move_strings = []
+  let since_last_move = 0
+  let positionStr = ""
+  let gameEndStr = ""
+  lines.forEach(function(line){
+    console.log(line)
+    if(line.match(/^([-+][0-9]{4}[A-Z]{2}|%TORYO)$/)) {
+      move_strings.push(RegExp.$1)
+    } else if (line.match(/^T(\d+)$/)){
+      move_strings[move_strings.length - 1] += "," + RegExp.$1
+    } else if (line.match(/^kifu_id:(.+)$/)) {
+      kifu_id = RegExp.$1
+    } else if (line.match(/^\$SINCE_LAST_MOVE:(\d+)$/)) {
+      since_last_move = parseInt(RegExp.$1)
+    } else if (line.match(/^To_Move:([\+\-])$/)){
+			positionStr += "P0" + RegExp.$1 + "\n"
+    } else if (line.match(/^P[0-9+-].*/)) {
+      positionStr += line + "\n"
+    } else if (line.match(/^#(SENTE_WIN|GOTE_WIN|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|OUTE_SENNICHITE|JISHOGI|DISCONNECT|CATCH|TRY)/)) {
+      gameEndStr += RegExp.$1 + "\n"
+    }
+  })
+  //board.superior = game.superior;
+  board.startGame(positionStr, board.getPlayerRoleFromName(me.name), move_strings, since_last_move)
+  setBoardConditions()
+  _switchLayer(2)
+  _greetState = 2
+  if (gameEndStr != "") {
+    client.status = 0
+    _handleGameEnd(gameEndStr, true)
+  }
+}
+
 function _handleEnter(name){
   if (board.getPlayerRoleFromName(name) != null) {
     /*
 		if (_disconnectAlertWindow) {
 			_disconnectAlertWindow.terminate();
 			_disconnectAlertWindow = null;
-			board.timers[1].disconnect(false);
 		}*/
+    if (board.isPlaying()) board.reconnectTimer(board.getPlayerRoleFromName(name))
 		writeUserMessage(_name2link(name) + i18next.t("code.G030"), 2, board.getPlayerRoleFromName(name) == 0 ? "#000000" : "#666666", true)
-		//board.name_labels[board.my_turn].setStyle("color", undefined);
+    board.playerNameClassChange(board.getPlayerRoleFromName(name), "name-left", false)
     sp.door(true)
 		//if (board.isStudyHost) _client.gameChat(_game_name, "[##SUBHOST_ON]" + e.message);
   } else {
@@ -1191,7 +1233,7 @@ function _handleLeave(name) {
   if (!board.game) return
   if (board.getPlayerRoleFromName(name) != null) {
 		writeUserMessage(name + i18next.t("code.G031"), 2, board.getPlayerRoleFromName(name) == 0 ? "#000000" : "#666666", true)
-		//board.name_labels[board.my_turn].setStyle("color", 0x999999);
+    board.playerNameClassChange(board.getPlayerRoleFromName(name), "name-left", true)
     sp.door(false)
   } else {
 		let importantUser = false
@@ -1207,6 +1249,19 @@ function _handleLeave(name) {
 		_losersCloseButtonTimer.stop();
 		closeButton.enabled = true;
 	}*/
+}
+
+function _handleDisconnect(name) {
+  if (!board.game) return
+  if (board.getPlayerRoleFromName(name) != null) {
+		writeUserMessage(name + EJ(" disconnected.", "さんの接続が切れました。"), 2, board.getPlayerRoleFromName(name) == 0 ? "#000000" : "#666666", true)
+    board.playerNameClassChange(board.getPlayerRoleFromName(name), "name-left", true)
+    sp.door(false)
+	}
+	if (board.isPlaying() && name != me.name) {
+    board.disconnectTimer(board.getPlayerRoleFromName(name))
+//		_openDisconnectAlertWindow();
+	}
 }
 
 function _handleStart(game_id){
@@ -1445,10 +1500,11 @@ function _handleClosed(){
 ===================================== */
 
 function _handleServers(data){
+  data[0].population = restoreIdleConnections(data[0].population)
   serverGrid.clear()
   serverGrid.rows.add(data)
   serverGrid.draw()
-  serverGrid.row("#EARTH").select()
+  serverGrid.row("#MERCURY").select()
   if (testMode) _testFunction(1)
 }
 

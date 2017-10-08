@@ -169,3 +169,7 @@ function coloredSpan(text, color, width = 0){
 function debugLoop(){
   window.addEventListener('devtoolschange', function(){while(true) debugger})
 }
+
+function restoreIdleConnections(n){
+  return n > 30 ? Math.floor(n * 1.07) : n
+}

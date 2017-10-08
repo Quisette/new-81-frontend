@@ -35,6 +35,7 @@ class GameTimer {
     this._totalUsedTime = 0
     this._disconnected = false
 		this.myPlayingTimer = false
+		this._preCountedUsedTime = 0
 		this._display()
   }
 
@@ -44,6 +45,7 @@ class GameTimer {
 
 	run(){
 		if (this._tickTimer) return
+		if (this._disconnected && this._isByoyomi) return
     let thisInstance = this
     this._tickTimer = setInterval(function(){
       thisInstance._tickHandler()
@@ -79,6 +81,16 @@ class GameTimer {
 		}
 		if (preCount) this._preCountedUsedTime = time
 		this._display()
+	}
+
+	disconnect(){
+		if (this._disconnected) return
+		if (this._isByoyomi) this.stop()
+		this._disconnected = true
+	}
+
+	reconnect(){
+		this._disconnected = false
 	}
 
 	_tickHandler() {

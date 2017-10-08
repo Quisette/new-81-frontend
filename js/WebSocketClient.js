@@ -82,6 +82,13 @@ class WebSocketClient {
               else if (RegExp.$2 == "V2") thisInstance._storeBuffer("MONITOR", "kifu_id:" + RegExp.$1)
               else thisInstance._storeBuffer("MONITOR", RegExp.$2)
               return
+            } else if (line.match(/^##\[RECONNECT\]\[(.*)\]\s(.+)$/)) {
+              if (RegExp.$2 == "+OK") {
+                thisInstance.status = 2
+                thisInstance._callbackWithBuffer("RECONNECT")
+              } else if (RegExp.$2 == "V2") thisInstance._storeBuffer("RECONNECT", "kifu_id:" + RegExp.$1)
+              else thisInstance._storeBuffer("RECONNECT", RegExp.$2)
+              return
             }
           }
           // all timing
@@ -219,15 +226,19 @@ class WebSocketClient {
   }
 
   seek(user){
-    if (user.waitingGamename) {
+    if (user.waitingGameName) {
   		if (user.waitingTurn == "+") {
-  			send("%%SEEK " + user.waitingGameName + " -");
+  			this.send("%%SEEK " + user.waitingGameName + " -");
   		} else if (user.waitingTurn == "-") {
-  			send("%%SEEK " + user.waitingGameName + " +");
+  			this.send("%%SEEK " + user.waitingGameName + " +");
   		} else {
-  			send("%%SEEK " + user.waitingGameName + " *");
+  			this.send("%%SEEK " + user.waitingGameName + " *");
   		}
 	  }
+  }
+
+  reconnect(game_id){
+		this.send("%%RECONNECT " + game_id)
   }
 
 	stopWaiting() {

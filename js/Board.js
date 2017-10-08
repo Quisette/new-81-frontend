@@ -211,64 +211,41 @@ class Board{
     }
   }
 
-  startGame(myTurn) {
-    this.myRoleType = myTurn ? 0 : 1
+  startGame(positionStr, myRoleType, move_strings = [], since_last_move = 0) {
+    this.myRoleType = myRoleType
+    if (myRoleType == 2) this.setDirection(true)
+    else this.setDirection(myRoleType == 0)
+    this.loadNewPosition(positionStr)
     this.isPostGame = false
     this.studyHostType = 0
     this.onListen = true
     this._timers[0].initialize(this.game.total, this.game.byoyomi)
     this._timers[1].initialize(this.game.total, this.game.byoyomi)
-    this._timers[this.myRoleType].myPlayingTimer = true
+    if (this.isPlayer()) this._timers[this.myRoleType].myPlayingTimer = true
     /*
     rematch[0] = false;
     rematch[1] = false;
     _board_coord_image.visible = false;
-    timers[_my_turn == _position.turn ? 0 : 1].start();
-    if (moves) {
-  	  if (moves.length > 0) {
-    		for each(var move:Object in moves) {
-    			if (move.move == "%TORYO") {
-    				var mv:Movement = new Movement(kifu_list.length);
-    				mv.setGameEnd(_last_pos.turn, Movement.RESIGN, parseInt(move.time.substr(1)));
-    				kifu_list.push(mv);
-    				timers[_my_turn == _last_pos.turn ? 0 : 1].accumulateTime(parseInt(move.time.substr(1)));
-    			} else {
-    				makeMove(move.move + "," + move.time, true, false);
-    			}
-    		}
-  	  }
-    }
-    _client_timeout = false;
     studyOrigin = 0;
     */
-    this.runningTimer.run()
-    this.updateTurnHighlight()
-  }
-
-  startMonitor(kifu_id, positionStr, move_strings, since_last_move){
-    this.setDirection(true)
-    this.loadNewPosition(positionStr)
-    this.myRoleType = 2
-    this.isPostGame = false
-    this.studyHostType = 0
-    this.onListen = true
-    this._timers[0].initialize(this.game.total, this.game.byoyomi)
-    this._timers[1].initialize(this.game.total, this.game.byoyomi)
-    move_strings.forEach(function(move_str){
-      if (move_str.match(/^%TORYO/)) return
-      let move = new Movement(board.getFinalMove().num + 1)
-      move.setFromCSA(move_str.split(",")[0])
-      move.time = parseInt(move_str.split(",")[1])
-      this.runningTimer.useTime(move.time)
-      move = this._publicPosition.makeMove(move)
-      this.moves.push(move)
-      kifuGrid.row.add(move)
-    }, this)
-    this._position.loadFromString(this._publicPosition.toString())
-    this._refreshPosition()
-    kifuGrid.draw()
-    kifuGrid.rows().deselect()
-    kifuGrid.row(":last").select()
+    if (move_strings.length > 0) {
+      move_strings.forEach(function(move_str){
+        console.log(move_str)
+        if (move_str.match(/^%TORYO/)) return
+        let move = new Movement(board.getFinalMove().num + 1)
+        move.setFromCSA(move_str.split(",")[0])
+        move.time = parseInt(move_str.split(",")[1])
+        this.runningTimer.useTime(move.time)
+        move = this._publicPosition.makeMove(move)
+        this.moves.push(move)
+        kifuGrid.row.add(move)
+      }, this)
+      this._position.loadFromString(this._publicPosition.toString())
+      this._refreshPosition()
+      kifuGrid.draw()
+      kifuGrid.rows().deselect()
+      kifuGrid.row(":last").select()
+    }
 		if (since_last_move > 0) {
       this.runningTimer.useTime(since_last_move, true)
 		}
@@ -437,6 +414,12 @@ class Board{
     }
   }
 
+  playerNameClassChange(turn, className, add_or_remove){
+    //int, string, boolean
+    if (add_or_remove) this.playerInfos[turn].find("#player-info-name").addClass(className)
+    else this.playerInfos[turn].find("#player-info-name").removeClass(className)
+  }
+
   pauseAllTimers(){
     this._timers[0].stop(true)
     this._timers[1].stop(true)
@@ -445,8 +428,19 @@ class Board{
   close(){
     this.myRoleType = null
     this.game = null
-    this.playerInfos[0].find("#player-info-name").removeClass("name-winner")
-    this.playerInfos[1].find("#player-info-name").removeClass("name-winner")
+    this.playerInfos[0].find("#player-info-name").removeClass("name-winner name-left name-mouse-out")
+    this.playerInfos[1].find("#player-info-name").removeClass("name-winner name-left name-mouse-out")
+  }
+
+  disconnectTimer(turn){
+    //integer
+    this._timers[turn].disconnect()
+  }
+
+  reconnectTimer(turn){
+    //integer
+    this._timers[turn].reconnect()
+    if (this.isPlaying) this.runningTimer.run()
   }
 
   isPlayer(){
