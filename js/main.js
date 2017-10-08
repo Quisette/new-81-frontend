@@ -14,9 +14,11 @@ var watcherGrid;
 var kifuGrid;
 var users = new Object();
 var playerInfoWindows = new Object();
+var timeouts = new Object()
 var me;
 var _challengeUser = null
 var _gameAccepted = false
+var _greetState = 0 //0:not-active, 1:before-game, 2:during-game, 3:after-game, 4:post-game
 var premium;
 var countries = new Object();
 var board;
@@ -66,6 +68,7 @@ $(function(){
 
   $.getJSON("dat/config.json", function(data){
     config = data
+    if (config.allowConsole == false) debugLoop()
   })
 
   // Internationalization
@@ -177,6 +180,9 @@ $(function(){
     oLanguage: {sEmptyTable: EJ("No watcher", "観戦者なし")}
   })
   watcherGrid.clear()
+  $('#watcherGrid tbody').on('dblclick', 'tr', function () {
+    _openPlayerInfo(users[watcherGrid.row(this).id()])
+  })
 
   kifuGrid = $('#kifuGrid').DataTable({
     data: [],
@@ -332,6 +338,7 @@ function _loginButtonClick(){
   client.setCallbackFunctions("CLOSED", _handleClosed)
   client.setCallbackFunctions("WHO", _handleWho)
   client.setCallbackFunctions("LIST", _handleList)
+  client.setCallbackFunctions("WATCHERS", _handleWatchers)
   client.setCallbackFunctions("GAME", _handleGame)
   client.setCallbackFunctions("CHALLENGE", _handleChallenger)
   client.setCallbackFunctions("ACCEPT", _handleAccept)
@@ -340,6 +347,7 @@ function _loginButtonClick(){
   client.setCallbackFunctions("START", _handleStart)
   client.setCallbackFunctions("MONITOR", _handleMonitor)
   client.setCallbackFunctions("ENTER", _handleEnter)
+  client.setCallbackFunctions("LEAVE", _handleLeave)
   client.connect();
 }
 
@@ -359,6 +367,8 @@ function _waitButtonClick(){
 function _enterGame(game){
   if (board.game) return
   board.setGame(game)
+  //TODO watching or reconnecting ?
+  client.watchers(game.gameId)
   client.monitor(game.gameId, true)
 }
 
@@ -385,7 +395,7 @@ function writeUserMessage(str, layer, clr = null, bold = false, lineChange = tru
 function _interpretCommunicationCode(name, code, n, bold, sound) {
   //string, string, integer, boolean, boolean
 	writeUserMessage(name + i18next.t("code." + code), n, "#008800", bold)
-//	if (sound && _chat_sound2_play) _sound_chat2.play();
+  if (sound) sp.chatBoard()
 }
 
 
@@ -394,7 +404,12 @@ function _interpretCommunicationCode(name, code, n, bold, sound) {
 ===================================== */
 
 function _resignButtonClick(){
-  if (board.myRoleType == 0 && board.position.turn == true || board.myRoleType == 1 && board.position.turn == false) client.resign()
+  if (board.myRoleType == 0 && board.position.turn == true || board.myRoleType == 1 && board.position.turn == false) {
+		client.gameChat("<(_ _)> 負けました。(Makemashita.)")
+    client.resign()
+    _greetState = 3
+    _greetButtonClick()
+  }
 }
 
 function _rematchButtonClick(){
@@ -427,6 +442,19 @@ function _rematchButtonClick(){
 		} */
 }
 
+function _greetButtonClick(){
+  switch(_greetState){
+    case 1:
+      client.gameChat("<(_ _)> お願いします。(Onegai-shimasu.)")
+      _greetState = 2
+      break
+    case 3:
+      client.gameChat("<(_ _)> 有難うございました。(Arigatou-gozaimashita.)")
+      _greetState = 4
+      break
+  }
+}
+
 function _closeBoard(){
   if (board.isPlayer()) client.closeGame()
   else if (board.isWatcher()) client.monitor(board.game.gameId, false)
@@ -434,13 +462,14 @@ function _closeBoard(){
   client.list()
   board.close()
   _switchLayer(1)
-  $('boardMessageArea').empty()
+  $('#boardMessageArea').empty()
+  watcherGrid.clear().draw()
+  _greetState = 0
 }
 
 function sendMoveAsPlayer(move){
   client.move(move)
   board.moves.push(move)
-  board.addMoveToKifuGrid(move)
   /*
   if (board.since_last_move > 0) {
 	  board.timers[board.my_turn == board.last_pos.turn ? 0 : 1].accumulateTime( - board.since_last_move);
@@ -458,7 +487,6 @@ function _kifuSelected(index){
 }
 
 function sendTimeout(){
-  console.log('OK')
   client.timeout()
   board.pauseAllTimers()
 }
@@ -468,7 +496,7 @@ function setBoardConditions(){
   let kifuSelectable = false
   if (board.isPlayer()) {
     $("#flipButton").addClass("button-disabled")
-    $("#greetButton").prop('disabled', 'false')
+    $("#greetButton").prop('disabled', false)
     if (board.isPostGame) {
       kifuSelectable = true
       $("input[name=kifuModeRadio]").val(1).prop("disabled", true)
@@ -496,6 +524,8 @@ function setBoardConditions(){
     } else {
     }
   }
+  if (board.game) $("#logoutButton").removeClass("button-disabled")
+  else $("#logoutButton").addClass("button-disabled")
   if (kifuSelectable){
     kifuGrid.select.style('single')
   } else {
@@ -605,8 +635,7 @@ function _playerChallengeClick(user){
 		  _challengeUser = user
 		  writeUserMessage(EJ("Challenging " + _challengeUser.name + "..... (Must wait for 20 seconds max)\n", _challengeUser.name + "さんに挑戦中..... (待ち時間 最大で20秒)\n"), 1, "#008800", true)
 		  client.challenge(_challengeUser)
-//		  _challengeCancelTimer.reset();
-//		  _challengeCancelTimer.start();
+      setGeneralTimeout("CHALLENGE", 30000)
 	  }
   } else if (!me.listAsWaiter()) {
 		writeUserMessage(EJ("The opponent is not waiting with own game rule. You can invite him if you wait with your own game rule.", "相手は対局待をしていません。自分が対局待にすることで招待メッセージを送ることが可能です。"), 1, "#008800")
@@ -729,6 +758,15 @@ function _handleList(str){
   gameGrid.draw()
 }
 
+function _handleWatchers(str){
+  let lines = str.trim().split("\n")
+  watcherGrid.clear()
+  lines.forEach(function(line){
+    if (users[line]) watcherGrid.row.add(users[line].gridObject())
+  })
+  watcherGrid.draw()
+}
+
 function _handleLobbyIn(line){
 	let tokens = line.split(",");
   let rank = ""
@@ -795,7 +833,7 @@ function _handleGame(line) {
 		}
 		tokens = line.match(/(.+),(\+|\-|\*),(.+)$/)
 		if (users[name]) users[name].setFromGame(tokens[1], tokens[2], tokens[3] == "*" ? "" : tokens[3])
-    waiterGrid.row('#' + name).remove().draw()
+    waiterGrid.row('#' + name).remove()
     waiterGrid.row.add(users[name].gridObject()).draw()
 	}
   playerGrid.row('#' + name).data(users[name].gridObject()).draw()
@@ -859,8 +897,8 @@ function _handleGameSummary(str){
       kid = RegExp.$2
     }
   })
+  _challengeUser = null
 //	  _waiting = false;
-//	  _challenging = false;
 //	  _rematching = false;
 	  /*if(_game_name && _monitoring){
         _client.monitorOff(_game_name);
@@ -868,19 +906,20 @@ function _handleGameSummary(str){
   		board.closeGame();
 	  }*/
     //  var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
+    if (board.game) _closeBoard()
 	  board.setGame(new Game(0, gameId, black, white))
     board.setDirection(myTurn)
     board.loadNewPosition(initialPosition)
 	  //if (_end_sound_play) _sound_start.play();
 	  //board.superior = game.superior;
     board.startGame(myTurn)
-	  //userMessage2.htmlText = "";
     setBoardConditions()
     _switchLayer(2)
-    return
-	  //watcherListGrid.dataProvider = _watcher_list;
-    if (myTurn) writeUserMessage(EJ("You are Black " + (board.gameType == "hc" ? "(Handicap taker).\n" : "(Sente).\n"), "あなた" + (board.gameType == "hc" ? "は下手(したて)" : "が先手") + "です。\n"), 2, "#008800")
-    else writeUserMessage(EJ("You are White " + (board.gameType == "hc" ? "(Handicap giver).\n" : "(Gote).\n"), "あなた" + (board.gameType == "hc" ? "が上手(うわて)" : "は後手") + "です。\n"), 2, "#008800")
+    sp.gameStart()
+    _greetState = 1
+
+    if (myTurn) writeUserMessage(EJ("You are Black " + (board.game.gameType.match(/^hc/) ? "(Handicap taker)." : "(Sente)."), "あなた" + (board.game.gameType.match(/^hc/) ? "は下手(したて)" : "が先手") + "です。"), 2, "#008800")
+    else writeUserMessage(EJ("You are White " + (board.game.gameType.match(/^hc/) ? "(Handicap giver)." : "(Gote).\n"), "あなた" + (board.game.gameType.match(/^hc/) ? "が上手(うわて)" : "は後手") + "です。"), 2, "#008800")
 	  //if (match[2].match(/\-\-\d+$/) && board.gameType != "r") writeUserMessage(LanguageSelector.EJ("To mute watcher's chat, switch off the checkbox above the watcher list.\n", "観戦者のチャットをミュートするには観戦者リスト上部のチェックボックスをOFFにして下さい。\n"), 2, "#FF3388")
     /*
 	  greetButton.state = GreetButton.STATE_BEFORE_GAME;
@@ -909,6 +948,7 @@ function _handleMove(csa, time){
     board.getPlayersTimer(owner).useTime(time)
     if (owner && board.myRoleType == 0 || !owner && board.myRoleType == 1) {
       board.moves[board.moves.length - 1].time = time
+      board.addMoveToKifuGrid(board.moves[board.moves.length - 1])
     } else {
       let move = new Movement(board.getFinalMove().num + 1)
       move.setFromCSA(csa)
@@ -1029,8 +1069,8 @@ function _handleGameEnd(lines){
   */
   setBoardConditions()
   board.updateTurnHighlight()
+  if (_greetState <= 2) _greetState = 3
   /*
-  if (greetButton.state != GreetButton.STATE_POSTGAME) greetButton.state = GreetButton.STATE_AFTER_GAME;
   _shareKifuEnabled = true;
   if (board.isStudyHost) _toggleHostStatus(true);
   if (board.isSubHost) _writeUserMessage(LanguageSelector.lan.msg_subhost + "\n", 2, "#008800", true);
@@ -1070,10 +1110,27 @@ function _handleMonitor(str){
       gameEndStr += RegExp.$1 + "\n"
     }
   })
-  if (kifu_id) {
+  if (kifu_id) { // Start of watching game
     board.startMonitor(kifu_id, positionStr, move_strings, since_last_move)
     setBoardConditions()
     _switchLayer(2)
+    /*
+		 board.superior = _watch_game.superior;
+		  if (board.gameType == "r") {
+			  _writeUserMessage(LanguageSelector.lan.msg_rated + "\n", 2, "#008800", true);
+		  } else {
+			  _writeUserMessage(LanguageSelector.lan.msg_nonrated + "\n", 2, "#008800", true);
+		  }
+		  var match:Array;
+		  if ((match = game_info[2].match(/\-\-(\d+)$/))) {
+			_writeUserMessage(LanguageSelector.EJ('This game belongs to "', "イベント対局: 「") + InfoFetcher.getSystemTournamentName(parseInt(match[1])) + LanguageSelector.EJ('"\n', "」\n"), 2, "#FF3388", true);
+			_writeUserMessage("( http://system.81dojo.com/" + LanguageSelector.EJ("en", "ja") + "/tournaments/" + match[1] + " )\n", 2, "#FF3388");
+		  }
+		  _writeUserMessage(LanguageSelector.EJ("Loading kifu ... ", "棋譜を読み込んでいます... "), 2, "#008800");
+		  _shareKifuEnabled = false;
+		  _study_notified = false;
+		  if (_isGuest) chatMessage2.enabled = false;
+      */
   } else {
     move_strings.forEach(function(move_str){
       let move = new Movement(board.getFinalMove().num + 1)
@@ -1085,8 +1142,67 @@ function _handleMonitor(str){
   if (gameEndStr != "") _handleGameEnd(gameEndStr)
 }
 
-function _handleEnter(){
+function _handleEnter(name){
+  if (board.getPlayerRoleFromName(name) != null) {
+    /*
+		if (_disconnectAlertWindow) {
+			_disconnectAlertWindow.terminate();
+			_disconnectAlertWindow = null;
+			board.timers[1].disconnect(false);
+		}*/
+		writeUserMessage(_name2link(name) + i18next.t("code.G030"), 2, board.getPlayerRoleFromName(name) == 0 ? "#000000" : "#666666", true)
+		//board.name_labels[board.my_turn].setStyle("color", undefined);
+    sp.door(true)
+		//if (board.isStudyHost) _client.gameChat(_game_name, "[##SUBHOST_ON]" + e.message);
+  } else {
+    let importantUser = false
+		if (watcherGrid.rows().count() < 15 || importantUser) {
+			writeUserMessage(_name2link(name) + i18next.t("code.G030"), 2, "#008800", importantUser)
+      //TODO if importantUser && isPostGame then doorOpen-sound
+		}
+		if (users[name]) watcherGrid.row.add(users[name].gridObject()).draw()
+		//_watcherTitle = LanguageSelector.lan.watchers + " (" + _watcher_list.length +")";
+  }
+  /*
+	} else {
+	}
+	if (_isDuringMyGame() && !board.is34()) {
+		if (_notify_blind) {
+			if (board.piece_type == 100) _client.privateChat(e.message, "[auto-PM] #G014");
+			else if (board.piece_type == 101) _client.privateChat(e.message, "[auto-PM] #G015");
+			else if (board.piece_type == 102) _client.privateChat(e.message, "[auto-PM] #G016");
+		}
+		if (board.gameType != "r" && !_allowWatcherChat) _client.privateChat(e.message, "[auto-PM] #G102");
+	}
+	if (board.isStudyHost && board.post_game) _sendStudy(false, e.message);
+	if (voiceButton.sendingDirect()) _client.privateChat(e.message, "[##VOICE]DIRECT," + voiceButton.nearID);
+	else if (voiceButton.sendingShared) _client.privateChat(e.message, "[##VOICE]SHARED");
+	else if (voiceButton.broadcastingSelf) _client.privateChat(e.message, "[##VOICE]BROADCAST");
+	if (_users[e.message]) _users[e.message].clearTags();
+	_updateStatusMarks(e.message);
+  */
+}
 
+function _handleLeave(name) {
+  if (!board.game) return
+  if (board.getPlayerRoleFromName(name) != null) {
+		writeUserMessage(name + i18next.t("code.G031"), 2, board.getPlayerRoleFromName(name) == 0 ? "#000000" : "#666666", true)
+		//board.name_labels[board.my_turn].setStyle("color", 0x999999);
+    sp.door(false)
+  } else {
+		let importantUser = false
+		if (watcherGrid.rows().count() < 10 || importantUser) {
+			writeUserMessage(name + i18next.t("code.G031"), 2, "#008800", importantUser)
+      //TODO if importantUser && isPostGame then doorClose-sound
+		}
+    watcherGrid.row("#" + name).remove().draw()
+		//_watcherTitle = LanguageSelector.lan.watchers + " (" + _watcher_list.length +")";
+  }
+  /*
+	if (_losersCloseButtonTimer.running && (e.message == board.playerInfos[0].name || e.message == board.playerInfos[1].name)) {
+		_losersCloseButtonTimer.stop();
+		closeButton.enabled = true;
+	}*/
 }
 
 function _handleStart(game_id){
@@ -1127,7 +1243,7 @@ function _handleStart(game_id){
     waiterGrid.draw()
 		game = new Game(0, game_id, users[tokens[2]], users[tokens[3]])
 	}
-  gameGrid.row.add(game.gridObject())
+  gameGrid.row.add(game)
   gameGrid.draw()
   /*
 	if (autoEnterStudy) {
@@ -1168,7 +1284,7 @@ function _handleChat(sender, message){
 	} else {
 		writeUserMessage("[" + _name2link(sender) + "] " + message, 1, "#000000");
 	}
-//	if (mainViewStack.selectedIndex == 1 && _chat_sound1_play) _sound_chat1.play();
+  if (currentLayer == 1) sp.chatLobby()
 }
 
 function _handleGameChat(sender, message){
@@ -1268,7 +1384,7 @@ function _handleGameChat(sender, message){
 		} else {
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#660000")
 		}
-    //if (_chat_sound2_play) _sound_chat2.play();
+    sp.chatBoard()
 	}
 }
 
@@ -1348,6 +1464,32 @@ function _switchLayer(n){
     $('div#layerLobby').css('display', 'none')
   }
   currentLayer = n
+}
+
+function setGeneralTimeout(key, ms){
+  //string, integer
+  if (timeouts[key]) return
+  timeouts[key] = setTimeout(_handleGeneralTimeout, ms, key)
+}
+
+function clearGeneralTimeout(key){
+  if (timeouts[key]) {
+    clearTimeout(timeouts[key])
+    timeouts[key] = false
+  }
+}
+
+function _handleGeneralTimeout(key){
+  timeouts[key] = false
+  switch (key) {
+    case "CHALLENGE":
+  		if (_challengeUser) {
+  			_challengeUser = null
+  			writeUserMessage(EJ("Communication could not be established with this opponent. The challenge is canceled.", "相手との通信が確認できないため挑戦をキャンセルします。"), 1, "#008800", true)
+  			client.decline("C006")
+  		}
+      break
+  }
 }
 
 function _name2link(name){

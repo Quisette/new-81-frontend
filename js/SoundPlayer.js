@@ -2,16 +2,23 @@
 
 class SoundPlayer{
   constructor(){
-    this.chatEnabled = true
+    this.chatLobbyEnabled = true
+    this.chatBoardEnabled = true
     this.buttonEnabled = true
-    this.gameEndEnabled = true
+    this.gameStartEndEnabled = true
     this.byoyomiType = 1
 
     this._channels = new Object()
     this._loadChannel("CHALLENGER", "challenger")
     this._loadChannel("CHIME", "chime")
+    this._loadChannel("GAME_START", "start")
     this._loadChannel("WIN", "win")
     this._loadChannel("LOSE", "lose")
+    this._loadChannel("CHAT1", "chat_lobby")
+    this._loadChannel("CHAT2", "chat_board")
+    this._loadChannel("NOTIFY", "chat_notify")
+    this._loadChannel("DOOR_OPEN", "fusuma_open")
+    this._loadChannel("DOOR_CLOSE", "fusuma_close")
   }
 
   static get CONST(){
@@ -34,14 +41,32 @@ class SoundPlayer{
   }
 
   sayTimeUp(){
+  }
 
+  chatLobby(){
+    if (this.chatLobbyEnabled) this.play("CHAT1")
+  }
+
+  chatBoard(){
+    if (this.chatBoardEnabled) this.play("CHAT2")
+  }
+
+  chatPrivate(currentLayer){
+    if (currentLayer == 1 && this.chatLobbyEnabled || currentLayer == 2 && this.chatBoardEnabled) this.play("NOTIFY")
+  }
+
+  gameStart(){
+    if (this.gameStartEndEnabled) this.play("GAME_START")
   }
 
   gameEnd(win){
     //boolean
-    if (this.gameEndEnabled){
-      this.play(win ? "WIN" : "LOSE")
-    }
+    if (this.gameStartEndEnabled) this.play(win ? "WIN" : "LOSE")
+  }
+
+  door(open){
+    //boolean
+    if (this.chatBoardEnabled) this.play(open ? "DOOR_OPEN" : "DOOR_CLOSE")
   }
 
   play(key){

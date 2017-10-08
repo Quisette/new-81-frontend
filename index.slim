@@ -18,9 +18,6 @@ html
     / change this to include.min.js to obfuscate
     script src="js/include.js"
     script src="js/devtools-detect.js"
-    / remove 'return' for debug protection
-    javascript:
-      window.addEventListener('devtoolschange', function(){return;while(true) debugger})
   body
     include viewLogin
     include viewLobby

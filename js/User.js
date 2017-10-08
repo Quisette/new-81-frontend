@@ -137,4 +137,8 @@ class User{
     return this._waitingGameName
   }
 
+  get waitingTurn(){
+    return this._waitingTurn
+  }
+
 }

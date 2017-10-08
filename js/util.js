@@ -165,3 +165,7 @@ function coloredSpan(text, color, width = 0){
   str += '">' + text + '</span>'
   return str
 }
+
+function debugLoop(){
+  window.addEventListener('devtoolschange', function(){while(true) debugger})
+}

@@ -100,7 +100,7 @@ class WebSocketClient {
           } else if (line.match(/^##\[LOBBY_OUT\]\[(.+)\]$/)) {
             thisInstance._callbackFunctions["LOBBY_OUT"](RegExp.$1)
           } else if (line.match(/^##\[ENTER\]\[(.+)\]$/)) {
-            thisInstance._callbackFunctions["ENTER"](RegExp.$1);
+            thisInstance._callbackFunctions["ENTER"](RegExp.$1)
           } else if (line.match(/^##\[LEAVE\]\[(.+)\]$/)) {
             thisInstance._callbackFunctions["LEAVE"](RegExp.$1)
           } else if (line.match(/^##\[DISCONNECT\]\[(.+)\]$/)) {
@@ -111,6 +111,9 @@ class WebSocketClient {
           } else if (line.match(/^##\[LIST\]\s(.+)$/)){
             if (RegExp.$1 == "+OK") thisInstance._callbackWithBuffer("LIST")
             else thisInstance._storeBuffer("LIST", RegExp.$1)
+          } else if (line.match(/^##\[WATCHERS\]\s(.+)$/)){
+            if (RegExp.$1 == "+OK") thisInstance._callbackWithBuffer("WATCHERS")
+            else thisInstance._storeBuffer("WATCHERS", RegExp.$1)
   			  } else if (line.match(/^##\[GAME\](.*)$/)) {
   				  thisInstance._callbackFunctions["GAME"](RegExp.$1)
   			  } else if (line.match(/^##\[START\]\[(.*)\]$/)) {
@@ -160,6 +163,10 @@ class WebSocketClient {
     this.send("%%LIST");
   }
 
+  watchers(game_id){
+    this.send("%%%WATCHERS " + game_id)
+  }
+
   chat(str){
     this.send("%%CHAT " + str)
   }
@@ -204,6 +211,18 @@ class WebSocketClient {
 
   decline(comment = null){
 		this.send("DECLINE" + (comment ? (" " + comment) : ""))
+  }
+
+  seek(user){
+    if (user.waitingGamename) {
+  		if (user.waitingTurn == "+") {
+  			send("%%SEEK " + user.waitingGameName + " -");
+  		} else if (user.waitingTurn == "-") {
+  			send("%%SEEK " + user.waitingGameName + " +");
+  		} else {
+  			send("%%SEEK " + user.waitingGameName + " *");
+  		}
+	  }
   }
 
 	stopWaiting() {

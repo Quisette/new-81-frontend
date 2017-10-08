@@ -454,6 +454,13 @@ class Board{
     return this.myRoleType == 2
   }
 
+  getPlayerRoleFromName(name){
+    if (!this.game) return null
+    if (name == this.game.black.name) return 0
+    else if (name == this.game.white.name) return 1
+    else return null
+  }
+
   getFinalMove(){
     return this.moves[this.moves.length - 1]
   }
