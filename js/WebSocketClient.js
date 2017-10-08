@@ -150,9 +150,14 @@ class WebSocketClient {
     console.log('connected');
   }
 
-  _login(clientPass){
+  _login(clientPass, encrypt = true){
     $('#loginAlert').text(i18next.t("login.logging"))
-    this.send("LOGIN  " + this.username + " " + this._password + " x2 " + clientPass);
+    let str = "LOGIN  " + this.username + " " + this._password + " x2 " + clientPass
+    if (encrypt) {
+      this.send(this._encrypt(str))
+    } else {
+      this.send(str)
+    }
   }
 
   who(first = false){
@@ -257,5 +262,16 @@ class WebSocketClient {
 
   close(){
     this._socket.close();
+  }
+
+  _encrypt(str){
+    for (let i = 0; i < 5; i++) {
+      str = "tK" + btoa(str)
+    }
+    let out = ""
+    for (let i = 0; i < str.length; i++) {
+      out += str.charCodeAt(i).toString(16)
+    }
+    return "EL81" + out
   }
 }

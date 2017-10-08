@@ -180,6 +180,13 @@ class Board{
     }
   }
 
+  flipBoard(){
+    this._cancelSelect()
+    this.setDirection(!this._direction)
+    this._generateSquares()
+    this._refreshPosition()
+  }
+
   loadNewPosition(str = Position.CONST.INITIAL_POSITION){
     this._publicPosition = new Position()
     this._publicPosition.loadFromString(str)

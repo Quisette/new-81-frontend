@@ -455,6 +455,10 @@ function _greetButtonClick(){
   }
 }
 
+function _flipButtonClick(){
+  board.flipBoard()
+}
+
 function _closeBoard(){
   if (board.isPlayer()) client.closeGame()
   else if (board.isWatcher()) client.monitor(board.game.gameId, false)
