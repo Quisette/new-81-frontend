@@ -24,6 +24,7 @@ class Board{
     this._initialPositionStr = null
     this.moves = new Array()
     this.game = null
+    this._rematchReady = [false, false]
     this._generateParts()
     this._setTheme()
   }
@@ -127,6 +128,7 @@ class Board{
   }
 
   _refreshSquare(sq){
+    sq.removeClass("square-last")
     let koma = this._position.getPieceFromSquare(sq)
     if (koma) {
       sq.css('background-image', 'url(img/themes/' + this._theme + '/' + koma.toImagePath(!this._direction) + ')')
@@ -158,6 +160,11 @@ class Board{
         sq.appendTo(this._komadais[i])
       }, this)
     }
+    if (this._position.lastMove) {
+      $('#sq' + this._position.lastMove.toX + '_' + this._position.lastMove.toY).addClass('square-last')
+      $('#sq' + this._position.lastMove.fromX + '_' + this._position.lastMove.fromY).addClass('square-last')
+    }
+    if ($("#modalImpasse").dialog('isOpen')) this.calcImpasse()
   }
 
   setGame(game){
@@ -189,14 +196,16 @@ class Board{
 
   loadNewPosition(str = Position.CONST.INITIAL_POSITION){
     this._publicPosition = new Position()
+    this._publicPosition.superior = !this.game.isHandicap() && this.game.black.rate > this.game.white.rate
     this._publicPosition.loadFromString(str)
     this._position = new Position()
+    this._position.superior = !this.game.isHandicap() && this.game.black.rate > this.game.white.rate
     this._position.loadFromString(str)
     this._initialPositionStr = str
     this._generateSquares()
     this._refreshPosition()
     this.moves = new Array()
-    let firstMove = new Movement(0)
+    let firstMove = new Movement()
     this.moves.push(firstMove)
     kifuGrid.clear()
     this.addMoveToKifuGrid(firstMove)
@@ -222,9 +231,8 @@ class Board{
     this._timers[0].initialize(this.game.total, this.game.byoyomi)
     this._timers[1].initialize(this.game.total, this.game.byoyomi)
     if (this.isPlayer()) this._timers[this.myRoleType].myPlayingTimer = true
+    this._rematchReady = [false, false]
     /*
-    rematch[0] = false;
-    rematch[1] = false;
     _board_coord_image.visible = false;
     studyOrigin = 0;
     */
@@ -232,15 +240,15 @@ class Board{
       move_strings.forEach(function(move_str){
         console.log(move_str)
         if (move_str.match(/^%TORYO/)) return
-        let move = new Movement(board.getFinalMove().num + 1)
+        let move = new Movement(board.getFinalMove())
         move.setFromCSA(move_str.split(",")[0])
         move.time = parseInt(move_str.split(",")[1])
         this.runningTimer.useTime(move.time)
-        move = this._publicPosition.makeMove(move)
+        move = this._publicPosition.makeMove(move, false)
         this.moves.push(move)
         kifuGrid.row.add(move)
       }, this)
-      this._position.loadFromString(this._publicPosition.toString())
+      this._position.deepCopy(this._publicPosition)
       this._refreshPosition()
       kifuGrid.draw()
       kifuGrid.rows().deselect()
@@ -262,7 +270,7 @@ class Board{
       kifuGrid.draw()
       kifuGrid.rows().deselect()
       kifuGrid.row(":last").select()
-      this._position.loadFromString(this._publicPosition.toString())
+      this._position.deepCopy(this._publicPosition)
       this._refreshPosition()
     }
     this.updateTurnHighlight()
@@ -328,7 +336,7 @@ class Board{
 
   _manualMoveCommandComplete(destinationSquare, promote){
     //sqaure, boolean
-    let move = new Movement(kifuGrid.row({selected: true}).data().num + 1)
+    let move = new Movement(kifuGrid.row({selected: true}).data())
     move.setFromManualMove(this._position.turn, this._selectedSquare, destinationSquare, promote)
     this._cancelSelect()
     this._executeManualMove(move)
@@ -342,7 +350,7 @@ class Board{
     this._refreshPosition()
     if (this.isPlaying()) {
       sendMoveAsPlayer(move)
-      this._publicPosition.loadFromString(this._position.toString())
+      this._publicPosition.deepCopy(this._position)
       this.updateTurnHighlight()
     }
   }
@@ -351,7 +359,7 @@ class Board{
     this._publicPosition.makeMove(move)
     this.addMoveToKifuGrid(move)
     if (this.onListen) {
-      this._position.loadFromString(this._publicPosition.toString())
+      this._position.deepCopy(this._publicPosition)
       this._refreshPosition()
     }
   }
@@ -361,7 +369,7 @@ class Board{
 	  //_last_to_square = null;
     this._position.loadFromString(this._initialPositionStr)
     for (let i = 0; i < moves.length; i++) {
-      if (moves[i].replayable()) this._position.makeMove(moves[i])
+      if (moves[i].replayable()) this._position.makeMove(moves[i], false)
     }
     /*
 		  if (mv.replayable()) {
@@ -430,6 +438,17 @@ class Board{
     this.game = null
     this.playerInfos[0].find("#player-info-name").removeClass("name-winner name-left name-mouse-out")
     this.playerInfos[1].find("#player-info-name").removeClass("name-winner name-left name-mouse-out")
+    this._timers[0].stop()
+    this._timers[1].stop()
+  }
+
+  rematch(turn){
+    //integer
+    this._rematchReady[turn] = true
+  }
+
+  rematchAgreed(){
+    return this._rematchReady[0] == true && this._rematchReady[1] == true
   }
 
   disconnectTimer(turn){
@@ -441,6 +460,14 @@ class Board{
     //integer
     this._timers[turn].reconnect()
     if (this.isPlaying) this.runningTimer.run()
+  }
+
+  calcImpasse(){
+    if (this.isPlaying() && this.myRoleType == (this._position.turn ? 0 : 1)) {
+      _updateImpasseWindow(this._position.calcImpasse(), this.myRoleType)
+    } else {
+      _updateImpasseWindow(this._position.calcImpasse())
+    }
   }
 
   isPlayer(){

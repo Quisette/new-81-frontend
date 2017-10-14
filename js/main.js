@@ -40,9 +40,10 @@ function _testFunction(phase){
 //    return
     _handleServers([
       {id:1, name:'MERCURY', description_en: 'test', description_ja: 'テスト', enabled: true, population: 0, host: 'shogihub.com', port: 4084},
-      {id:2, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.220.131', port: 4081}
+      {id:2, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.47.133', port: 4081}
     ])
   } else if (phase == 1) { // After servers are loaded
+    return
     serverGrid.row("#MERCURY").select()
     _loginButtonClick()
   } else if (phase == 2) { // After logged in
@@ -219,7 +220,6 @@ $(function(){
       {id: "i18n-cancel", click: function(){$(this).dialog('close')}}
     ]
   })
-
   $('#modalChallenger').dialog({
     modal: true,
     dialogClass: 'no-close',
@@ -229,6 +229,19 @@ $(function(){
       $('.ui-widget-overlay').hide().fadeIn()
     },
     show: 'fade'
+  })
+  $('#modalImpasse').dialog({
+    modal: true,
+    autoOpen: false,
+    position: {my: 'center bottom'},
+    width: 250,
+    open: function(e, ui){
+      $('.ui-widget-overlay').hide().fadeIn()
+    },
+    show: 'fade',
+    buttons: [
+      {id: "i18n-impasse.declare", click: function(){_handleImpasseDeclare()}}
+    ]
   })
 
   // Load localStorage
@@ -258,6 +271,7 @@ $(function(){
       mouseX = event.clientX
       mouseY = event.clientY
   }
+  _resize()
 
   // Do in every relogin
 
@@ -274,8 +288,15 @@ $(function(){
 ===================================== */
 
 window.onresize = function () {
+  _resize()
+}
+
+function _resize(){
   $("div.menuBar").find("a.button").css('min-width', window.innerWidth / 12.)
-};
+  $("#playerGridWrapper, #waiterGridWrapper, #gameGridWrapper, #watcherGridWrapper, #kifuGridWrapper").each(function(){
+    $(this).find('.dataTables_scrollBody').css('height', $(this).height() - $(this).find($("thead")).height())
+  })
+}
 
 /* ====================================
     Login View functions
@@ -298,12 +319,13 @@ function _updateLanguage(){
   $('#newGameRuleSelect').empty()
   if (i18next.language == "ja") {
     Object.keys(HANDICAPS_JA).forEach(function(key){
-      if (key == "r" || key == "vazoo") return true
+      if (key == "r" || key.match(/^va/)) return true
       $('#newGameRuleSelect').append($("<option />").val(key).text(HANDICAPS_JA[key]))
     })
   }
-  $('#modalNewGame').dialog('option', 'title', i18next.t("new_game.title"))
-  $('#modalChallenger').dialog('option', 'title', i18next.t("challenger.title"))
+  $('#modalNewGame, #modalChallenger, #modalImpasse').each(function(){
+    $(this).dialog('option', 'title', i18next.t($(this).attr('data-i18n-title')))
+  })
   $('[id^=i18n-]').each(function(){
     $(this).button('option', 'label', i18next.t($(this).attr('id').split("-")[1]))
   })
@@ -368,10 +390,13 @@ function _waitButtonClick(){
 
 function _enterGame(game){
   if (board.game) return
+  if (game.isVariant()) {
+    writeUserMessage(EJ("This game rule is not supported by HTML client yet.", "この対局ルールはHTML版アプリでは未対応です。"), 1, "#ff0000")
+    return
+  }
   board.setGame(game)
   //TODO watching or reconnecting ?
 	if (!game.gameId.match(/^STUDY/) && board.getPlayerRoleFromName(me.name) != null) { // Reconnect
-    console.log(board.getPlayerRoleFromName(me.name))
 		if (me.status == 1) {
       writeUserMessage(EJ("Stop waiting for game before you reconnect.", "対局に再接続するには、対局待状態を解除して下さい。"), 1, "#008800", true)
       board.close()
@@ -428,32 +453,34 @@ function _resignButtonClick(){
 
 function _rematchButtonClick(){
   if (board.isPlayer()) {
-  	//if (_game_name && !board.rematch[board.my_turn]) {
+    if (!board.rematchAgreed()){
+  		client.gameChat("[##REMATCH]")
       /*
   		if (_isGuest && _guestGamesExpired()) {
   			Alert.show(LanguageSelector.lan.msg_guest_expire, LanguageSelector.lan.error, 4);
   			return;
   		} */
-//  		client.gameChat("[##REMATCH]")
-  } /*else {
-		var match:Array = _game_name.split("+")[1].match(/^([0-9a-z]+?)_(.*)$/);
-		var found:Boolean = false;
-		for each (var game:Object in _game_list) {
-			if (game.id.split("+")[1] == match[1] + "_@" + match[2] && game.status == "game") {
-				found = true;
-				break;
-			}
+    }
+  } else {
+    let newGameName = ""
+    if (board.game.gameId.split("+")[1].match(/^([0-9a-z]+?)_(.*)$/)){
+      newGameName = RegExp.$1 + "_@" + RegExp.$2
+    } else return
+    let foundRow = gameGrid.rows(function(idx, data, node){
+      return data.gameId.split("+")[1] == newGameName// && data.status == "game"
+    })
+    if (foundRow) {
+      client.monitor(board.game.gameId, false)
+      board.close()
+      $('#boardMessageArea').empty()
+      watcherGrid.clear().draw()
+      board.setGame(foundRow.data()[0])
+      client.watchers(board.game.gameId)
+      client.monitor(board.game.gameId, true)
+    } else {
+			writeUserMessage(EJ("The rematch game is already finished.", "再戦の対局が既に終了しています"), 2, "#008800")
 		}
-		if (!found) {
-			_writeUserMessage(LanguageSelector.EJ("The rematch game is already finished.\n", "再戦の対局が既に終了しています\n"), 2, "#008800");
-		} else {
-			_clearAllTags();
-			_client.monitorOff(_game_name);
-			board.closeGame();
-			_monitoring = false;
-			_watch_game = game;
-			_execute_watch();
-		} */
+  }
 }
 
 function _greetButtonClick(){
@@ -471,6 +498,12 @@ function _greetButtonClick(){
 
 function _flipButtonClick(){
   board.flipBoard()
+}
+
+function _impasseButtonClick(){
+  if (board.game.isVariant()) return
+  $("#modalImpasse").dialog('open')
+  board.calcImpasse()
 }
 
 function _closeBoard(){
@@ -534,8 +567,8 @@ function setBoardConditions(){
   } else if (board.isWatcher()){
     $("input[name=kifuModeRadio]").val(1).prop("disabled", true)
     $("#greetButton").prop('disabled', 'true')
-    $("#resignButton").addClass("button-disabled")
-    $("#flipButton, #positionMenuButton, #kifuMenuButton, #rematchButton").removeClass("button-disabled")
+    $("#resignButton, #rematchButton").addClass("button-disabled")
+    $("#flipButton, #positionMenuButton, #kifuMenuButton").removeClass("button-disabled")
     $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: true})
     if (board.isPostGame) {
       kifuSelectable = true
@@ -690,6 +723,11 @@ function _playerPMClick(e, forcePM = false){
     $(e).find("div#player-info-layer-1").css('opacity', 1)
     $(e).find("div#player-info-layer-2").css('opacity', 0)
   }
+}
+
+function _handleImpasseDeclare(){
+  $("#modalImpasse").dialog('close')
+  client.kachi()
 }
 
 /* ====================================
@@ -921,15 +959,14 @@ function _handleGameSummary(str){
     //  var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
     if (board.game) _closeBoard()
 	  board.setGame(new Game(0, gameId, black, white))
-	  //board.superior = game.superior;
     board.startGame(initialPosition, myTurn ? 0 : 1)
     setBoardConditions()
     _switchLayer(2)
     sp.gameStart()
     _greetState = 1
 
-    if (myTurn) writeUserMessage(EJ("You are Black " + (board.game.gameType.match(/^hc/) ? "(Handicap taker)." : "(Sente)."), "あなた" + (board.game.gameType.match(/^hc/) ? "は下手(したて)" : "が先手") + "です。"), 2, "#008800")
-    else writeUserMessage(EJ("You are White " + (board.game.gameType.match(/^hc/) ? "(Handicap giver)." : "(Gote).\n"), "あなた" + (board.game.gameType.match(/^hc/) ? "が上手(うわて)" : "は後手") + "です。"), 2, "#008800")
+    if (myTurn) writeUserMessage(EJ("You are Black " + (board.game.isHandicap() ? "(Handicap taker)." : "(Sente)."), "あなた" + (board.game.isHandicap() ? "は下手(したて)" : "が先手") + "です。"), 2, "#008800")
+    else writeUserMessage(EJ("You are White " + (board.game.isHandicap() ? "(Handicap giver)." : "(Gote).\n"), "あなた" + (board.game.isHandicap() ? "が上手(うわて)" : "は後手") + "です。"), 2, "#008800")
 	  //if (match[2].match(/\-\-\d+$/) && board.gameType != "r") writeUserMessage(LanguageSelector.EJ("To mute watcher's chat, switch off the checkbox above the watcher list.\n", "観戦者のチャットをミュートするには観戦者リスト上部のチェックボックスをOFFにして下さい。\n"), 2, "#FF3388")
     /*
 	  greetButton.state = GreetButton.STATE_BEFORE_GAME;
@@ -960,7 +997,7 @@ function _handleMove(csa, time){
       board.moves[board.moves.length - 1].time = time
       board.addMoveToKifuGrid(board.moves[board.moves.length - 1])
     } else {
-      let move = new Movement(board.getFinalMove().num + 1)
+      let move = new Movement(board.getFinalMove())
       move.setFromCSA(csa)
       move.time = time
       board.handleReceivedMove(move)
@@ -983,7 +1020,7 @@ function _handleGameEnd(lines, atReconnection = false){
   }
   */
   board.isPostGame = true
-  let move = new Movement(board.getFinalMove().num + 1)
+  let move = new Movement(board.getFinalMove())
   move.setGameEnd(gameEndType) //turn too?
   board.moves.push(move) //refresh list too
   writeUserMessage(move.toGameEndMessage(), 2, "#DD0088")
@@ -1125,7 +1162,6 @@ function _handleMonitor(str){
     setBoardConditions()
     _switchLayer(2)
     /*
-		 board.superior = _watch_game.superior;
 		  if (board.gameType == "r") {
 			  _writeUserMessage(LanguageSelector.lan.msg_rated + "\n", 2, "#008800", true);
 		  } else {
@@ -1136,14 +1172,13 @@ function _handleMonitor(str){
 			_writeUserMessage(LanguageSelector.EJ('This game belongs to "', "イベント対局: 「") + InfoFetcher.getSystemTournamentName(parseInt(match[1])) + LanguageSelector.EJ('"\n', "」\n"), 2, "#FF3388", true);
 			_writeUserMessage("( http://system.81dojo.com/" + LanguageSelector.EJ("en", "ja") + "/tournaments/" + match[1] + " )\n", 2, "#FF3388");
 		  }
-		  _writeUserMessage(LanguageSelector.EJ("Loading kifu ... ", "棋譜を読み込んでいます... "), 2, "#008800");
 		  _shareKifuEnabled = false;
 		  _study_notified = false;
-		  if (_isGuest) chatMessage2.enabled = false;
       */
   } else {
     move_strings.forEach(function(move_str){
-      let move = new Movement(board.getFinalMove().num + 1)
+      if (move_str.match(/^%TORYO/)) return
+      let move = new Movement(board.getFinalMove())
       move.setFromCSA(move_str.split(",")[0])
       move.time = parseInt(move_str.split(",")[1])
       board.handleMonitorMove(move)
@@ -1177,7 +1212,6 @@ function _handleReconnect(str){
       gameEndStr += RegExp.$1 + "\n"
     }
   })
-  //board.superior = game.superior;
   board.startGame(positionStr, board.getPlayerRoleFromName(me.name), move_strings, since_last_move)
   setBoardConditions()
   _switchLayer(2)
@@ -1313,26 +1347,19 @@ function _handleStart(game_id){
 }
 
 function _handleChat(sender, message){
-	if (message.match(/^\[\#\#BROADCAST\](.+)$/)) {
-    // TODO
-    return;
-	}
   // TODO: if in ignore list
-	if (message.match(/^\[\#\#WINS\](\d+)$/)) {
+	if (message.match(/^\[##INFONEW\]/)) {
+		return
+	} else if (message.match(/^\[##BROADCAST\](.+)$/)) {
+    // TODO
+    return
+	} else if (message.match(/^\[##WINS\](\d+)$/)) {
 		writeUserMessage(_name2link(sender) + EJ(" has won ", "さんが通算") + parseInt(RegExp.$1) + EJ(" games!", "勝を達成しました!"), 1, "#008800", true);
-//		if (currentLayer == 1 && _chat_sound1_play) _sound_chat1.play();
-		return;
-	}
-	if (message.match(/^\[\#\#EXP\](.+),(\d+)$/)) {
+	} else if (message.match(/^\[##EXP\](.+),(\d+)$/)) {
 //		writeUserMessage(_name2link(sender) + EJ(" is promoted to " + makeRank34FromExp(parseInt(RegExp.$2)) + " class in " + (RegExp.$1 == "nr" ? "10-sec Shogi" : gameTypeShort(RegExp.$1)) + "!", "さん、" + (RegExp.$1 == "nr" ? "10秒将棋" : gameTypeShort(RegExp.$1)) + "で " + makeRank34FromExp(parseInt(RegExp.$2)) + " に昇格!!"), 1, "#008800", true);
-//		if (currentLayer == 1 && _chat_sound1_play) _sound_chat1.play();
-		return;
-	}
-	if (message.match(/^\[\#\#INFONEW\]/)) {
-		return;
-	}
-	if (message.match(/^\[##.+\]/)) return;
-	if (_isFavorite(sender)) {
+	} else if (message.match(/^\[##.+\]/)) {
+    return
+  } else if (_isFavorite(sender)) {
 		writeUserMessage("[" + _name2link(sender) + "] " + message, 1, "#DD7700");
 	} else if (_isColleague(sender)) {
 		writeUserMessage("[" + _name2link(sender) + "] " + message, 1, "#550066");
@@ -1411,6 +1438,18 @@ function _handleGameChat(sender, message){
 	} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##TEMPLATE\]([A-Z]\d{3})/))) {
 		_handleGameChat(new ServerMessageEvent("template", "##[GAMECHAT][" + sender + LanguageSelector.EJ("] <Template> ", "] <定型> ") + LanguageSelector.lan[match[1]]));
     */
+	} else if (message.match(/^\[##REMATCH\]$/)) {
+    board.rematch(board.getPlayerRoleFromName(sender))
+    _interpretCommunicationCode(name, "G050", 2, true, true)
+    if (board.rematchAgreed()) {
+			writeUserMessage(EJ("Rematch agreed!", "再戦成立!"), 2, "#008800", true)
+			if (board.isPlayer()) {
+        client.closeGame()
+				client.rematch(board.game, board.myRoleType)
+			} else {
+        $("#rematchButton").removeClass("button-disabled")
+			}
+    }
 	} else if (message.match(/^\[##.+\]/)) {
 	} else if (message.match(/^\[auto\-chat\]\s#([A-Z]\d{3})$/)) {
 		_interpretCommunicationCode(sender, RegExp.$1, 2, false, true)

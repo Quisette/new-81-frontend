@@ -53,6 +53,7 @@ div.layer
 div.grid-wrapper
   background-color: white
   border: 1px solid #ccc
+  overflow: hidden
 
 div.menuBar
   background-color: $KeyColor
@@ -231,7 +232,7 @@ div.game-timer
   width: 80px
   height: 30px
 div.game-timer-label
-  font-size: 20px
+  font-size: 19px
   font-family: 'Arial Black'
   line-height: 29px
 div.game-timer-sub-label
@@ -257,10 +258,12 @@ div#watcherBox
   width: 210px
   margin-right: $boardGap
   background-color: $GreyCanvasColor
+  margin-bottom: $boardGap
 
 div#kifuBox
   width: 170px
   margin-right: $boardGap
+  margin-bottom: $boardGap
   background-color: $GreyCanvasColor
 
 // -------------------------------
@@ -307,6 +310,14 @@ button.promotion-button
 img.promotion-image
   height: 48px
   margin: 0
+
+div#modalImpasse
+  display: none
+  padding: 10px
+table#impasse
+  text-align: center
+  td
+    padding: 0 10px
 
 // -------------------------------
 // Utilities

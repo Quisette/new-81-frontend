@@ -205,10 +205,13 @@
     "stop": "Stop Waiting"
   },
   "pass_invalid": "Wrong password. Cannot enter the room.",
-  "declare": "Declare Win",
-  "entered_impasse": "Entered",
-  "pieces_impasse": "Pieces",
-  "points_impasse": "Points",
+  "impasse": {
+    "title": "Impasse Status",
+    "declare": "Declare Win",
+    "entered": "Entered",
+    "pieces": "Pieces",
+    "points": "Points"
+  },
   "error": "Error",
   "tendency": "Tendencies",
   "rate_history": "Rate History",

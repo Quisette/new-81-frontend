@@ -1,8 +1,9 @@
 "use strict"
 
 class Movement{
-  constructor(n = 0){
-    this.num = n
+  constructor(previousMove = null){
+    this.num = previousMove == null ? 0 : (previousMove.num + 1)
+    this.previousMove = previousMove
     this.endTypeKey = null
     this.owner = Position.CONST.SENTE
     this.pieceType = null

@@ -208,10 +208,13 @@
     "stop": "対局待を止める"
   },
   "pass_invalid": "パスワードが一致しないため入室できません。",
-  "declare": "勝ち宣言",
-  "entered_impasse": "入玉",
-  "pieces_impasse": "駒数",
-  "points_impasse": "点数",
+  "impasse": {
+    "title": "27点宣言法 確認パネル",
+    "declare": "勝ち宣言",
+    "entered": "入玉",
+    "pieces": "敵陣駒数",
+    "points": "確定点数"
+  },
   "error": "エラー",
   "tendency": "戦型採用率",
   "rate_history": "レーティング推移",

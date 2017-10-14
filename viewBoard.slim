@@ -9,7 +9,7 @@ div.layer#layerBoard
         li
           a.button.button-disabled#resignButton href="#" data-i18n="board.resign" onclick="_resignButtonClick()"
         li
-          a.button#impasseButton href="#" data-i18n="board.impasse" onclick=""
+          a.button#impasseButton href="#" data-i18n="board.impasse" onclick="_impasseButtonClick()"
         li
           a.button#flipButton href="#" onclick="_flipButtonClick()" data-i18n-title="board.flip"
             img src="img/icon_flip.png"
@@ -42,7 +42,7 @@ div.layer#layerBoard
             div style="text-align:left"
               input#receiveWatcherChatCheckBox type="checkbox"
               span data-i18n="board.allow_chat"
-            div.grid-wrapper style="flex:1"
+            div.grid-wrapper#watcherGridWrapper style="flex:1"
               table.stripe.hover#watcherGrid
                 tr
                   thead
@@ -66,7 +66,7 @@ div.layer#layerBoard
               p
                 input type="radio" name="kifuModeRadio" value="1" checked="true" onchange=""
                 span data-i18n="board.listen"
-            div.grid-wrapper style="flex:1"
+            div.grid-wrapper#kifuGridWrapper style="flex:1"
               table.stripe.hover#kifuGrid
                 tr
                   thead

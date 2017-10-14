@@ -36,6 +36,7 @@ class GameTimer {
     this._disconnected = false
 		this.myPlayingTimer = false
 		this._preCountedUsedTime = 0
+		this.stop()
 		this._display()
   }
 

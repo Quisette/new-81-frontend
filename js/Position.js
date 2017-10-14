@@ -4,7 +4,7 @@ class Position{
   constructor(gameType){
     this._gameType = gameType
     this.turn = Position.CONST.SENTE
-    this._superior //int
+    this.superior = Position.CONST.GOTE
     if (gameType == "vazoo") {
       this.xN = 3
       this.yN = 4
@@ -26,6 +26,7 @@ class Position{
     this.komadais = new Array(2)
     this.komadais[0] = []
     this.komadais[1] = []
+    this.lastMove = null
   }
 
   static get CONST(){
@@ -76,6 +77,7 @@ class Position{
         if(koma_str != " * "){
           let owner = koma_str.charAt(0) == '+' ? Position.CONST.SENTE : Position.CONST.GOTE
           this._squares[x][y] = this.createPiece(koma_str.slice(1,3), owner, x, y)
+          if (this._squares[x][y].isKing() && owner == this.superior) this._squares[x][y].promote()
         } else {
           this._squares[x][y] = null
         }
@@ -202,7 +204,7 @@ class Position{
     return squares
   }
 
-  makeMove(move){
+  makeMove(move, withSound = true){
     // move: Movement
     let koma1
     let koma2
@@ -226,13 +228,15 @@ class Position{
       this._removePieceFromKomadai(move.owner, move.pieceType)
     }
     this.turn = !this.turn
+    this.lastMove = move
+    if (withSound) sp.piece()
     return move
   }
 
   canPromote(sqFrom, sqTo){
     if (sqFrom.data('x') <= 0) return false
     let koma = this.getPieceFromSquare(sqFrom)
-    if (!koma || koma.isPromoted()) return false
+    if (!koma || !koma.isPromotable() || koma.isPromoted()) return false
     if (koma.owner) {
       return sqFrom.data('y') <= this._promoteY0 || sqTo.data('y') <= this._promoteY0
     } else {
@@ -257,6 +261,41 @@ class Position{
     })
     return hash
   }
+
+  deepCopy(pos){
+    //Position
+    this.loadFromString(pos.toString())
+    this.lastMove = pos.lastMove
+  }
+
+	calcImpasse() {
+		let totalPoints = 0
+    let impasseStatus = [{entered: false, pieces: 0, points: 0}, {entered: false, pieces: 0, points: 0}]
+		for (let i = 0; i < 2; i++) {
+      this.komadais[i].forEach(function(piece){
+        impasseStatus[i].points += piece.point
+			})
+			totalPoints += impasseStatus[i].points
+		}
+		for (let y = 0; y < 9; y++) {
+			for (let x = 0; x < 9; x++) {
+				if (this._squares[x][y]) {
+          totalPoints += this._squares[x][y].point
+          let owner = this._squares[x][y].owner
+          if ((owner && (y + 1) <= this._promoteY0) || (!owner && (y + 1) >= this._promoteY1)) {
+            if (this._squares[x][y].isKing()) {
+              impasseStatus[owner ? 0 : 1].entered = true
+            } else {
+              impasseStatus[owner ? 0 : 1].pieces += 1
+              impasseStatus[owner ? 0 : 1].points += this._squares[x][y].point
+            }
+          }
+        }
+			}
+		}
+		impasseStatus[1].points += 54 - totalPoints
+    return impasseStatus
+	}
 
 }
 
@@ -303,27 +342,6 @@ class Position{
 			return this._impasseStatus;
 		}
 
-		public function canPromote(from:Point,to:Point):Boolean {
-			to = translateHumanCoordinates(to);
-			var koma:Koma;
-			if (from.x > HAND) return false;
-			from = translateHumanCoordinates(from);
-			koma = getKomaAt(from);
-			if(koma.isPromoted()) return false;
-			if (koma.type == Koma.OU || koma.type == Koma.KI) return false;
-			if (koma_names == koma_names_zoo && koma.type != Koma.FU) return false;
-			if(koma.ownerPlayer == SENTE){
-				if(from.y <= _promoteY1 || to.y <= _promoteY1){
-					return true;
-				}
-			} else {
-				if(from.y >= _promoteY2 || to.y >= _promoteY2){
-					return true;
-				}
-			}
-			return false;
-		}
-
 		public function mustPromote(from:Point, to:Point):Boolean {
 			if (koma_names == koma_names_zoo) return false;
 			from = translateHumanCoordinates(from);
@@ -366,116 +384,6 @@ class Position{
 				}
 			}
 			return false;
-		}
-
-    public function generateMovementFromString(moveStr:String):Movement {
-	  if (!moveStr || moveStr.charAt(0) == "%") return null;
-	  var turn:int = moveStr.charAt(0) == "+" ? Kyokumen.SENTE : Kyokumen.GOTE;
-      var from:Point = new Point(parseInt(moveStr.charAt(1)),parseInt(moveStr.charAt(2)));
-      if(from.x == 0){
-        from.x = HAND;
-        from.y = HAND;
-      } else {
-        from = translateHumanCoordinates(from);
-      }
-      var to:Point = new Point(parseInt(moveStr.charAt(3)),parseInt(moveStr.charAt(4)));
-      to = translateHumanCoordinates(to);
-      var capture:Boolean = getKomaAt(to) != null
-	  var match:Array = moveStr.match(/,T([0-9]*)/);
-	  var time:int = parseInt(match[1]);
-	  if (from.x != HAND){
-	  	var promote:Boolean = getKomaAt(from).type != koma_names.indexOf(moveStr.slice(5,7)) && !isKyoto;
-	  }
-	  var originalKomaType:int = koma_names.indexOf(moveStr.slice(5, 7)) - (promote ? Koma.PROMOTE : 0);
-	  var additionalIdentifier:Boolean = false;
-	  outer: for (var y:int = 0; y < 9; y++) {
-		  for (var x:int = 0; x < 9; x++) {
-			  if (x == from.x && y == from.y) continue;
-			  if (_ban[x][y] && _ban[x][y].ownerPlayer == turn && _ban[x][y].type == originalKomaType) {
-				  if (!cantMove(_ban[x][y], new Point(x,y), to, false)) additionalIdentifier = true;
-			  }
-			  if (additionalIdentifier) break outer;
-		  }
-	  }
-	  var mv:Movement = new Movement();
-	  mv.setFromKyokumen(turn, from, to, originalKomaType, promote, capture, _last_to, additionalIdentifier, time);
-	  return mv;
-    }
-
-		public function move(mv:Movement):void {
-			//drop
-			if(mv.from.x == HAND){
-				_komadai[mv.turn].removeKoma(isKyoto ? Koma.typeKyotoConverted(mv.type, true) : mv.type);
-			}
-			//put piece into hand if capturing.
-			if (getKomaAt(mv.to) != null) {
-				if(mv.from.x == HAND){
-					return; //illegal
-				} else {
-					var captured_koma:Koma = getKomaAt(mv.to);
-					_captureKoma(captured_koma,_turn);
-				}
-			}
-			//move piece
-			if(mv.from.x != HAND){
-				//_ban[mv.from.x - 1][mv.from.y - 1] = null;
-				setKomaAt(mv.from,null);
-			}
-			setKomaAt(mv.to, mv.getResultKoma());
-			_last_to = mv.to;
-			_turn = _turn == SENTE ? GOTE : SENTE;
-		}
-
-		private function _captureKoma(koma:Koma,turn:int):void {
-      setKomaAt(new Point(koma.x,koma.y),null);
-			koma.ownerPlayer = turn;
-			koma.x = HAND;
-			koma.y = HAND;
-			if (isKyoto) koma.convertKyoto(true);
-			if (koma.isPromoted()) {
-				koma.depromote();
-			}
-			_komadai[turn].addKoma(koma);
-		}
-
-		public function calcImpasse():void {
-			var turn:int;
-			var total_points:int = 0;
-			for (turn = 0; turn < 2; turn++) {
-				_impasseStatus[turn].entered = false;
-				_impasseStatus[turn].pieces = 0;
-				_impasseStatus[turn].points = 0;
-				for (var i:int = 0; i < 8; i++) {
-					_impasseStatus[turn].points += _komadai[turn].getNumOfKoma(i) * koma_impasse_points[i];
-				}
-				total_points += _impasseStatus[turn].points;
-			}
-			for (var y:int = 0; y < 9; y++) {
-				for (var x:int = 0; x < 9; x++) {
-					if (_ban[x][y]) {
-						total_points += koma_impasse_points[_ban[x][y].type];
-						if (y <= _promoteY1) {
-							turn = SENTE;
-						} else if (y >= _promoteY2) {
-							turn = GOTE;
-						} else {
-							continue;
-						}
-						if (_ban[x][y].ownerPlayer == turn) {
-							_impasseStatus[turn].pieces += 1;
-							_impasseStatus[turn].points += koma_impasse_points[_ban[x][y].type];
-						}
-					}
-				}
-			}
-			_impasseStatus[GOTE].points += ALL_POINTS - total_points;
-			for (turn = 0; turn < 2; turn++) {
-				if (_impasseStatus[turn].points >= koma_impasse_points[0]) {
-					_impasseStatus[turn].points -= koma_impasse_points[0];
-					_impasseStatus[turn].pieces -= 1;
-					_impasseStatus[turn].entered = true;
-				}
-			}
 		}
 
 		public function calcMaterial(turn:int, joban:Boolean):String {

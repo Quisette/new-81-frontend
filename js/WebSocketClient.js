@@ -155,6 +155,7 @@ class WebSocketClient {
 
   _handleSocketOpen(){
     console.log('connected');
+    console.log(this._socket)
   }
 
   _login(clientPass, encrypt = true){
@@ -237,6 +238,20 @@ class WebSocketClient {
 	  }
   }
 
+	rematch(game, turn){
+    //game, integer
+		let game_name = game.gameId.split("+")[1]
+    if (game_name.match(/^([0-9a-z]+?)_(.*)$/)) {
+      let gameType = RegExp.$1
+      let identifier = RegExp.$2
+  		if (gameType.match(/^hc/)) {
+  			this.send("%%GAME " + gameType + "_@" + identifier + (turn == 0 ? " +" : " -"))
+  		} else {
+  			this.send("%%GAME " + gameType + "_@" + identifier + (turn == 0 ? " -" : " +"))
+  		}
+    }
+	}
+
   reconnect(game_id){
 		this.send("%%RECONNECT " + game_id)
   }
@@ -251,6 +266,14 @@ class WebSocketClient {
 
   resign(){
     this.send("%TORYO")
+  }
+
+  kachi(){
+    this.send("%KACHI")
+  }
+
+  declare(){
+    this.send("%%%DECLARE")
   }
 
   closeGame(){

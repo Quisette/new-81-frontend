@@ -9,6 +9,8 @@ class SoundPlayer{
     this.byoyomiType = 1
 
     this._channels = new Object()
+    this._loadChannel("PIECE_NORMAL", "piece")
+    this._loadChannel("PIECE_DOUBLE", "piece_double")
     this._loadChannel("CHALLENGER", "challenger")
     this._loadChannel("CHIME", "chime")
     this._loadChannel("GAME_START", "start")
@@ -25,6 +27,14 @@ class SoundPlayer{
     return {
       SOUND_PATH: 'sound',
       BYOYOMI_DIRECTORIES: ['', 'byoyomi01', 'byoyomi02', 'byoyomi03']
+    }
+  }
+
+  piece(isDouble = false){
+    if (isDouble) {
+      this.play("PIECE_DOUBLE")
+    } else {
+      this.play("PIECE_NORMAL")
     }
   }
 

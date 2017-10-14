@@ -53,6 +53,13 @@ class Piece{
     return this._promoted
   }
 
+  isKing(){
+    return false
+  }
+
+  isPromotable(){
+    return true
+  }
 //  kyotoConvert(){
 //  		 kyoto_conversion:Array = new Array(0, 7, 4, 5, 2, 3, 15, 1, 8, 9, 10, 11, 12, 13, 14, 6);
 //  }
@@ -74,6 +81,12 @@ class PieceOU extends Piece{
   }
   promotedMoves(){
     return this.normalMoves()
+  }
+  isKing(){
+    return true
+  }
+  isPromotable(){
+    return false
   }
 }
 
@@ -123,6 +136,9 @@ class PieceKI extends Piece{
   }
   normalMoves(){
     return [[0, +1], [+1, +1], [-1, +1], [+1, +0], [-1, +0], [0, -1]]
+  }
+  isPromotable(){
+    return false
   }
 }
 

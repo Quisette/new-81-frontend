@@ -16,6 +16,7 @@ class Game{
     this.watchers = 0
     this.opening = "*"
     this.password = ""
+    this.status = ""
 		if (game_info[2].match(/\.([0-9a-z]{6})/)) this.password = RegExp.$1
   }
 
@@ -57,6 +58,14 @@ class Game{
 
   opening(){
     return ""
+  }
+
+  isHandicap(){
+    return this.gameType.match(/^hc/)
+  }
+
+  isVariant(){
+    return this.gameType.match(/^va/)
   }
 
 }
