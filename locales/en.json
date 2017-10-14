@@ -207,11 +207,12 @@
   "pass_invalid": "Wrong password. Cannot enter the room.",
   "impasse": {
     "title": "Impasse Status",
-    "declare": "Declare Win",
     "entered": "Entered",
     "pieces": "Pieces",
     "points": "Points"
   },
+  "since_disconnect": "Time past since disconnection: ",
+  "declare": "Declare Win",
   "error": "Error",
   "tendency": "Tendencies",
   "rate_history": "Rate History",
@@ -227,7 +228,7 @@
     "study_notify": "Study-position is changed. Back to [Follow latest position] mode to update.",
     "rated": "This game is Rated.\nPlayers CANNOT see watcher's chat until the game ends.\nWatcher can PM to players, but it will be notified to others.",
     "nonrated": "This game is Non-rated.\nPlayers CAN see watcher's chat even during game.",
-    "disconnect": "Opponent disconnected.",
+    "opponent_disconnect": "Opponent disconnected. You can declare win after 60 seconds, or keep waiting. However, you will be forced to win automatically after 300 seconds.",
     "disconnect_self": "You are disconnected from the server. The applet is no longer active. Please reload the applet to login again and continue.　Do you want to reload immidately?",
     "game_end": {
       "time_up": "Time up.",
@@ -239,8 +240,6 @@
       "jishogi": "Game end by 27-point rule."
     },
     "lag": "Your timer is lagging by more than 5 sec due to CPU load. Time-up loss can occur earlier than your timer hits zero.",
-    "disconnect_alert1": "You can declare win after 60 seconds, or keep waiting.",
-    "disconnect_alert2": "Declaration is automatically made after 300 seconds.",
     "addlist": "Added to the list temporarily. Go to Option Window to set it permanent or cancel.",
     "addlist_favorite": "Added to the favorite list temporarily. Go to Option Window to set it permanent or cancel.",
     "addlist_block": "Blocked all communication from the user. This setting will be canceled on your next login.",

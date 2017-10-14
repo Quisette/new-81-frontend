@@ -15,6 +15,7 @@ var kifuGrid;
 var users = new Object();
 var playerInfoWindows = new Object();
 var timeouts = new Object()
+var _disconnectTimer
 var me;
 var _challengeUser = null
 var _gameAccepted = false
@@ -240,7 +241,7 @@ $(function(){
     },
     show: 'fade',
     buttons: [
-      {id: "i18n-impasse.declare", click: function(){_handleImpasseDeclare()}}
+      {id: "i18n-declare", click: function(){_handleImpasseDeclare()}}
     ]
   })
 
@@ -413,10 +414,13 @@ function _enterGame(game){
 
 function writeUserMessage(str, layer, clr = null, bold = false, lineChange = true){
   let area
+  let p
   if (layer == 1) {
     area = $('#lobbyMessageArea')
   } else if (layer == 2) {
     area = $('#boardMessageArea')
+    p = $("p#disconnectTimer")
+    if (p.length) p.detach()
   }
 	str = str.replace(/</g, "&lt;")
 	str = str.replace(/&lt;sPAn/g, "<span");
@@ -428,6 +432,7 @@ function writeUserMessage(str, layer, clr = null, bold = false, lineChange = tru
     'font-weight': (bold ? 'bold' : '')
   }).html(str).appendTo(area)
   if (lineChange) area.append('<br>')
+  if (p.length) p.appendTo(area)
   area.animate({scrollTop: area[0].scrollHeight}, 'fast')
 }
 
@@ -1012,13 +1017,8 @@ function _handleGameEnd(lines, atReconnection = false){
   let gameEndType = lines.split("\n")[0]
   let result = lines.split("\n")[1]
   //var adviseIllegal:Boolean = false;
-  /*
-  if (_disconnectAlertWindow) {
-	  _disconnectAlertWindow.terminate();
-	  _disconnectAlertWindow = null;
-	  var opponent_disconnected:Boolean = true;
-  }
-  */
+  clearInterval(_disconnectTimer)
+  $("p#disconnectTimer").remove()
   board.isPostGame = true
   let move = new Movement(board.getFinalMove())
   move.setGameEnd(gameEndType) //turn too?
@@ -1224,11 +1224,8 @@ function _handleReconnect(str){
 
 function _handleEnter(name){
   if (board.getPlayerRoleFromName(name) != null) {
-    /*
-		if (_disconnectAlertWindow) {
-			_disconnectAlertWindow.terminate();
-			_disconnectAlertWindow = null;
-		}*/
+    clearInterval(_disconnectTimer)
+    $("p#disconnectTimer").remove()
     if (board.isPlaying()) board.reconnectTimer(board.getPlayerRoleFromName(name))
 		writeUserMessage(_name2link(name) + i18next.t("code.G030"), 2, board.getPlayerRoleFromName(name) == 0 ? "#000000" : "#666666", true)
     board.playerNameClassChange(board.getPlayerRoleFromName(name), "name-left", false)
@@ -1291,11 +1288,38 @@ function _handleDisconnect(name) {
 		writeUserMessage(name + EJ(" disconnected.", "さんの接続が切れました。"), 2, board.getPlayerRoleFromName(name) == 0 ? "#000000" : "#666666", true)
     board.playerNameClassChange(board.getPlayerRoleFromName(name), "name-left", true)
     sp.door(false)
+  	if (board.isPlaying() && name != me.name) {
+      board.disconnectTimer(board.getPlayerRoleFromName(name))
+      writeUserMessage(i18next.t("msg.opponent_disconnect"), 2, "#ff0000")
+      _startDisconnectTimer()
+  	}
 	}
-	if (board.isPlaying() && name != me.name) {
-    board.disconnectTimer(board.getPlayerRoleFromName(name))
-//		_openDisconnectAlertWindow();
-	}
+}
+
+function _startDisconnectTimer(){
+  $("p#disconnectTimer").remove()
+  let p = $('<p></p>', {id: 'disconnectTimer'})
+  $("#boardMessageArea").append(p)
+  p.html(i18next.t("since_disconnect") + '<span id="disconnectCount">0</span>&nbsp' + i18next.t("sec"))
+  let count = 0
+  _disconnectTimer = setInterval(function(){
+    count++
+    $("span#disconnectCount").text(count)
+    if (count == 60) {
+      $('<input id="disconnectDeclareButton" type="button" value="' + i18next.t("declare") + '" style="height:20px;margin-left:5px">').appendTo(p)
+      $("#disconnectDeclareButton").click(function(){
+        _handleDisconnectDeclare()
+      })
+    } else if (count >= 300) {
+      _handleDisconnectDeclare()
+    }
+  }, 1000)
+}
+
+function _handleDisconnectDeclare(){
+  clearInterval(_disconnectTimer)
+  client.declare()
+  $("p#disconnectTimer").remove()
 }
 
 function _handleStart(game_id){
