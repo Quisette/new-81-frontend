@@ -121,6 +121,7 @@ $(function(){
     searching: false, paging: false, info: false,
     select: "single",
     order: [[5, 'desc']],
+    scrollY: true,
     oLanguage: {sEmptyTable: EJ("Loading...", "読込中...")}
   })
   playerGrid.clear()
@@ -140,6 +141,7 @@ $(function(){
     searching: false, paging: false, info: false,
     select: "single",
     order: [[1, 'desc']],
+    scrollY: true,
     oLanguage: {sEmptyTable: EJ("No player is waiting", "対局待プレーヤがいません")}
   })
   waiterGrid.clear()
@@ -161,6 +163,7 @@ $(function(){
     searching: false, paging: false, info: false,
     select: "single",
     order: false,
+    scrollY: true,
     oLanguage: {sEmptyTable: EJ("No game room found.", "対局がありません")}
   })
   gameGrid.clear()
@@ -179,6 +182,7 @@ $(function(){
     searching: false, paging: false, info: false,
     select: "single",
     order: [[2, 'desc']],
+    scrollY: true,
     oLanguage: {sEmptyTable: EJ("No watcher", "観戦者なし")}
   })
   watcherGrid.clear()
@@ -195,6 +199,7 @@ $(function(){
     ],
     searching: false, paging: false, info: false,
     select: "api",
+    scrollY: true,
     order: false
   })
   kifuGrid.clear()
@@ -368,6 +373,7 @@ function _loginButtonClick(){
   client.setCallbackFunctions("DECLINE", _handleDecline)
   client.setCallbackFunctions("GAME_SUMMARY", _handleGameSummary)
   client.setCallbackFunctions("START", _handleStart)
+  client.setCallbackFunctions("RESULT", _handleResult)
   client.setCallbackFunctions("MONITOR", _handleMonitor)
   client.setCallbackFunctions("RECONNECT", _handleReconnect)
   client.setCallbackFunctions("ENTER", _handleEnter)
@@ -432,7 +438,7 @@ function writeUserMessage(str, layer, clr = null, bold = false, lineChange = tru
     'font-weight': (bold ? 'bold' : '')
   }).html(str).appendTo(area)
   if (lineChange) area.append('<br>')
-  if (p.length) p.appendTo(area)
+  if (p && p.length) p.appendTo(area)
   area.animate({scrollTop: area[0].scrollHeight}, 'fast')
 }
 
@@ -509,6 +515,10 @@ function _impasseButtonClick(){
   if (board.game.isVariant()) return
   $("#modalImpasse").dialog('open')
   board.calcImpasse()
+}
+
+function _optionButtonClick(){
+  openResult(1)
 }
 
 function _closeBoard(){
@@ -1029,11 +1039,11 @@ function _handleGameEnd(lines, atReconnection = false){
   switch (result) {
     case "LOSE":
     	board.studyHostType = 2
-    	//_openGameResultWindow(-1);
     	board.playerNameClassChange(1 - board.myRoleType, "name-winner", true)
       writeUserMessage(EJ("### You Lose ###", "### あなたの負けです ###"), 2, "#DD0088", true)
-    	//if (adviseIllegal) _writeUserMessage(LanguageSelector.EJ("( For details of illegal moves in shogi, see: http://81dojo.com/documents/Illegal_Move )\n", "( 将棋の反則手についてはこちらでご確認下さい: http://81dojo.com/documents/反則手 )\n"), 2, "#DD0088");
       sp.gameEnd(false)
+    	openResult(-1)
+    	//if (adviseIllegal) _writeUserMessage(LanguageSelector.EJ("( For details of illegal moves in shogi, see: http://81dojo.com/documents/Illegal_Move )\n", "( 将棋の反則手についてはこちらでご確認下さい: http://81dojo.com/documents/反則手 )\n"), 2, "#DD0088");
       /*
     	if (board.gameType == "r") _losses_session += 1;
     	var history = "  ●";
@@ -1043,22 +1053,22 @@ function _handleGameEnd(lines, atReconnection = false){
       break
     case "WIN":
       board.studyHostType = 1
-    	//_openGameResultWindow(1);
     	board.playerNameClassChange(board.myRoleType, "name-winner", true)
       writeUserMessage(EJ("### You Win ###\n", "### あなたの勝ちです ###\n"), 2, "#DD0088", true)
       sp.gameEnd(true)
+    	openResult(1)
       /*
     	if (board.gameType == "r") _wins_session += 1;
     	history = "  ◯";
-    	if (board.gameType == "r" && board.kifu_list.length >= 6 && ((_users[login_name].wins + 1) % 100 == 0)) _client.chat("[##WINS]" + (_users[login_name].wins + 1));
       */
+    	// if (board.game.isRated() && board.moves.length >= 6 && (me.wins + 1) % 100 == 0)) client.chat("[##WINS]" + (me.wins + 1))
       break
     case "DRAW":
     	if (board.myRoleType == 1) board.studyHostType = 2
     	else if (board.myRoleType == 0) board.studyHostType = 1
-    	//_openGameResultWindow(0);
       writeUserMessage(EJ("### Draw ###\n", "### 引き分け ###\n"), 2, "#DD0088", true)
       sp.gameEnd(true)
+    	if (board.isPlayer() && !atReconnection) openResult(0)
     	//history = "  引";
       break
     case "SENTE_WIN":
@@ -1131,6 +1141,11 @@ function _handleGameEnd(lines, atReconnection = false){
 	  }
   }
   */
+}
+
+function _handleResult(str){
+  let tokens = str.split(",")
+  loadResult(tokens[0], tokens[1], tokens[2], tokens[3])
 }
 
 function _handleMonitor(str){

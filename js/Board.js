@@ -505,4 +505,8 @@ class Board{
     return this._position
   }
 
+  get div(){
+    return this._div
+  }
+
 }

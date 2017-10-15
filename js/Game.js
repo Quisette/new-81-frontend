@@ -60,6 +60,10 @@ class Game{
     return ""
   }
 
+  isRated(){
+    return this.gameType == "r"
+  }
+
   isHandicap(){
     return this.gameType.match(/^hc/)
   }
