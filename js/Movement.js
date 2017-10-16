@@ -67,7 +67,7 @@ class Movement{
   toCSA(){
     let str = this.owner ? "+" : "-"
     str += this.fromX.toString() + this.fromY.toString() + this.toX.toString() + this.toY.toString()
-    str += Movement.PIECE_NAMES_CSA[this.pieceType]
+    str += Movement.PIECE_NAMES_CSA[this.pieceType + (this.promote && this.pieceType < 8 ? 8 : 0)]
     return str
   }
 

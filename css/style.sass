@@ -5,6 +5,7 @@ $AccentColor: rgb(212, 152, 0)
 $GreyCanvasColor: #fafafa
 $LobbyGap: 7px
 $boardGap: 7px
+$MenuBarHeight: 35px
 $PlayerListWidth: 368px
 $GameListWidth: 574px
 $BoardBoxWidth: 784px
@@ -54,23 +55,27 @@ div.layer
 
 div.grid-wrapper
   background-color: white
+  background-image: url(../img/grid_header.gif)
+  background-repeat: repeat-x
   border: 1px solid #ccc
   overflow: hidden
 
 div.menuBar
+  z-index: 1
   background-color: $KeyColor
   text-align: left
-  height: 35px
-  ul
+  height: $MenuBarHeight
+  > ul
     margin: 0
     padding: 0
     list-style: none
-    li
+    > li
       display: inline
       margin: 0
       padding: 0
       float: left
-      a.button
+      position: relative
+      > a.button
         min-width: 100px
         height: 35px
         line-height: 35px
@@ -82,10 +87,29 @@ div.menuBar
           background-color: rgba(255,255,255,0.2)
         img
           vertical-align: -7px
-      a.button-disabled
+      > a.button-disabled
         pointer-events: none
         background-color: $DarkKeyColor
         opacity: 0.7
+ul.subMenu
+  position: absolute
+  top: $MenuBarHeight
+  left: 0
+  margin: 0
+  padding: 0
+  list-style: none
+  li
+    background-color: $KeyColor
+    width: 100%
+    display: block
+    a
+      padding: 0 2px
+      display: block
+      line-height: 2.5em
+      color: white
+      white-space: nowrap
+      &:hover
+        background-color: rgba(255,255,255,0.2)
 img.avatar
   width: 128px
   height: 128px

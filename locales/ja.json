@@ -64,14 +64,6 @@
     "chat": "チャット",
     "auto_scroll": "自動スクロール"
   },
-  "status_tip_mobile": "モバイルアプリ使用中",
-  "status_tip_self": "自分",
-  "status_tip_direct": "直通ボイスチャット感想戦中",
-  "status_tip_shared": "公開可ボイスチャット感想戦中",
-  "status_tip_broadcast": "放送中",
-  "status_tip_listen": "あなたの公開ボイスチャットを視聴中",
-  "status_tip_host": "感想戦ホスト",
-  "position_query": "局面問い合わせ",
   "board": {
     "resign": "投了",
     "impasse": "持将棋計算",
@@ -108,6 +100,22 @@
     "move": "指し手",
     "move_time": "時間"
   },
+  "submenu": {
+    "ranking": "ランキング",
+    "kifu_search": "棋譜検索",
+    "bbs": "国際掲示板",
+    "tournament": "大会",
+    "club": "サークル",
+    "player_search": "ユーザ検索"
+  },
+  "status_tip_mobile": "モバイルアプリ使用中",
+  "status_tip_self": "自分",
+  "status_tip_direct": "直通ボイスチャット感想戦中",
+  "status_tip_shared": "公開可ボイスチャット感想戦中",
+  "status_tip_broadcast": "放送中",
+  "status_tip_listen": "あなたの公開ボイスチャットを視聴中",
+  "status_tip_host": "感想戦ホスト",
+  "position_query": "局面問い合わせ",
   "search_panel": "情報検索",
   "kifu_search": "棋譜検索",
   "share": "棋譜共有",

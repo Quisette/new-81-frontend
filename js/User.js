@@ -122,7 +122,11 @@ class User{
   }
 
   avatarURL(){
-    return "http://system.81dojo.com/players/" + this.name + "/avatar"
+    if (this._countryCode == 1 || this._countryCode == 2) {
+      return "http://81dojo.com/dojo/images/avatars/" + (this._countryCode == 1 ? "study_black" : "study_white") + ".jpg"
+    } else {
+      return "http://system.81dojo.com/players/" + this.name + "/avatar"
+    }
   }
 
   set countryCode(v){
@@ -130,7 +134,8 @@ class User{
   }
 
   get country(){
-    return countries[this._countryCode]
+    if (this._countryCode == 1 || this._countryCode == 2) return new Country(this._countryCode, "", "", "")
+    else return countries[this._countryCode]
   }
 
   get waitingGameName(){

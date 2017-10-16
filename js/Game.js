@@ -56,8 +56,14 @@ class Game{
     return str
   }
 
-  opening(){
-    return ""
+  openingStr(){
+    let object
+    if (this.password != "") {
+      object = {short: EJ("PRIVATE", "[ロック]"), tip: i18next.t("private_room")}
+    } else {
+      object = openingTypeObject(this.hasNoOpeningTypes() ? this.gameType : this.opening)
+    }
+    return '<span title="' + object.tip + '">' + object.short + "</span>"
   }
 
   isRated(){
@@ -70,6 +76,10 @@ class Game{
 
   isVariant(){
     return this.gameType.match(/^va/)
+  }
+
+  hasNoOpeningTypes(){
+    return this.gameType.match(/^(hc|va)/) && this.gameType != "hcfixed"
   }
 
 }

@@ -157,7 +157,7 @@ $(function(){
       {data: "ruleShort", width: "16%", bSortable: false},
       {data: "moves", width: "7%", bSortable: false},
       {data: "watchers", width: "7%", bSortable: false},
-      {data: "opening", width: "12%", bSortable: false}
+      {data: "openingStr", width: "12%", bSortable: false}
     ],
     rowId: "gameId",
     searching: false, paging: false, info: false,
@@ -249,6 +249,18 @@ $(function(){
       {id: "i18n-declare", click: function(){_handleImpasseDeclare()}}
     ]
   })
+
+  // Sub menus
+  $('.subMenu').hide()
+  $('.menuBar > ul > li').hover(function(){
+    if ($(this).find('a').hasClass('button-disabled')) return
+    $("ul:not(:animated)", this).css('min-width', $(this).width()).slideDown()
+  }, function(){
+    $("ul",this).slideUp()
+  })
+
+  // Hide all layers other than login
+  _switchLayer(0)
 
   // Load localStorage
   if (localStorage.login) $('#usernameInput').val(localStorage.login)
@@ -395,6 +407,10 @@ function _waitButtonClick(){
   $('#modalNewGame').dialog('open')
 }
 
+function _navigateToWebSystem(path){
+  window.open('http://system.81dojo.com/' + EJ('en', 'ja') + '/' + path, '_blank')
+}
+
 function _enterGame(game){
   if (board.game) return
   if (game.isVariant()) {
@@ -518,7 +534,6 @@ function _impasseButtonClick(){
 }
 
 function _optionButtonClick(){
-  openResult(1)
 }
 
 function _closeBoard(){
@@ -663,7 +678,7 @@ function _openPlayerInfo(user, doOpen = true){
         if (element.find("#privateMessageArea").html() == "") element.dialog('destroy').remove()
       },
       buttons: [
-        {text: i18next.t("player_info.challenge"), click: function(){_playerChallengeClick(user)}},
+        {text: i18next.t("player_info.challenge"), click: function(){_playerChallengeClick(user); $(this).dialog('close')}},
         {text: i18next.t("player_info.detail"), click: function(){_playerDetailClick(user)}},
         {text: "PM", click: function(){_playerPMClick(this)}}
       ]
@@ -697,6 +712,8 @@ function _playerChallengeClick(user){
   	  writeUserMessage(EJ("New player with a provisional rating cannot challenge 6-Dan or higher for rated games.", "レート未確定の新鋭棋士は六段以上とのレーティング対局には挑戦出来ません。"), 1, "#008800")
     } else if (user.waitingGameName.match(/_automatch\-/)) {
 		  client.seek(user)
+    } else if (user.waitingGameName.match(/^va/)) {
+  	  writeUserMessage(EJ("This game rule is not supported yet.", "HTML版は特殊ルールには未対応です。"), 1, "#ff0000")
 	  } else {
 		  _challengeUser = user
 		  writeUserMessage(EJ("Challenging " + _challengeUser.name + "..... (Must wait for 20 seconds max)\n", _challengeUser.name + "さんに挑戦中..... (待ち時間 最大で20秒)\n"), 1, "#008800", true)
@@ -808,18 +825,19 @@ function _handleList(str){
   let lines = str.trim().split("\n")
   gameGrid.clear()
   lines.forEach(function(line){
+    if (line == "") return
     n += 1
     let tokens = line.split(" ")
 		let black = users[tokens[0].split("+")[2]]
 		if (!black) {
 			black = new User(tokens[0].split("+")[2])
-			if (tokens[0].match(/^STUDY\+/)) black.countryCode = 1
+			if (tokens[0].match(/^STUDY\+/)) black.setFromStudy(true)
 			else black.setFromList(tokens[2], parseInt(tokens[4]))
 		}
 		let white = users[tokens[0].split("+")[3]]
 		if (!white) {
 			white = new User(tokens[0].split("+")[3])
-			if (tokens[0].match(/^STUDY\+/)) white.countryCode = 2
+			if (tokens[0].match(/^STUDY\+/)) white.setFromStudy(false)
 			else white.setFromList(tokens[3], parseInt(tokens[5]))
 		}
 		let game = new Game(n, tokens[0], black, white);
@@ -1591,16 +1609,9 @@ function _handleServers(data){
 ===================================== */
 
 function _switchLayer(n){
-  if (n == 0) {
-    $('div#layerLogin').css('display', 'initial')
-    $('div#layerLobby').css('display', 'initial')
-  } else if (n == 1){
-    $('div#layerLobby').css('display', 'initial')
-    $('div#layerLogin').css('display', 'none')
-  } else if (n == 2){
-    $('div#layerLogin').css('display', 'none')
-    $('div#layerLobby').css('display', 'none')
-  }
+  $('div#layerLogin').css({'z-index': n == 0 ? 2 : 1, opacity: n == 0 ? 1 : 0})
+  $('div#layerLobby').css({'z-index': n == 1 ? 2 : 1, opacity: n == 1 ? 1 : 0})
+  $('div#layerBoard').css({'z-index': n == 2 ? 2 : 1, opacity: n == 2 ? 1 : 0})
   currentLayer = n
 }
 

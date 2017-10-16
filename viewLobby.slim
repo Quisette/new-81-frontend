@@ -11,8 +11,21 @@ div.layer#layerLobby
           a.button href="#" onclick="_optionButtonClick()" data-i18n-title="lobby.options"
             img src="img/icon_gear.png"
         li
-          a.button href="#" onclick="_webSystemButtonClick()" data-i18n-title="lobby.websystem"
+          a.button href="#" data-i18n-title="lobby.websystem"
             img src="img/icon_web2.png"
+          ul.subMenu
+            li
+              a href="#" data-i18n="submenu.ranking" onclick="_navigateToWebSystem('ranking')"
+            li
+              a href="#" data-i18n="submenu.kifu_search" onclick="_navigateToWebSystem('kifus/search/form')"
+            li
+              a href="#" data-i18n="submenu.bbs" onclick="_navigateToWebSystem('forums')"
+            li
+              a href="#" data-i18n="submenu.tournament" onclick="_navigateToWebSystem('tournaments')"
+            li
+              a href="#" data-i18n="submenu.club" onclick="_navigateToWebSystem('circles')"
+            li
+              a href="#" data-i18n="submenu.player_search" onclick="_navigateToWebSystem('players/search/form')"
         li
           a.button href="#" onclick="client.close()" data-i18n="lobby.logout"
       div#lobbyHeader

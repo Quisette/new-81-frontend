@@ -166,6 +166,75 @@ function coloredSpan(text, color, width = 0){
   return str
 }
 
+const SWINGING_FILE_NAME_JA = {
+  "2": "向かい飛車",
+  "3": "三間飛車",
+  "4": "四間飛車",
+  "5": "中飛車"
+}
+const SWINGING_FILE_NAME_EN = {
+  "2": "Opposing Rook",
+  "3": "3rd-file Rook",
+  "4": "4th-file Rook",
+  "5": "Central Rook"
+}
+const OPENING_NAME_JA = {
+	"*": "",
+  "unknown": "力戦",
+	"side_pawn": "横歩取り",
+	"double_wing": "相掛かり",
+	"bishop_exchange": "角換り",
+	"yagura": "矢倉",
+	"double_ranging": "相振り"
+}
+const OPENING_NAME_EN = {
+	"*": "",
+  "unknown": "Free-style",
+	"side_pawn": "Side Pawn Picker",
+	"double_wing": "Aigakari(Double Wing Attack)",
+	"bishop_exchange": "Bishop Exchange",
+	"yagura": "Yagura",
+	"double_ranging": "Double Swinging Rook"
+}
+function openingTypeObject(key){
+  let short = ""
+  let tip = ""
+  if (key.match(/^(hc|va)/)) {  // key is gameType code for handicaps or variants
+    switch (key) {
+  		case "hctombonl":
+  			short = "トンボ桂"; break;
+  		case "hctombol":
+  			short = "トンボ香"; break;
+  		case "va5656":
+  			short = "ゴロゴロ"; break;
+  		case "vajudkins":
+  			short = "六々将棋"; break;
+  		case "vazoo":
+  			short = "どうぶつ"; break;
+  		case "va33":
+  			short = "９マス"; break;
+      default:
+        short = HANDICAPS_JA[key]
+    }
+    tip = i18next.language == "ja" ? HANDICAPS_JA[key] : HANDICAPS_EN[key]
+  } else if (key.match(/opposition_(black|white)(\d)/)) {  // key is opening type, and it is swinging rook
+    short = "対抗" + (RegExp.$1 == "black" ? "☗" : "☖") + SWINGING_FILE_NAME_JA[RegExp.$2][0]
+    if (i18next.language == "ja") {
+      tip = "対抗形 " + (RegExp.$1 == "black" ? "☗" : "☖") + SWINGING_FILE_NAME_JA[RegExp.$2]
+    } else {
+      tip = "Opposition, " + (RegExp.$1 == "black" ? "Black's " : "White's ") + SWINGING_FILE_NAME_EN[RegExp.$2]
+    }
+	} else { // key is other opening types
+    short = OPENING_NAME_JA[key]
+    if (i18next.language == "ja") {
+      tip = key == "double_ranging" ? (short + "飛車") : short
+    } else {
+      tip = OPENING_NAME_EN[key]
+    }
+	}
+  return {short: short, tip: tip}
+}
+
 function debugLoop(){
   window.addEventListener('devtoolschange', function(){while(true) debugger})
 }

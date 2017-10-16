@@ -143,7 +143,7 @@ class WebSocketClient {
   }
 
   _callbackWithBuffer(key){
-    if (this._buffer[key] == undefined || this._buffer[key] == "") return
+    if (this._buffer[key] == undefined) this._buffer[key] = ""
     this._callbackFunctions[key](this._buffer[key])
     this._buffer[key] = ""
   }

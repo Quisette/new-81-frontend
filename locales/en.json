@@ -63,13 +63,6 @@
     "chat": "Chat",
     "auto_scroll": "Auto-scroll"
   },
-  "status_tip_mobile": "Using mobile app",
-  "status_tip_self": "Myself",
-  "status_tip_direct": "Using DIRECT post-game voice-chat",
-  "status_tip_shared": "Using PUBLIC post-game voice-chat",
-  "status_tip_broadcast": "Broadcasting",
-  "status_tip_listen": "Listening to your public voice-chat",
-  "status_tip_host": "Host of the study-mode",
   "board": {
     "resign": "Resign",
     "impasse": "Impasse?",
@@ -107,6 +100,21 @@
     "move": "Move",
     "move_time": "Time"
   },
+  "submenu": {
+    "ranking": "Ranking",
+    "kifu_search": "Kifu search",
+    "bbs": "World Forum",
+    "tournament": "Tournaments",
+    "club": "Clubs",
+    "player_search": "Player search"
+  },
+  "status_tip_mobile": "Using mobile app",
+  "status_tip_self": "Myself",
+  "status_tip_direct": "Using DIRECT post-game voice-chat",
+  "status_tip_shared": "Using PUBLIC post-game voice-chat",
+  "status_tip_broadcast": "Broadcasting",
+  "status_tip_listen": "Listening to your public voice-chat",
+  "status_tip_host": "Host of the study-mode",
   "search_panel": "Search Panel",
   "kifu_search": "Kifu Search",
   "share": "Share Kifu",
