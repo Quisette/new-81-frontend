@@ -401,6 +401,8 @@ function _loginButtonClick(){
 function _refreshButtonClick(){
   client.who()
   client.list()
+  $("#refreshButton").addClass("button-disabled")
+  setGeneralTimeout("REFRESH", 10000)
 }
 
 function _waitButtonClick(){
@@ -1637,6 +1639,9 @@ function _handleGeneralTimeout(key){
   			writeUserMessage(EJ("Communication could not be established with this opponent. The challenge is canceled.", "相手との通信が確認できないため挑戦をキャンセルします。"), 1, "#008800", true)
   			client.decline("C006")
   		}
+      break
+    case "REFRESH":
+      $("#refreshButton").removeClass("button-disabled")
       break
   }
 }
