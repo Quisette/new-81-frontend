@@ -5,7 +5,7 @@ html
     meta http-equiv="X-UA-Compatible" content="IE=edge"
     title 81道場
     link rel="shortcut icon" href="favicon.ico"
-    link rel="stylesheet" type="text/css" href="css/style.min.css" media="all"
+    link id="style1" rel="stylesheet" type="text/css" href="" media="all"
     link rel="stylesheet" type="text/css" href="css/datatables.css" media="all"
     link rel="stylesheet" type="text/css" href="css/jquery-ui.css" media="all"
     script src="js/jquery-2.2.4.min.js"
@@ -15,8 +15,14 @@ html
     script src="js/i18next.min.js"
     script src="js/i18nextXHRBackend.min.js"
     script src="js/jquery-ui.min.js"
-    / change this to include.min.js to obfuscate
-    script src="js/include.js"
+    / change below to include.min.js to obfuscate
+    javascript:
+      var version = ""
+      $.ajaxSetup({ async: false })
+      $.get("dat/version.txt?" + new Date().getTime(), function(data){version=data})
+      $("link#style1").prop('href', "css/style.min.css?" + version)
+      $("<script>").prop('src', 'js/include.js?' + version).appendTo("head")
+      $.ajaxSetup({ async: true })
     script src="js/devtools-detect.js"
   body
     include viewLogin

@@ -68,7 +68,7 @@ $(function(){
   xhr.send()
   sp = new SoundPlayer()
 
-  $.getJSON("dat/config.json", function(data){
+  $.getJSON("dat/config.json?" + new Date().getTime(), function(data){
     config = data
     if (config.allowConsole == false) debugLoop()
   })
@@ -80,7 +80,7 @@ $(function(){
     fallbackLng: 'ja',
     debug: true,
     backend: {
-      loadPath: "locales/{{lng}}.json"
+      loadPath: "locales/{{lng}}.json?" + version
     }
   }, function(err, t) {
     _updateLanguage()

@@ -1,9 +1,5 @@
-var cache_key = "0"
-$.get("dat/cache_key.txt", function(data){
-  cache_key = data
-})
 function _jsinclude(path){
-  document.write('<script src="' + path + '?' + cache_key + '"></script>')
+  document.write('<script src="' + path + '?' + version + '"></script>')
 }
 _jsinclude("js/Piece.js")
 _jsinclude("js/Movement.js")
