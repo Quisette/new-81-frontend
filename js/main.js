@@ -423,6 +423,9 @@ function _enterGame(game){
   if (game.isVariant()) {
     writeUserMessage(EJ("This game rule is not supported by HTML client yet.", "この対局ルールはHTML版アプリでは未対応です。"), 1, "#ff0000")
     return
+  } else if (game.password != "") {
+    writeUserMessage(EJ("Entering private room is not supported by HTML client yet.", "プライベート対局室への入室はHTML版アプリでは未対応です。"), 1, "#ff0000")
+    return
   }
   board.setGame(game)
   //TODO watching or reconnecting ?
