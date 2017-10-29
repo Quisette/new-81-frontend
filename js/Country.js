@@ -9,15 +9,15 @@ class Country{
   }
 
   flagImgTag16(){
-    return '<img title="' + this.toString() + '" src="' + IMAGE_DIRECTORY + 'flags_ss/' + this.code3 + '.png"/>'
+    return '<img title="' + this.toString() + '" alt="" src="' + IMAGE_DIRECTORY + 'flags_ss/' + this.code3 + '.png"/>'
   }
 
   flagImgTag27(){
-    return '<img title="' + this.toString() + '" src="' + IMAGE_DIRECTORY + 'flags_s/' + this.code3 + '.gif" style="vertical-align:middle"/>'
+    return '<img title="' + this.toString() + '" alt="" src="' + IMAGE_DIRECTORY + 'flags_s/' + this.code3 + '.gif" style="vertical-align:middle"/>'
   }
 
   flagImgTagMovie(){
-    return '<img title="' + this.toString() + '" src="' + IMAGE_DIRECTORY + 'flags_gif/' + this.code3 + '.gif" style="vertical-align:middle"/>'
+    return '<img title="' + this.toString() + '" alt="" src="' + IMAGE_DIRECTORY + 'flags_gif/' + this.code3 + '.gif" style="vertical-align:middle"/>'
   }
 
   name3Tag(){

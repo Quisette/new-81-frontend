@@ -12,7 +12,7 @@ div.layer#layerLogin
         input type="radio" name="loginType" value="0" checked="true" onchange="_loginTypeChange()"
         span data-i18n="login.registered"
         input type="radio" name="loginType" value="1" onchange="_loginTypeChange()" disabled="true"
-        span data-i18n="login.guest" 
+        span data-i18n="login.guest"
       p
         span.small data-i18n="login.loginname"
         br
@@ -20,7 +20,7 @@ div.layer#layerLogin
       p
         span.small data-i18n="login.password"
         br
-        input type="password" id="passwordInput"
+        input type="password" id="passwordInput" data-i18n-title="msg.password_encrypted"
       p
         input type="checkbox" id="loginSave"
         span data-i18n="login.save"
@@ -35,7 +35,7 @@ div.layer#layerLogin
             th data-i18n="login.description"
             th data-i18n="login.players"
           tbody
-  p ver.2017/08/06
+  p#versionText ver.
   p
     |(c) Hidetchi
   p powered by shogi-server, and

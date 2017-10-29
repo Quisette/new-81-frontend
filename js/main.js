@@ -53,6 +53,9 @@ function _testFunction(phase){
 }
 
 $(function(){
+  // Load version InfoFetcher
+  $('p#versionText').text('ver. ' + version)
+
   // Generate board
   board = new Board($('#boardBox'))
 
@@ -284,6 +287,7 @@ $(function(){
       }
     }
   })
+  $("#passwordInput").tooltip()
   window.onmousemove = function(event) {
       event = event || window.event
       mouseX = event.clientX
@@ -347,6 +351,7 @@ function _updateLanguage(){
   $('[id^=i18n-]').each(function(){
     $(this).button('option', 'label', i18next.t($(this).attr('id').split("-")[1]))
   })
+  $('#passwordInput').tooltip()
 }
 
 function _loginTypeChange(){
@@ -450,7 +455,7 @@ function writeUserMessage(str, layer, clr = null, bold = false, lineChange = tru
 	str = str.replace(/&lt;sPAn/g, "<span");
 	str = str.replace(/&lt;\/SpaN>/g, "</span>");
 	str = str.replace(/(https?\:\/\/[^\"^\s^\\]+)/g, '<a href="$1" target="_blank">$1</a>')
-	str = str.replace(/\\n/g, "<br>&emsp;&emsp;&emsp;")
+	str = str.replace(/\n/g, "<br>&emsp;")
   $('<span></span>',{}).css({
     'color': (clr ? clr : ''),
     'font-weight': (bold ? 'bold' : '')
@@ -794,6 +799,7 @@ function _handleLoggedIn(str){
   $('#header-rate').text("R" + me.rate + " : ")
   $('#header-mile').text(mileage + EJ(" D-Miles : ", " Dマイル : "))
   $('#header-premium').text(makePremiumName(premium) + EJ(" class", " クラス"))
+  writeUserMessage(i18next.t("msg.html5_initial"), 1, "#008800")
   client.who(true)
   client.list()
   if (testMode) _testFunction(2)
@@ -1499,7 +1505,7 @@ function _handleGameChat(sender, message){
     */
 	} else if (message.match(/^\[##REMATCH\]$/)) {
     board.rematch(board.getPlayerRoleFromName(sender))
-    _interpretCommunicationCode(name, "G050", 2, true, true)
+    _interpretCommunicationCode(sender, "G050", 2, true, true)
     if (board.rematchAgreed()) {
 			writeUserMessage(EJ("Rematch agreed!", "再戦成立!"), 2, "#008800", true)
 			if (board.isPlayer()) {
@@ -1602,7 +1608,7 @@ function _handleServers(data){
   serverGrid.clear()
   serverGrid.rows.add(data)
   serverGrid.draw()
-  serverGrid.row("#MERCURY").select()
+  serverGrid.row(0).select()
   if (testMode) _testFunction(1)
 }
 
