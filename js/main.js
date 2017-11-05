@@ -579,7 +579,10 @@ function _closeBoard(){
   _switchLayer(1)
   $('#boardMessageArea').empty()
   watcherGrid.clear().draw()
+  kifuGrid.clear().draw()
   _greetState = 0
+  _studyBase = null
+  _studyBranch = null
 }
 
 function sendMoveAsPlayer(move){
@@ -667,7 +670,7 @@ function setBoardConditions(){
     }
   } else if (board.isWatcher()){
     kifuGrid.select.style('single')
-    $("input[name=kifuModeRadio]").prop("disabled", false)
+    $("input[name=kifuModeRadio]").prop("disabled", board.isHost())
     $("#greetButton").prop('disabled', 'true')
     $("#resignButton, #rematchButton").addClass("button-disabled")
     $("#flipButton, #positionMenuButton, #kifuMenuButton").removeClass("button-disabled")
@@ -1698,6 +1701,7 @@ function _handleClosed(){
 ===================================== */
 
 function _handleStudy() {
+  if (_studyBase == null) return
 	if (_studyBranch == "*") {
     if (kifuGrid.row(':last').data().branch) _restorePublicKifu()
     kifuGrid.rows().deselect()

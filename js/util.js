@@ -167,7 +167,7 @@ function coloredSpan(text, color, width = 0){
 }
 
 function scrollGridToSelected(grid){
-  $(grid.table().container()).find('.dataTables_scrollBody').scrollTop(grid.row('.selected').node().offsetTop)
+  if (grid.row('.selected').node()) $(grid.table().container()).find('.dataTables_scrollBody').scrollTop(grid.row('.selected').node().offsetTop)
 }
 
 const SWINGING_FILE_NAME_JA = {
