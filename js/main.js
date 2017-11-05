@@ -28,6 +28,9 @@ var mouseX
 var mouseY
 var testMode = false
 var config = null
+var options = new Object()
+var _studyBase = null
+var _studyBranch = null
 
 /* ====================================
     On document.ready
@@ -48,7 +51,7 @@ function _testFunction(phase){
     serverGrid.row("#MERCURY").select()
     _loginButtonClick()
   } else if (phase == 2) { // After logged in
-    client.send("%%GAME hc2pd_test2-900-30 -")
+    //client.send("%%GAME hc2pd_test2-900-30 -")
   }
 }
 
@@ -294,6 +297,11 @@ $(function(){
       mouseY = event.clientY
   }
   _resize()
+
+  // Define default options
+  options = {
+    notation: 1
+  }
 
   // Do in every relogin
 
@@ -543,7 +551,23 @@ function _impasseButtonClick(){
   board.calcImpasse()
 }
 
+function _giveHostButtonClick(){
+  if (!board.isHost()) return
+  let user = null
+  if (board.game.white.name != me.name && board.isPlayerPresent(1)) {
+    user = board.game.white
+  } else if (board.game.black.name != me.name && board.isPlayerPresent(0)) {
+    user = board.game.black
+  }
+  if (user) {
+		client.gameChat("[##GIVEHOST]" + user.name)
+    board.studyHostType = 1
+    setBoardConditions()
+  }
+}
+
 function _optionButtonClick(){
+  writeUserMessage(EJ('No option available yet.', 'オプション機能は準備中です'), currentLayer, "#ff0000")
 }
 
 function _closeBoard(){
@@ -573,8 +597,44 @@ function sendMoveAsPlayer(move){
   */
 }
 
+function _kifuModeRadioChange(){
+  if ($("input[name=kifuModeRadio]:eq(0)").prop("checked")) {
+    $("#kifuGridWrapper").find(".dataTables_scrollBody").addClass("local-kifu")
+    board.onListen = false
+  } else {
+    $("#kifuGridWrapper").find(".dataTables_scrollBody").removeClass("local-kifu")
+    board.onListen = true
+    if (board.isPostGame && _studyBase != null) _handleStudy()
+    if (!board.isPostGame) {
+      if (kifuGrid.row(':last').data().branch) _restorePublicKifu()
+      kifuGrid.row(':last').select()
+      scrollGridToSelected(kifuGrid)
+      board.replayMoves(board.moves)
+    }
+  }
+}
+
+function forceLocalMode(){
+  if ($("input[name=kifuModeRadio]:eq(0)").prop('checked') == false){
+    $("input[name=kifuModeRadio]:eq(0)").prop('checked', true)
+    _kifuModeRadioChange()
+  }
+}
+
 function _kifuSelected(index){
+  if (kifuGrid.row(':last').data().branch && !kifuGrid.row(index).data().branch) _restorePublicKifu()
   board.replayMoves(kifuGrid.rows(Array.from(Array(index+1).keys())).data())
+  if (board.isHost()) {
+    sendStudy(index)
+  } else {
+    forceLocalMode()
+  }
+}
+
+function _restorePublicKifu(){
+  kifuGrid.clear()
+  kifuGrid.rows.add(board.moves)
+  kifuGrid.draw()
 }
 
 function sendTimeout(){
@@ -584,18 +644,19 @@ function sendTimeout(){
 
 function setBoardConditions(){
   board.setBoardConditions()
-  let kifuSelectable = false
+  $("#lobbyOptionButton")
   if (board.isPlayer()) {
     $("#flipButton").addClass("button-disabled")
     $("#greetButton").prop('disabled', false)
     if (board.isPostGame) {
-      kifuSelectable = true
-      $("input[name=kifuModeRadio]").val(1).prop("disabled", true)
+      kifuGrid.select.style('single')
+      $("input[name=kifuModeRadio]").prop("disabled", board.isHost())
       $("#resignButton").addClass("button-disabled")
       $("#positionMenuButton, #kifuMenuButton, #rematchButton, #closeGameButton").removeClass("button-disabled")
       $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: true})
     } else {
-      $("input[name=kifuModeRadio]").val(1).prop("disabled", true)
+      kifuGrid.select.style('api')
+      $("input[name=kifuModeRadio]").prop("disabled", true)
       $("#resignButton").removeClass("button-disabled")
       $("#positionMenuButton, #kifuMenuButton, #rematchButton, #closeGameButton").addClass("button-disabled")
       if (board.game.gameType != "r") {
@@ -605,23 +666,20 @@ function setBoardConditions(){
       }
     }
   } else if (board.isWatcher()){
-    $("input[name=kifuModeRadio]").val(1).prop("disabled", true)
+    kifuGrid.select.style('single')
+    $("input[name=kifuModeRadio]").prop("disabled", false)
     $("#greetButton").prop('disabled', 'true')
     $("#resignButton, #rematchButton").addClass("button-disabled")
     $("#flipButton, #positionMenuButton, #kifuMenuButton").removeClass("button-disabled")
     $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: true})
-    if (board.isPostGame) {
-      kifuSelectable = true
-    } else {
-    }
   }
   if (board.game) $("#logoutButton").removeClass("button-disabled")
   else $("#logoutButton").addClass("button-disabled")
-  if (kifuSelectable){
-    kifuGrid.select.style('single')
-  } else {
-    kifuGrid.select.style('api')
-  }
+  if (board.onListen) $("input[name=kifuModeRadio]:eq(1)").prop("checked", true)
+  else $("input[name=kifuModeRadio]:eq(0)").prop("checked", true)
+  $("#giveHostButton").removeClass("button-disabled")
+  if (!board.isHost()) $("#giveHostButton").addClass("button-disabled")
+  _kifuModeRadioChange()
 }
 
 /* ====================================
@@ -1062,6 +1120,7 @@ function _handleGameEnd(lines, atReconnection = false){
   let move = new Movement(board.getFinalMove())
   move.setGameEnd(gameEndType) //turn too?
   board.moves.push(move) //refresh list too
+  if (!kifuGrid.row(':last').data().branch) board.addMoveToKifuGrid(move)
   writeUserMessage(move.toGameEndMessage(), 2, "#DD0088")
 	//if (GameTimer.soundType >= 2) Byoyomi.sayTimeUp();
   //board.timeout();
@@ -1239,7 +1298,6 @@ function _handleReconnect(str){
   let positionStr = ""
   let gameEndStr = ""
   lines.forEach(function(line){
-    console.log(line)
     if(line.match(/^([-+][0-9]{4}[A-Z]{2}|%TORYO)$/)) {
       move_strings.push(RegExp.$1)
     } else if (line.match(/^T(\d+)$/)){
@@ -1274,7 +1332,7 @@ function _handleEnter(name){
 		writeUserMessage(_name2link(name) + i18next.t("code.G030"), 2, board.getPlayerRoleFromName(name) == 0 ? "#000000" : "#666666", true)
     board.playerNameClassChange(board.getPlayerRoleFromName(name), "name-left", false)
     sp.door(true)
-		//if (board.isStudyHost) _client.gameChat(_game_name, "[##SUBHOST_ON]" + e.message);
+		if (board.isHost()) client.gameChat("[##SUBHOST_ON]" + name)
   } else {
     let importantUser = false
 		if (watcherGrid.rows().count() < 15 || importantUser) {
@@ -1284,9 +1342,8 @@ function _handleEnter(name){
 		if (users[name]) watcherGrid.row.add(users[name].gridObject()).draw()
 		//_watcherTitle = LanguageSelector.lan.watchers + " (" + _watcher_list.length +")";
   }
+  if (board.isHost()) client.privateChat(name, "[##STUDY]" + _generateStudyText(kifuGrid.row({selected: true}).data().num))
   /*
-	} else {
-	}
 	if (_isDuringMyGame() && !board.is34()) {
 		if (_notify_blind) {
 			if (board.piece_type == 100) _client.privateChat(e.message, "[auto-PM] #G014");
@@ -1295,7 +1352,6 @@ function _handleEnter(name){
 		}
 		if (board.gameType != "r" && !_allowWatcherChat) _client.privateChat(e.message, "[auto-PM] #G102");
 	}
-	if (board.isStudyHost && board.post_game) _sendStudy(false, e.message);
 	if (voiceButton.sendingDirect()) _client.privateChat(e.message, "[##VOICE]DIRECT," + voiceButton.nearID);
 	else if (voiceButton.sendingShared) _client.privateChat(e.message, "[##VOICE]SHARED");
 	else if (voiceButton.broadcastingSelf) _client.privateChat(e.message, "[##VOICE]BROADCAST");
@@ -1457,8 +1513,29 @@ function _handleGameChat(sender, message){
 				board.typingIndicatorStart(1);
 			}
 		}
-	} else if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
-		_handleStudy(sender, match[1], match[2]);
+    */
+	} else if (message.match(/\[\#\#STUDY\](\d+)\/(.+)$/)) {
+    /*
+  	if (!board.studyOn) {
+  		board.studyOn = true;
+  		_users[name].isHost = true;
+  		_updateStatusMarks();
+  	}*/
+  	// board.clearArrows(Board.ARROWS_PUBLIC);
+    _studyBase = parseInt(RegExp.$1)
+    _studyBranch = RegExp.$2
+  	if (board.isHost() && name == me.name) return
+    /*
+  	if (!_study_notified && board.post_game && !board.onListen && !board.isStudyHost) {
+  		_writeUserMessage(LanguageSelector.lan.msg_study_notify + "\n", 2, "#008800");
+  		_study_notified = true;
+  	}
+    */
+		if (!(board.isPostGame && board.onListen)) return
+		_handleStudy()
+    /*
+		var old_length:int = board.study_list.length;
+		if (old_length == 0) _writeUserMessage(name + LanguageSelector.EJ(": Studying a branch from move #" + base + "\n", ": " + base + "手目からの分岐手順を検討\n"), 2, "#008800");
 	} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\]CLEAR$/))) {
 		if (sender != login_name) board.clearArrows(Board.ARROWS_PUBLIC, sender);
 	} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\](.+),(.+),(.+),(.+),(.+),(.+)$/))) {
@@ -1488,21 +1565,32 @@ function _handleGameChat(sender, message){
 				}
 			}
 		}
-	} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##GIVEHOST\](.+)$/))) {
-		if (match[1] == login_name) _toggleHostStatus(true);
-		else _writeUserMessage(LanguageSelector.EJ("Study Host status given to " + match[1] + "\n", "感想戦ホストは、" + match[1] + "さんに引き継がれました。\n"), 2, "#008800", false);
+    */
+	} else if (message.match(/^\[##GIVEHOST\](.+)$/)) {
+		if (RegExp.$1 == me.name) {
+      sendStudy()
+      board.studyHostType = 2
+      board.onListen = true
+      setBoardConditions()
+			writeUserMessage(i18next.t("msg.host"), 2, "#008800", true)
+    } else {
+      writeUserMessage(EJ("Study Host status given to " + RegExp.$1, "感想戦ホストは、" + RegExp.$1 + "さんに引き継がれました。"), 2, "#008800")
+    }
+    /*
 		if (_users[match[1]]) {
 			for each (var user:Object in _users) user.isHost = false;
 			_users[match[1]].isHost = true;
 			_updateStatusMarks();
 		}
-	} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##SUBHOST_ON\](.+)$/))) {
-		if (match[1] == login_name) {
-			_writeUserMessage(LanguageSelector.lan.msg_subhost_given + "\n", 2, "#008800", true);
-			board.isSubHost = true;
+    */
+	} else if (message.match(/^\[##SUBHOST_ON\](.+)$/)) {
+		if (RegExp.$1 == me.name) {
+			writeUserMessage(i18next.t("msg.subhost_given"), 2, "#008800", true)
+			board.studyHostType = 1
 		} else {
-			_writeUserMessage(LanguageSelector.EJ("Study Sub-host status given to " + _name2link(match[1]) + "\n", _name2link(match[1]) + "さんに、感想戦サブ・ホスト権限が付与されました。\n"), 2, "#008800", false);
+			writeUserMessage(EJ("Study Sub-host status given to " + _name2link(RegExp.$1), _name2link(RegExp.$1) + "さんに、感想戦サブ・ホスト権限が付与されました。"), 2, "#008800")
 		}
+    /*
 	} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##TEMPLATE\]([A-Z]\d{3})/))) {
 		_handleGameChat(new ServerMessageEvent("template", "##[GAMECHAT][" + sender + LanguageSelector.EJ("] <Template> ", "] <定型> ") + LanguageSelector.lan[match[1]]));
     */
@@ -1556,7 +1644,10 @@ function _handleGameChat(sender, message){
 
 function _handlePrivateChat(sender, message){
 	if (message.match(/^\[\#\#STUDY\](\d+)\/(.+)$/)) {
-//		_handleStudy(name, match[1], match[2]);
+    _studyBase = parseInt(RegExp.$1)
+    _studyBranch = RegExp.$2
+		if (!(board.isPostGame && board.onListen)) return
+		_handleStudy()
 		return
 	} else if (message.match(/^\[\#\#FITNESS\](\d),(\d)$/)) {
 //		let str = EJ("Opponent's ", "対局相手の") + LanguageSelector.lan.study_level + ": " + (match[1] == 0 ? ("<" + LanguageSelector.lan.not_defined + ">") : (LanguageSelector.EJ("Level ", "レベル") + (parseInt(match[1]) - 1)));
@@ -1600,6 +1691,56 @@ function _handleClosed(){
   playerGrid.clear().draw()
   waiterGrid.clear().draw()
   gameGrid.clear().draw()
+}
+
+/* ====================================
+    Post-game communication
+===================================== */
+
+function _handleStudy() {
+	if (_studyBranch == "*") {
+    if (kifuGrid.row(':last').data().branch) _restorePublicKifu()
+    kifuGrid.rows().deselect()
+    kifuGrid.row(_studyBase).select()
+    scrollGridToSelected(kifuGrid)
+    board.replayMoves(kifuGrid.rows(Array.from(Array(_studyBase + 1).keys())).data())
+	} else {
+    kifuGrid.clear()
+    kifuGrid.rows.add(board.moves.slice(0, _studyBase + 1))
+    board.replayMoves(kifuGrid.rows(Array.from(Array(_studyBase + 1).keys())).data())
+    let prevMove = board.moves[_studyBase]
+    _studyBranch.split("/").forEach(function(csa){
+      let move = new Movement(prevMove)
+      move.setFromCSA(csa)
+      move.branch = true
+      prevMove = board.handleBranchMove(move)
+      kifuGrid.rows.add([prevMove])
+    })
+    board.refreshPosition()
+    kifuGrid.draw()
+    kifuGrid.row(':last').select()
+    scrollGridToSelected(kifuGrid)
+		// if (name != login_name && board.study_list.length >= old_length) board.showLastSquareLabel(name);
+	}
+}
+
+function _generateStudyText(index){
+  //integer
+  let str = ""
+  for (let i = 0; i <= index; i++) {
+    let move = kifuGrid.row(i).data()
+    if (!move.branch) {
+      str = move.num.toString()
+    } else {
+      str += "/" + move.toCSA()
+    }
+  }
+	if (!str.match(/\//)) str += "/*"
+  return str
+}
+
+function sendStudy(index = kifuGrid.row({selected: true}).data().num){
+  client.gameChat("[##STUDY]" + _generateStudyText(index))
 }
 
 /* ====================================

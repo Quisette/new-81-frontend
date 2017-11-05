@@ -21,7 +21,7 @@ div.layer#layerBoard
         li
           a.button#kifuMenuButton href="#" data-i18n="board.kifu" onclick=""
         li
-          a.button#giveHostButton href="#" onclick="" data-i18n-title="board.give_host"
+          a.button#giveHostButton href="#" onclick="_giveHostButtonClick()" data-i18n-title="board.give_host"
             img src="img/icon_hat2.png"
         li
           a.button#rematchButton href="#" onclick="_rematchButtonClick()" data-i18n-title="board.rematch"
@@ -61,10 +61,10 @@ div.layer#layerBoard
           div#kifuBox.vbox
             div style="text-align:left"
               p
-                input type="radio" name="kifuModeRadio" value="0" onchange=""
-                span data-i18n="board.replay"
+                input type="radio" name="kifuModeRadio" value="0" onchange="_kifuModeRadioChange()"
+                span.local-kifu data-i18n="board.replay"
               p
-                input type="radio" name="kifuModeRadio" value="1" checked="true" onchange=""
+                input type="radio" name="kifuModeRadio" value="1" onchange="_kifuModeRadioChange()"
                 span data-i18n="board.listen"
             div.grid-wrapper#kifuGridWrapper style="flex:1"
               table.stripe.hover#kifuGrid

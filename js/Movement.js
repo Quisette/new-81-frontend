@@ -7,13 +7,17 @@ class Movement{
     this.endTypeKey = null
     this.owner = Position.CONST.SENTE
     this.pieceType = null
+    this.fromX = null //human coordinate
+    this.fromY = null //human coordinate
     this.toX = null //human coordinate
     this.toY = null //human coordinate
     this.promote = false
+    this.promotable = false
     this.capture = false
     this.toSame = false
     this.additionalIdentifier = false
     this.time = null
+    this.branch = false
   }
 
   static get CONST(){
@@ -26,7 +30,26 @@ class Movement{
   		OUTE_SENNICHITE: 6,
   		DISCONNECT: 7,
   		CATCH: 8,
-  		TRY: 9
+  		TRY: 9,
+  		LIST_UNIVERSAL: 0,
+  		LIST_JAPANESE: 1, // Default in WebSystem options database
+  		LIST_WESTERN: 2,
+  		LIST_1TO1: 4, // Default for English app
+  		koma_japanese_names: ['玉', '飛', '角', '金', '銀', '桂', '香', '歩', '', '龍', '馬', '', '成銀', '成桂', '成香', 'と'],
+  		rank_japanese_names: ['', '一','二','三','四','五','六','七','八','九'],
+  		file_japanese_names: ['', '１', '２', '３', '４', '５', '６', '７', '８', '９'],
+  		koma_universal_names: ['Ｋ', 'Ｒ', 'Ｂ', 'Ｇ', 'Ｓ', 'Ｎ', 'Ｌ', 'Ｐ', '', 'Ｄ', 'Ｈ', '', '+S', '+N', '+L', 'Ｔ'],
+      special_notations_ja: {
+        TIME_UP: '時間切れ',
+        DISCONNECT: '接続切れ',
+        ILLEGAL_MOVE: '反則手',
+        RESIGN: '投了',
+        OUTE_SENNICHITE: '反則手',
+        SENNICHITE: '千日手',
+        JISHOGI: '27点宣言',
+        CATCH: 'キャッチ!',
+        TRY: 'トライ!'
+      }
     }
   }
 
@@ -94,19 +117,46 @@ class Movement{
     }
   }
 
+  toJapaneseNotation(forFile = false){
+		let alphabet = !forFile && options.notation == Movement.CONST.LIST_1TO1
+    let str
+		if (this.toX == this.previousMove.toX && this.toY == this.previousMove.toY) {
+			str = alphabet ? "x " : "同　";
+		} else {
+			str = Movement.CONST.file_japanese_names[this.toX]
+			str += alphabet ? Movement.CONST.file_japanese_names[this.toY] : Movement.CONST.rank_japanese_names[this.toY]
+		}
+		str += alphabet ? Movement.CONST.koma_universal_names[this.pieceType] : Movement.CONST.koma_japanese_names[this.pieceType]
+		if (this.fromX == 0 && this.fromY == 0) {
+			if (this.additionalIdentifier || forFile) str += alphabet ? "*" : "打"
+		} else {
+			if (this.additionalIdentifier && !forFile) {
+				str += "(" + Movement.CONST.file_rank_numbers[this.fromX] + Movement.CONST.file_rank_numbers[this.fromY] + ")"
+			}
+			if (this.promote) {
+				str += alphabet ? "+" : "成"
+			} else if (!forFile && this.promotable){
+				str += alphabet ? "=" : "不成"
+			}
+		}
+	  return (this.owner == Position.CONST.SENTE ? "☗" : "☖") + str
+  }
+
   replayable(){
     return this.num != 0 && this.endTypeKey == null
   }
 
   get numStr(){
-    return this.num.toString()
+    return (this.branch ? "*" : "") + this.num.toString()
   }
 
   get moveStr(){
     if (this.num == 0) {
       return EJ('Start', '開始')
+    } else if (this.endTypeKey) {
+      return Movement.CONST.special_notations_ja[this.endTypeKey]
     } else {
-      return this.toCSA()
+      return this.toJapaneseNotation()
     }
   }
 

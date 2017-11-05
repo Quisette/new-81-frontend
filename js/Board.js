@@ -211,12 +211,16 @@ class Board{
     this.addMoveToKifuGrid(firstMove)
   }
 
-  addMoveToKifuGrid(move){
+  addMoveToKifuGrid(move, highlight = true){
+    if (move.num < kifuGrid.rows().count()) {
+      while (kifuGrid.row(move.num).length == 1) kifuGrid.row(move.num).remove()
+    }
     kifuGrid.row.add(move)
     kifuGrid.draw()
-    if (this.onListen) {
+    if (highlight) {
       kifuGrid.rows().deselect()
-      kifuGrid.row(":last").select()
+      kifuGrid.row(move.num).select()
+      scrollGridToSelected(kifuGrid)
     }
   }
 
@@ -238,7 +242,6 @@ class Board{
     */
     if (move_strings.length > 0) {
       move_strings.forEach(function(move_str){
-        console.log(move_str)
         if (move_str.match(/^%TORYO/)) return
         let move = new Movement(board.getFinalMove())
         move.setFromCSA(move_str.split(",")[0])
@@ -253,6 +256,7 @@ class Board{
       kifuGrid.draw()
       kifuGrid.rows().deselect()
       kifuGrid.row(":last").select()
+      scrollGridToSelected(kifuGrid)
     }
 		if (since_last_move > 0) {
       this.runningTimer.useTime(since_last_move, true)
@@ -265,11 +269,16 @@ class Board{
     this.runningTimer.useTime(move.time)
     move = this._publicPosition.makeMove(move)
     this.moves.push(move)
-    if (this.onListen) {
+    if (!kifuGrid.row(':last').data().branch) {
       kifuGrid.row.add(move)
       kifuGrid.draw()
-      kifuGrid.rows().deselect()
-      kifuGrid.row(":last").select()
+      if (this.onListen) {
+        kifuGrid.rows().deselect()
+        kifuGrid.row(":last").select()
+        scrollGridToSelected(kifuGrid)
+      }
+    }
+    if (this.onListen) {
       this._position.deepCopy(this._publicPosition)
       this._refreshPosition()
     }
@@ -352,11 +361,17 @@ class Board{
       sendMoveAsPlayer(move)
       this._publicPosition.deepCopy(this._position)
       this.updateTurnHighlight()
+    } else {
+      move.branch = true
+      this.addMoveToKifuGrid(move)
+      if (this.onListen && this.studyHostType >= 1) sendStudy()
+      else forceLocalMode()
     }
   }
 
   handleReceivedMove(move){
-    this._publicPosition.makeMove(move)
+    move = this._publicPosition.makeMove(move)
+    this.moves.push(move)
     this.addMoveToKifuGrid(move)
     if (this.onListen) {
       this._position.deepCopy(this._publicPosition)
@@ -384,15 +399,22 @@ class Board{
     this._refreshPosition()
   }
 
+  handleBranchMove(move){
+    return this._position.makeMove(move, false)
+  }
+
   setBoardConditions(){
     if (this.isPlayer()) {
       if (this.isPostGame){
-        this._canMoveMyPiece = false
-        this._canMoveHisPiece = false
+        this._canMoveMyPiece = true
+        this._canMoveHisPiece = true
       } else {
         this._canMoveMyPiece = true
         this._canMoveHisPiece = false
       }
+    } else {
+      this._canMoveMyPiece = true
+      this._canMoveHisPiece = true
     }
   }
 
@@ -470,6 +492,10 @@ class Board{
     }
   }
 
+  refreshPosition(){
+    this._refreshPosition()
+  }
+
   isPlayer(){
     return (this.myRoleType == 0 || this.myRoleType == 1)
   }
@@ -480,6 +506,15 @@ class Board{
 
   isWatcher(){
     return this.myRoleType == 2
+  }
+
+  isHost(){
+    return this.studyHostType == 2
+  }
+
+  isPlayerPresent(turn){
+    //integer: 0 or 1
+    return !this.playerInfos[turn].find("#player-info-name").hasClass("name-left")
   }
 
   getPlayerRoleFromName(name){
