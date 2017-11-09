@@ -271,11 +271,13 @@ class Board{
     this.moves.push(move)
     if (!kifuGrid.row(':last').data().branch) {
       kifuGrid.row.add(move)
-      kifuGrid.draw()
       if (this.onListen) {
+        kifuGrid.draw()
         kifuGrid.rows().deselect()
         kifuGrid.row(":last").select()
         scrollGridToSelected(kifuGrid)
+      } else {
+        drawGridMaintainScroll(kifuGrid)
       }
     }
     if (this.onListen) {

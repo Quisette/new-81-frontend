@@ -170,6 +170,13 @@ function scrollGridToSelected(grid){
   if (grid.row('.selected').node()) $(grid.table().container()).find('.dataTables_scrollBody').scrollTop(grid.row('.selected').node().offsetTop)
 }
 
+function drawGridMaintainScroll(grid){
+  let scrollBody = $(grid.table().container()).find('.dataTables_scrollBody')
+  let scrollPos = scrollBody.scrollTop()
+  grid.draw()
+  scrollBody.scrollTop(scrollPos)
+}
+
 const SWINGING_FILE_NAME_JA = {
   "2": "向かい飛車",
   "3": "三間飛車",

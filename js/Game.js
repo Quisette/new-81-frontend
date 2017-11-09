@@ -59,7 +59,7 @@ class Game{
   openingStr(){
     let object
     if (this.password != "") {
-      object = {short: EJ("PRIVATE", "[ロック]"), tip: i18next.t("private_room")}
+      object = {short: EJ("PRIVATE", "[ロック]"), tip: i18next.t("new_game.private_room")}
     } else {
       object = openingTypeObject(this.hasNoOpeningTypes() ? this.gameType : this.opening)
     }

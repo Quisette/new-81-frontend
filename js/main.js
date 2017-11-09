@@ -637,7 +637,7 @@ function _kifuSelected(index){
 function _restorePublicKifu(){
   kifuGrid.clear()
   kifuGrid.rows.add(board.moves)
-  kifuGrid.draw()
+  drawGridMaintainScroll(kifuGrid)
 }
 
 function sendTimeout(){
@@ -888,8 +888,8 @@ function _handleWho(str){
     playerGrid.row.add(users[key].gridObject())
     if (users[key].listAsWaiter()) waiterGrid.row.add(users[key].gridObject())
   })
-  playerGrid.draw()
-  waiterGrid.draw()
+  drawGridMaintainScroll(playerGrid)
+  drawGridMaintainScroll(waiterGrid)
 }
 
 function _handleList(str){
@@ -960,7 +960,8 @@ function _handleLobbyIn(line){
 	if (add) {
 		// TODO serverLabel.text = serverName + LanguageSelector.EJ(" : ", "サーバ : ") + LanguageSelector.lan.lobby + LanguageSelector.EJ(" (", " (ログイン数 ") + _user_list.length + LanguageSelector.EJ(" players)", "名)");
 	}
-  playerGrid.row.add(users[name].gridObject()).draw()
+  playerGrid.row.add(users[name].gridObject())
+  drawGridMaintainScroll(playerGrid)
 }
 
 function _handleLobbyOut(name){
@@ -970,8 +971,10 @@ function _handleLobbyOut(name){
 			// TODO if (isFavorite && _chat_sound1_play) _sound_door_close.play();
 		}
 	}
-  playerGrid.row("#" + name).remove().draw()
-  waiterGrid.row("#" + name).remove().draw()
+  playerGrid.row("#" + name).remove()
+  waiterGrid.row("#" + name).remove()
+  drawGridMaintainScroll(playerGrid)
+  drawGridMaintainScroll(waiterGrid)
 	// TODO serverLabel.text = serverName + LanguageSelector.EJ(" : ", "サーバ : ") + LanguageSelector.lan.lobby + LanguageSelector.EJ(" (", " (ログイン数 ") + _user_list.length + LanguageSelector.EJ(" players)", "名)");
 	delete users[name];
 }
@@ -983,7 +986,8 @@ function _handleGame(line) {
 			users[name].setFromGame("*", "*", "")
 			if (playerInfoWindows[name]) playerInfoWindows[name].disableChallenge()
 		}
-    waiterGrid.row('#' + name).remove().draw()
+    waiterGrid.row('#' + name).remove()
+    drawGridMaintainScroll(waiterGrid)
 	} else {
 		let tokens = line.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*),/)
 		if (tokens[2].match(/^@/)) return
@@ -995,9 +999,11 @@ function _handleGame(line) {
 		tokens = line.match(/(.+),(\+|\-|\*),(.+)$/)
 		if (users[name]) users[name].setFromGame(tokens[1], tokens[2], tokens[3] == "*" ? "" : tokens[3])
     waiterGrid.row('#' + name).remove()
-    waiterGrid.row.add(users[name].gridObject()).draw()
+    waiterGrid.row.add(users[name].gridObject())
+    drawGridMaintainScroll(waiterGrid)
 	}
-  playerGrid.row('#' + name).data(users[name].gridObject()).draw()
+  playerGrid.row('#' + name).data(users[name].gridObject())
+  drawGridMaintainScroll(playerGrid)
 }
 
 function _handleChallenger(name){
@@ -1342,8 +1348,11 @@ function _handleEnter(name){
 			writeUserMessage(_name2link(name) + i18next.t("code.G030"), 2, "#008800", importantUser)
       //TODO if importantUser && isPostGame then doorOpen-sound
 		}
-		if (users[name]) watcherGrid.row.add(users[name].gridObject()).draw()
-		//_watcherTitle = LanguageSelector.lan.watchers + " (" + _watcher_list.length +")";
+		if (users[name]) {
+      watcherGrid.row.add(users[name].gridObject())
+      drawGridMaintainScroll(watcherGrid)
+  		//_watcherTitle = LanguageSelector.lan.watchers + " (" + _watcher_list.length +")";
+    }
   }
   if (board.isHost()) client.privateChat(name, "[##STUDY]" + _generateStudyText(kifuGrid.row({selected: true}).data().num))
   /*
@@ -1375,7 +1384,8 @@ function _handleLeave(name) {
 			writeUserMessage(name + i18next.t("code.G031"), 2, "#008800", importantUser)
       //TODO if importantUser && isPostGame then doorClose-sound
 		}
-    watcherGrid.row("#" + name).remove().draw()
+    watcherGrid.row("#" + name).remove()
+    drawGridMaintainScroll(watcherGrid)
 		//_watcherTitle = LanguageSelector.lan.watchers + " (" + _watcher_list.length +")";
   }
   /*
@@ -1459,12 +1469,12 @@ function _handleStart(game_id){
       playerGrid.row.add(users[tokens[3]].gridObject())
       waiterGrid.row("#" + tokens[3]).remove()
     }
-    playerGrid.draw()
-    waiterGrid.draw()
+    drawGridMaintainScroll(playerGrid)
+    drawGridMaintainScroll(waiterGrid)
 		game = new Game(0, game_id, users[tokens[2]], users[tokens[3]])
 	}
   gameGrid.row.add(game)
-  gameGrid.draw()
+  drawGridMaintainScroll(gameGrid)
   /*
 	if (autoEnterStudy) {
 		_watch_game = _games[e.message];
