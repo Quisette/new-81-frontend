@@ -35,7 +35,7 @@ class Movement{
   		LIST_JAPANESE: 1, // Default in WebSystem options database
   		LIST_WESTERN: 2,
   		LIST_1TO1: 4, // Default for English app
-  		koma_japanese_names: ['玉', '飛', '角', '金', '銀', '桂', '香', '歩', '', '龍', '馬', '', '成銀', '成桂', '成香', 'と'],
+  		koma_japanese_names: ['玉', '飛', '角', '金', '銀', '桂', '香', '歩', '玉', '龍', '馬', '', '成銀', '成桂', '成香', 'と'],
   		rank_japanese_names: ['', '一','二','三','四','五','六','七','八','九'],
   		file_japanese_names: ['', '１', '２', '３', '４', '５', '６', '７', '８', '９'],
   		koma_universal_names: ['Ｋ', 'Ｒ', 'Ｂ', 'Ｇ', 'Ｓ', 'Ｎ', 'Ｌ', 'Ｐ', '', 'Ｄ', 'Ｈ', '', '+S', '+N', '+L', 'Ｔ'],

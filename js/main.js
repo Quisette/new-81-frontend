@@ -856,6 +856,10 @@ function _handleImpasseDeclare(){
   client.kachi()
 }
 
+function sendGrab(x, y){
+  client.gameChat("[##GRAB]" + x + "," + y)
+}
+
 /* ====================================
     Server message handlers
 ===================================== */
@@ -1539,10 +1543,10 @@ function _handleGameChat(sender, message){
 	if (!board.game) return
 	if (board.isPlaying() && (message.match(/^\[comment\]/))) return
 	if (message.match(/\[\#\#HOVER\](\d+),(\d+)$/)) {
-  /*
-		if (sender != login_name && board.onListen) board.handleHover(match[1], match[2]);
-	} else if ((match = e.message.match(/\[\#\#GRAB\](\d+),(\d+)$/))) {
-		if (sender != login_name && board.onListen) board.handleGrab(match[1], match[2]);
+		//if (sender != login_name && board.onListen) board.handleHover(match[1], match[2]);
+	} else if (message.match(/\[##GRAB\](\d+),(\d+)$/)) {
+		if (sender != me.name && board.onListen) board.handleGrab(RegExp.$1, RegExp.$2)
+    /*
 	} else if (e.message.match(/\[\#\#TYPE\]$/)) {
 		if (sender != login_name) {
 			if (sender == board.name_labels[0].text) {

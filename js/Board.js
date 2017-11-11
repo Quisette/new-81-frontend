@@ -148,6 +148,7 @@ class Board{
     $('.square').each(function(){
       thisInstance._refreshSquare($(this))
     })
+    $(".square-selected").removeClass("square-selected")
     for (let i = 0; i < 2; i++){
       let hash = this._position.handCoordinateHash(i)
       this._position.komadais[i].forEach(function(piece){
@@ -300,6 +301,15 @@ class Board{
       if (this._canMovePieceNow() && koma && koma.owner == this._position.turn) {
         this._selectedSquare = sq
         sq.addClass("square-selected")
+        if (this.isPlaying()) { //Send ##GRAB message
+          let x = sq.data().x
+          let y = sq.data().y
+          if (x <= 0) {
+            x = 100 + koma.pieceType
+            y = 0
+          }
+          sendGrab(x, y)
+        }
         this._position.getMovableGridsFromSquare(sq).forEach(function(e){
           $("#sq" + e[0] + "_" + e[1]).addClass("square-movable")
         })
@@ -409,6 +419,17 @@ class Board{
     return this._position.makeMove(move, false)
   }
 
+  handleGrab(x, y){
+    $(".square-selected").removeClass("square-selected")
+    if (x == 0) {
+      return
+    } else if (x >= 100) {
+      y = x - 100
+      x = this._position.turn ? 0 : -1
+    }
+    $("#sq" + x + "_" + y).addClass("square-selected")
+  }
+
   setBoardConditions(){
     if (this.isPlayer()) {
       if (this.isPostGame){
@@ -434,7 +455,7 @@ class Board{
       this._selectedSquare.removeClass("square-selected")
       this._selectedSquare = null
     }
-    //if (this.isPlaying()) grabPiece(0,0)
+    if (this.isPlaying()) sendGrab(0,0)
 		//_endGrab();
 		//if (highlight_movable) _hideMovableSquares();
 		//_pieceGrab = false;
