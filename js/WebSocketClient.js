@@ -92,11 +92,11 @@ class WebSocketClient {
             }
           }
           // all timing
-          if (line.match(/^##\[CHAT\]\[(.+)\]\s(.+)$/)) {
+          if (line.match(/^##\[CHAT\]\[(.+?)\]\s(.+)$/)) {
             thisInstance._callbackFunctions["CHAT"](RegExp.$1, RegExp.$2)
-          } else if (line.match(/^##\[GAMECHAT\]\[(.+)\]\s(.+)$/)) {
+          } else if (line.match(/^##\[GAMECHAT\]\[(.+?)\]\s(.+)$/)) {
             thisInstance._callbackFunctions["GAMECHAT"](RegExp.$1, RegExp.$2)
-      		} else if (line.match(/^##\[PRIVATECHAT\]\[(.+)\]\s(.+)$/)) {
+      		} else if (line.match(/^##\[PRIVATECHAT\]\[(.+?)\]\s(.+)$/)) {
             thisInstance._callbackFunctions["PRIVATECHAT"](RegExp.$1, RegExp.$2)
           } else if (line.match(/^##\[MILE\](.+)$/)) {
             thisInstance._callbackFunctions["MILE"](RegExp.$1)

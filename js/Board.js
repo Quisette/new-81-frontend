@@ -25,6 +25,8 @@ class Board{
     this.moves = new Array()
     this.game = null
     this._rematchReady = [false, false]
+    this._arrowsSelf = []
+    this._arrowsPublic = []
     this._generateParts()
     this._setTheme()
   }
@@ -42,6 +44,7 @@ class Board{
     for (let i = 0; i < 2; i++){
       this.playerInfos[i].append('<div class="avatar-wrapper" style="margin:5px 15px;"><img class="avatar"/></div><span id="player-info-mark" style="font-size:15px">' + (i == 0 ? '☗' : '☖') + '</span><span id="player-info-name"></span><br><span id="player-info-rate"></span>')
     }
+    this._arrowCanvas = $('<canvas></canvas>', {id: 'boardCanvas'}).attr({width: this._div.width(), height: this._div.height()}).appendTo(this._div)
   }
 
   _setTheme(){
@@ -196,10 +199,10 @@ class Board{
 
   loadNewPosition(str = Position.CONST.INITIAL_POSITION){
     this._publicPosition = new Position()
-    this._publicPosition.superior = !this.game.isHandicap() && this.game.black.rate > this.game.white.rate
+    this._publicPosition.superior = this.game ? (!this.game.isHandicap() && this.game.black.rate > this.game.white.rate) : false
     this._publicPosition.loadFromString(str)
     this._position = new Position()
-    this._position.superior = !this.game.isHandicap() && this.game.black.rate > this.game.white.rate
+    this._position.superior = this.game ? (!this.game.isHandicap() && this.game.black.rate > this.game.white.rate) : false
     this._position.loadFromString(str)
     this._initialPositionStr = str
     this._generateSquares()
@@ -354,6 +357,7 @@ class Board{
   }
 
   _executeManualMove(move){
+    this.clearArrows(false)
     if (this.isPlaying()) {
       this.runningTimer.stop()
     }
@@ -498,6 +502,47 @@ class Board{
     this._refreshPosition()
   }
 
+  addArrow(fromType, fromX, fromY, toX, toY, color, isPublic, sender){
+    //integer, integer, integer, integer, integer, uint, boolean, string
+    let arrows = isPublic ? this._arrowsPublic : this._arrowsSelf
+    let isFull = arrows.length >= BoardArrow.CONST.MAX_ARROWS
+    if (isFull) {
+      arrows.shift()
+      if (this.onListen) this.redrawAllArrows(isPublic)
+    }
+    let arrow = new BoardArrow(fromType, fromX, fromY, toX, toY, color, sender, this._arrowCanvas)
+    arrows.push(arrow)
+    if (this.onListen) arrow.draw()
+  }
+
+  clearArrows(isPublic, sender = "*"){
+    let arrows = isPublic ? this._arrowsPublic : this._arrowsSelf
+    let found = false
+    if (sender != "*") {
+      for (let i = arrows.length - 1; i >= 0; i--) {
+        if (arrows[i].name == sender) {
+          found = true
+          arrows.splice(i,1)
+        }
+      }
+    }
+    if (!found) arrows.length = 0
+    if (this.onListen && isPublic || !this.onListen && !isPublic) this.redrawAllArrows(isPublic)
+    return found
+  }
+
+  redrawAllArrows(isPublic, withLable = false){
+    let arrows = isPublic ? this._arrowsPublic : this._arrowsSelf
+    this.clearCanvas()
+    arrows.forEach(function(arrow){
+      arrow.draw()
+    })
+  }
+
+  clearCanvas(){
+    this._arrowCanvas.get(0).getContext('2d').clearRect(0, 0, this._arrowCanvas.width(), this._arrowCanvas.height())
+  }
+
   isPlayer(){
     return (this.myRoleType == 0 || this.myRoleType == 1)
   }
@@ -512,6 +557,10 @@ class Board{
 
   isHost(){
     return this.studyHostType == 2
+  }
+
+  isSubHost(){
+    return this.studyHostType == 1
   }
 
   isPlayerPresent(turn){
