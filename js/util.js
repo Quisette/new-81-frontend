@@ -167,7 +167,10 @@ function coloredSpan(text, color, width = 0){
 }
 
 function scrollGridToSelected(grid){
-  if (grid.row('.selected').node()) $(grid.table().container()).find('.dataTables_scrollBody').scrollTop(grid.row('.selected').node().offsetTop)
+  if (grid.row('.selected').node()) {
+    let scrollBody = $(grid.table().container()).find('.dataTables_scrollBody')
+    scrollBody.scrollTop(grid.row('.selected').node().offsetTop - scrollBody.height() + 80)
+  }
 }
 
 function drawGridMaintainScroll(grid){
@@ -210,6 +213,7 @@ const OPENING_NAME_EN = {
 function openingTypeObject(key){
   let short = ""
   let tip = ""
+  if (key.match(/opposition_(black|white)0/)) key = "unknown" // Countermeasure to shogi-server bug
   if (key.match(/^(hc|va)/)) {  // key is gameType code for handicaps or variants
     switch (key) {
   		case "hctombonl":

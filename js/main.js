@@ -26,7 +26,7 @@ var board;
 var hidden_prm;
 var mouseX
 var mouseY
-var testMode = true
+var testMode = false
 var config = null
 var options = new Object()
 var _studyBase = null
@@ -161,8 +161,8 @@ $(function(){
       {data: "senteStr", width: "29%", className: "dt-body-left", bSortable: false},
       {data: "goteStr", width: "29%", className: "dt-body-right", bSortable: false},
       {data: "ruleShort", width: "16%", bSortable: false},
-      {data: "moves", width: "7%", bSortable: false},
-      {data: "watchers", width: "7%", bSortable: false},
+      {data: "movesStr", width: "7%", bSortable: false},
+      {data: "watchersStr", width: "7%", bSortable: false},
       {data: "openingStr", width: "12%", bSortable: false}
     ],
     rowId: "gameId",
@@ -915,7 +915,9 @@ function _handleWho(str){
     playerGrid.row.add(users[key].gridObject())
     if (users[key].listAsWaiter()) waiterGrid.row.add(users[key].gridObject())
   })
-  drawGridMaintainScroll(playerGrid)
+  playerGrid.draw()
+  playerGrid.row('#' + me.name).select()
+  scrollGridToSelected(playerGrid)
   drawGridMaintainScroll(waiterGrid)
 }
 
@@ -923,6 +925,7 @@ function _handleList(str){
   let n = 0
   let lines = str.trim().split("\n")
   gameGrid.clear()
+  let games = []
   lines.forEach(function(line){
     if (line == "") return
     n += 1
@@ -941,8 +944,14 @@ function _handleList(str){
 		}
 		let game = new Game(n, tokens[0], black, white);
 		game.setFromList(parseInt(tokens[1]), tokens[6], tokens[7] == "true", tokens[8] == "true", parseInt(tokens[9]), tokens[10])
-    gameGrid.row.add(game)
+    games.push(game)
   })
+  games.sort(function(a, b){
+    if (a.maxRate() < b.maxRate()) return 1
+    if (a.maxRate() > b.maxRate()) return -1
+    return 0
+  })
+  gameGrid.rows.add(games)
   gameGrid.draw()
 }
 
@@ -1007,8 +1016,9 @@ function _handleLobbyOut(name){
 }
 
 function _handleGame(line) {
+  let name = ""
 	if (line.match(/^\[(.+)\]$/)) {
-    let name = RegExp.$1
+    name = RegExp.$1
 		if (users[name]) {
 			users[name].setFromGame("*", "*", "")
 			if (playerInfoWindows[name]) playerInfoWindows[name].disableChallenge()
@@ -1024,7 +1034,8 @@ function _handleGame(line) {
 			name = tokens[2].split(".")[0]
 		}
 		tokens = line.match(/(.+),(\+|\-|\*),(.+)$/)
-		if (users[name]) users[name].setFromGame(tokens[1], tokens[2], tokens[3] == "*" ? "" : tokens[3])
+		if (!users[name]) return
+    users[name].setFromGame(tokens[1], tokens[2], tokens[3] == "*" ? "" : tokens[3])
     waiterGrid.row('#' + name).remove()
     waiterGrid.row.add(users[name].gridObject())
     drawGridMaintainScroll(waiterGrid)
@@ -1098,6 +1109,7 @@ function _handleGameSummary(str){
     if (board.game) _closeBoard()
 	  board.setGame(new Game(0, gameId, black, white))
     board.startGame(initialPosition, myTurn ? 0 : 1)
+    $("#kifuGridWrapper").find(".dataTables_scrollBody").removeClass("local-kifu")
     setBoardConditions()
     _switchLayer(2)
     sp.gameStart()
@@ -1156,8 +1168,10 @@ function _handleGameEnd(lines, atReconnection = false){
   board.isPostGame = true
   let move = new Movement(board.getFinalMove())
   move.setGameEnd(gameEndType) //turn too?
-  board.moves.push(move) //refresh list too
-  if (!kifuGrid.row(':last').data().branch) board.addMoveToKifuGrid(move)
+  if (gameEndType != "SUSPEND") {
+    board.moves.push(move) //refresh list too
+    if (!kifuGrid.row(':last').data().branch) board.addMoveToKifuGrid(move)
+  }
   writeUserMessage(move.toGameEndMessage(), 2, "#DD0088")
 	//if (GameTimer.soundType >= 2) Byoyomi.sayTimeUp();
   //board.timeout();
@@ -1294,7 +1308,7 @@ function _handleMonitor(str){
 			positionStr += "P0" + RegExp.$1 + "\n"
     } else if (line.match(/^P[0-9+-].*/)) {
       positionStr += line + "\n"
-    } else if (line.match(/^#(SENTE_WIN|GOTE_WIN|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|OUTE_SENNICHITE|JISHOGI|DISCONNECT|CATCH|TRY)/)) {
+    } else if (line.match(/^#(SENTE_WIN|GOTE_WIN|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|OUTE_SENNICHITE|JISHOGI|DISCONNECT|SUSPEND|CATCH|TRY)/)) {
       gameEndStr += RegExp.$1 + "\n"
     }
   })

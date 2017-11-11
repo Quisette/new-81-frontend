@@ -31,6 +31,7 @@ class Movement{
   		DISCONNECT: 7,
   		CATCH: 8,
   		TRY: 9,
+      SUSPEND: 10,
   		LIST_UNIVERSAL: 0,
   		LIST_JAPANESE: 1, // Default in WebSystem options database
   		LIST_WESTERN: 2,
@@ -114,6 +115,8 @@ class Movement{
         return EJ("CATCH!", "キャッチ!")
       case "TRY":
         return EJ("REACH!", "トライ!")
+      case "SUSPEND":
+        return EJ("Game suspended.", "対局は中断されました")
     }
   }
 

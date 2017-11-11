@@ -14,6 +14,8 @@ class Game{
 		this.white = white
     this.moves = 0
     this.watchers = 0
+		this.isBlackIn = true
+		this.isWhiteIn = true
     this.opening = "*"
     this.password = ""
     this.status = ""
@@ -32,12 +34,16 @@ class Game{
   senteStr(){
     let str = coloredSpan(makeRankFromRating(this.black.rate), makeColorFromRating(this.black.rate), 25)
     str += this.black.country.flagImgTag27()
-    str += '&nbsp;' + this.black.name
+    let nameHTML = this.status == "win" ? ('<span style="text-decoration:underline">' + this.black.name + '</span>') : this.black.name
+    nameHTML = (this.isBlackIn || this.isStudy()) ? nameHTML : coloredSpan(nameHTML, '#999')
+    str += '&nbsp;' + nameHTML
     return str
   }
 
   goteStr(){
-    let str = this.white.name + '&nbsp;'
+    let nameHTML = this.status == "lose" ? ('<span style="text-decoration:underline">' + this.white.name + '</span>') : this.white.name
+    nameHTML = (this.isWhiteIn || this.isStudy()) ? nameHTML : coloredSpan(nameHTML, '#999')
+    let str = nameHTML + '&nbsp;'
     str += this.white.country.flagImgTag27()
     str += coloredSpan(makeRankFromRating(this.white.rate), makeColorFromRating(this.white.rate), 25)
     return str
@@ -54,6 +60,19 @@ class Game{
     }
     str += this.total/60 + ' - ' + this.byoyomi
     return str
+  }
+
+  movesStr(){
+    if (this.status == "") return coloredSpan(EJ('New', '開始'), 'blue')
+    if (this.status == "game" || this.status == "suspend") return this.moves
+    return coloredSpan(EJ('End', '終局'), 'green')
+  }
+
+  watchersStr(){
+    if (this.watchers == 0) return ""
+		if (this.watchers >= 10) return coloredSpan(this.watchers, 'red')
+		if (this.watchers >= 5) return coloredSpan(this.watchers, '#e80')
+		return this.watchers
   }
 
   openingStr(){
@@ -80,6 +99,25 @@ class Game{
 
   hasNoOpeningTypes(){
     return this.gameType.match(/^(hc|va)/) && this.gameType != "hcfixed"
+  }
+
+  maxRate(){
+		let maxRate = Math.max(this.black.rate, this.white.rate)
+		if ((!this.isBlackIn || !this.isWhiteIn) && this.watchers < 5) {
+			return maxRate - 3000
+		} else if (this.isTournament() || (this.isStudy() && this.watchers >= 5) || this.watchers >= 10) {
+			return maxRate + 3000
+		} else {
+			return maxRate
+		}
+  }
+
+  isTournament(){
+		return this.gameName.match(/\-\-(\d+)\-(\d)/)
+  }
+
+  isStudy(){
+    return this.gameId.match(/^STUDY/)
   }
 
 }

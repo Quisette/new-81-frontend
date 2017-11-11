@@ -228,7 +228,7 @@
   "apply_dan": "JSA Certificate",
   "status": "Status",
   "msg": {
-    "html5_initial": "Welcome to HTML5 beta version. The available functions are still limited; no post-game analysis and study mode. If you find any bug, please report to info@81dojo.com.",
+    "html5_initial": "Welcome to HTML5 beta version. The available functions are still limited; no piece/voice options and no study/tournament mode. If you find any bug, please report to info@81dojo.com.",
     "password_encrypted": "Password will be encrypted while being sent to the server.",
     "newlogin": "\n- Double click names to see Player Info. (Also [***] in chat window)\n- Double click games to watch.\n- Play 5 rated games against someone whose rating is already fixed, and your rating will be determined!\n- If the registered rating was much lower than your actual strength, you must reset properly.\n- You can register only your home country or residing country.",
     "guestlogin": "- The orange ◆ mark on the Player List on the left indicates your guest account.\n- To watch a game and view a player's info, please double-click on the lists.\n- Guests can only use limited functions of 81Dojo. Please see the comparison table between a guest and a registered player. --> http://81dojo.com/documents/Guest_Login_System",
