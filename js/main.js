@@ -24,6 +24,7 @@ var premium;
 var countries = new Object();
 var board;
 var hidden_prm;
+var _hourMileCount
 var mouseX
 var mouseY
 var testMode = false
@@ -402,6 +403,7 @@ function _loginButtonClick(){
   client.setCallbackFunctions("RESULT", _handleResult)
   client.setCallbackFunctions("MONITOR", _handleMonitor)
   client.setCallbackFunctions("RECONNECT", _handleReconnect)
+  client.setCallbackFunctions("MILE", _handleMile)
   client.setCallbackFunctions("ENTER", _handleEnter)
   client.setCallbackFunctions("LEAVE", _handleLeave)
   client.setCallbackFunctions("DISCONNECT", _handleDisconnect)
@@ -883,17 +885,23 @@ function _handleLoggedIn(str){
   users[client.username] = new User(client.username)
   me = users[client.username]
   me.setFromLogin(tokens)
-  mileage = tokens[12]
+  mileage = parseInt(tokens[12])
   premium = makePremiumNum(parseInt(tokens[13]),tokens[14])
   hidden_prm = premium
+  _updateLobbyHeader()
+  writeUserMessage(i18next.t("msg.html5_initial"), 1, "#008800")
+  _hourMileCount = 0
+  setGeneralTimeout("HOUR_MILE", 3600000)
+  client.who(true)
+  client.list()
+  if (testMode) _testFunction(2)
+}
+
+function _updateLobbyHeader(){
   $('#header-playerName').text(me.name + " : ")
   $('#header-rate').text("R" + me.rate + " : ")
   $('#header-mile').text(mileage + EJ(" D-Miles : ", " Dマイル : "))
   $('#header-premium').text(makePremiumName(premium) + EJ(" class", " クラス"))
-  writeUserMessage(i18next.t("msg.html5_initial"), 1, "#008800")
-  client.who(true)
-  client.list()
-  if (testMode) _testFunction(2)
 }
 
 function _handleLoginFailed(code){
@@ -1221,22 +1229,17 @@ function _handleGameEnd(lines, atReconnection = false){
       sp.gameEnd(true)
       break
   }
-  /*
-  if (board.gameType == "hc") {
-	  if (board.my_turn == Kyokumen.GOTE) {
-		  board.isStudyHost = true;
-		  board.isSubHost = false;
-	  } else {
-		  board.isStudyHost = false;
-		  board.isSubHost = true;
-	  }
+  if (board.isPlayer() && board.game.gameType == "hc") {
+	  if (board.myRoleType == 0) board.studyHostType = 1
+    else board.studyHostType = 2
   }
+  if (board.isHost()) writeUserMessage(i18next.t("msg.host"), 2, "#008800", true)
+  else if (board.isSubHost()) writeUserMessage(i18next.t("msg.subhost"), 2, "#008800", true)
+  /*
   if (opponent_disconnected && board.isSubHost) {
 	  board.isStudyHost = true;
 	  board.isSubHost = false;
   }
-  */
-  /*
   if (_pmGameLog != "") {
 	  _writeUserMessage(LanguageSelector.EJ("PM received during the game:\n", "対局中にPMが届いています\n"), 2, "#FF0000", true);
 	  _writeUserMessage(_pmGameLog, 2, "#FF0000");
@@ -1260,16 +1263,16 @@ function _handleGameEnd(lines, atReconnection = false){
   history += openingName;
   if (board.gameType == "r") _games_session.push(history);
   _notifyOnCloseGame = true;
-  if (board.gameType == "r") _client.mileage(10);
-  else _client.mileage(5);
   */
+  if (board.isPlayer() && !atReconnection) {
+    if (board.game.gameType == "r") client.mileage(10, config.mileagePass)
+    else client.mileage(5, config.mileagePass)
+  }
   setBoardConditions()
   board.updateTurnHighlight()
   if (_greetState <= 2) _greetState = atReconnection ? 4 : 3
   /*
   _shareKifuEnabled = true;
-  if (board.isStudyHost) _toggleHostStatus(true);
-  if (board.isSubHost) _writeUserMessage(LanguageSelector.lan.msg_subhost + "\n", 2, "#008800", true);
   _status_disconnected = false;
   if (_isGuest) {
 	  var date:Date = new Date();
@@ -1737,7 +1740,19 @@ function _handlePrivateChat(sender, message){
 	}
 }
 
+function _handleMile(result) {
+	//if (_isGuest) return;
+  result = parseInt(result)
+  if (result == -1) return
+  let diff = result - mileage
+	if (diff > 0) writeUserMessage(EJ("You've earned " + diff + " D-Mile" + (diff == 1 ? "!" : "s!"), diff + " Dマイル獲得しました!"), 1, "#FF3388")
+	else if (diff < 0) writeUserMessage(EJ("You've used " + (- diff) + " D-Mile" + (diff == -1 ? "" : "s"), (- diff) + " Dマイルを消費しました。(通算マイル・期間マイルは減少しません)"), 1, "#FF3388")
+  mileage = result
+  _updateLobbyHeader()
+}
+
 function _handleClosed(){
+  _stopAllTimeouts()
   $('#loginAlert').text(i18next.t("login.closed"))
   $('#loginButton').attr('disabled', false)
   $('#loginButton').attr('value', i18next.t("login.relogin"))
@@ -1857,7 +1872,19 @@ function _handleGeneralTimeout(key){
     case "REFRESH":
       $("#refreshButton").removeClass("button-disabled")
       break
+    case "HOUR_MILE":
+			client.mileage([5, 8, 10, 10, 12, 12, 12, 12][_hourMileCount], config.mileagePass)
+      if (_hourMileCount < 7) {
+        _hourMileCount++
+        setGeneralTimeout("HOUR_MILE", 3600000)
+      }
   }
+}
+
+function _stopAllTimeouts(){
+  Object.keys(timeouts).forEach(function(key){
+    clearGeneralTimeout(key)
+  })
 }
 
 function _name2link(name){

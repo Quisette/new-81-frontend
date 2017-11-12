@@ -289,6 +289,14 @@ class WebSocketClient {
     this.send("%%MONITOR2" + (onoff ? "ON " : "OFF ") + game_name)
   }
 
+	mileage(diff, pass) {
+    //integer
+		//if (_isGuest) return;
+		//var now_date:Date = new Date();
+		//if (now_date.month == 7 && now_date.date == 1 && diff > 0) diff = 2 * diff;
+		this.send("%%MILE " + pass + " " + diff)
+	}
+
   send(str){
     this._socket.send(str);
     console.log("Sent: " + str)
