@@ -229,6 +229,8 @@
   "status": "Status",
   "msg": {
     "html5_initial": "Welcome to HTML5 beta version. The available functions are still limited; no piece/voice options and no study/tournament mode. If you find any bug, please report to info@81dojo.com.",
+    "game_start": "Make kind greetings when starting and ending the game. The best way to improve your skill is Postgame Analysis. (However, it is not against manners to skip the analysis and leave immediately after exchanging greeting.)",
+    "mute_chat": "You are receiving watcher's chat as this game is non-rated. (Switch off the checkbox above the wathcer list to disable it.)",
     "password_encrypted": "Password will be encrypted while being sent to the server.",
     "newlogin": "\n- Double click names to see Player Info. (Also [***] in chat window)\n- Double click games to watch.\n- Play 5 rated games against someone whose rating is already fixed, and your rating will be determined!\n- If the registered rating was much lower than your actual strength, you must reset properly.\n- You can register only your home country or residing country.",
     "guestlogin": "- The orange ◆ mark on the Player List on the left indicates your guest account.\n- To watch a game and view a player's info, please double-click on the lists.\n- Guests can only use limited functions of 81Dojo. Please see the comparison table between a guest and a registered player. --> http://81dojo.com/documents/Guest_Login_System",
@@ -237,7 +239,7 @@
     "subhost_given": "You are given Study sub-host status. You can move the host's pieces.",
     "study_notify": "Study-position is changed. Back to [Follow latest position] mode to update.",
     "rated": "This game is Rated.\nPlayers CANNOT see watcher's chat until the game ends.\nWatcher can PM to players, but it will be notified to others.",
-    "nonrated": "This game is Non-rated.\nPlayers CAN see watcher's chat even during game.",
+    "nonrated": "This game is Non-rated.\nPlayers CAN see watcher's chat by default. (Player can switch it off.)",
     "opponent_disconnect": "Opponent disconnected. You can declare win after 60 seconds, or keep waiting. However, you will be forced to win automatically after 300 seconds.",
     "disconnect_self": "You are disconnected from the server. The applet is no longer active. Please reload the applet to login again and continue.　Do you want to reload immidately?",
     "game_end": {

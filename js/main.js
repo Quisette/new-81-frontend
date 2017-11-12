@@ -19,6 +19,7 @@ var _disconnectTimer
 var me;
 var _challengeUser = null
 var _gameAccepted = false
+var _allowWatcherChat = false
 var _greetState = 0 //0:not-active, 1:before-game, 2:during-game, 3:after-game, 4:post-game
 var premium;
 var countries = new Object();
@@ -583,6 +584,12 @@ function _optionButtonClick(){
   writeUserMessage(EJ('No option available yet.', 'オプション機能は準備中です'), currentLayer, "#ff0000")
 }
 
+function _allowWatcherChatClick(){
+  _allowWatcherChat = $('#receiveWatcherChatCheckBox').is(':checked')
+  if (_allowWatcherChat) _sendAutoChat("#G101")
+  else _sendAutoChat("#G100")
+}
+
 function _closeBoard(){
   if (board.isPlayer()) client.closeGame()
   else if (board.isWatcher()) client.monitor(board.game.gameId, false)
@@ -707,6 +714,7 @@ function setBoardConditions(){
   else $("input[name=kifuModeRadio]:eq(0)").prop("checked", true)
   $("#giveHostButton").removeClass("button-disabled")
   if (!board.isHost()) $("#giveHostButton").addClass("button-disabled")
+  _allowWatcherChat = $("#receiveWatcherChatCheckBox").is(":checked")
   _kifuModeRadioChange()
 }
 
@@ -1077,12 +1085,7 @@ function _handleDecline(str){
 	}
 	_challengeUser = null
 	_gameAccepted = false
-  /*
-	if (_challengerAlertWindow) {
-		_challengerAlertWindow.terminate();
-		_challengerAlertWindow = null;
-	}
-  */
+  $('#modalChallenger').dialog('close')
 }
 
 function _handleGameSummary(str){
@@ -1123,9 +1126,10 @@ function _handleGameSummary(str){
     sp.gameStart()
     _greetState = 1
 
-    if (myTurn) writeUserMessage(EJ("You are Black " + (board.game.isHandicap() ? "(Handicap taker)." : "(Sente)."), "あなた" + (board.game.isHandicap() ? "は下手(したて)" : "が先手") + "です。"), 2, "#008800")
-    else writeUserMessage(EJ("You are White " + (board.game.isHandicap() ? "(Handicap giver)." : "(Gote).\n"), "あなた" + (board.game.isHandicap() ? "が上手(うわて)" : "は後手") + "です。"), 2, "#008800")
-	  //if (match[2].match(/\-\-\d+$/) && board.gameType != "r") writeUserMessage(LanguageSelector.EJ("To mute watcher's chat, switch off the checkbox above the watcher list.\n", "観戦者のチャットをミュートするには観戦者リスト上部のチェックボックスをOFFにして下さい。\n"), 2, "#FF3388")
+    writeUserMessage(i18next.t("msg.game_start") + "\n", 2, "#444444")
+    if (myTurn) writeUserMessage(EJ("You are Black " + (board.game.isHandicap() ? "(Handicap taker)." : "(Sente)."), "あなた" + (board.game.isHandicap() ? "は下手(したて)" : "が先手") + "です。"), 2, "#008800", true)
+    else writeUserMessage(EJ("You are White " + (board.game.isHandicap() ? "(Handicap giver)." : "(Gote).\n"), "あなた" + (board.game.isHandicap() ? "が上手(うわて)" : "は後手") + "です。"), 2, "#008800", true)
+	  if (board.game.gameType != "r") writeUserMessage(i18next.t("msg.mute_chat"), 2, "#008800")
     /*
 	  greetButton.state = GreetButton.STATE_BEFORE_GAME;
 	  board.onListen = true;
@@ -1319,12 +1323,8 @@ function _handleMonitor(str){
     board.startGame(positionStr, 2, move_strings, since_last_move)
     setBoardConditions()
     _switchLayer(2)
+		writeUserMessage(board.game.gameType == "r" ? i18next.t("msg.rated") : i18next.t("msg.nonrated"), 2, "#008800")
     /*
-		  if (board.gameType == "r") {
-			  _writeUserMessage(LanguageSelector.lan.msg_rated + "\n", 2, "#008800", true);
-		  } else {
-			  _writeUserMessage(LanguageSelector.lan.msg_nonrated + "\n", 2, "#008800", true);
-		  }
 		  var match:Array;
 		  if ((match = game_info[2].match(/\-\-(\d+)$/))) {
 			_writeUserMessage(LanguageSelector.EJ('This game belongs to "', "イベント対局: 「") + InfoFetcher.getSystemTournamentName(parseInt(match[1])) + LanguageSelector.EJ('"\n', "」\n"), 2, "#FF3388", true);
@@ -1401,21 +1401,18 @@ function _handleEnter(name){
     }
   }
   if (board.isHost()) client.privateChat(name, "[##STUDY]" + _generateStudyText(kifuGrid.row({selected: true}).data().num))
-  /*
-	if (_isDuringMyGame() && !board.is34()) {
+	if (board.isPlaying()) {
+    /*
 		if (_notify_blind) {
 			if (board.piece_type == 100) _client.privateChat(e.message, "[auto-PM] #G014");
 			else if (board.piece_type == 101) _client.privateChat(e.message, "[auto-PM] #G015");
 			else if (board.piece_type == 102) _client.privateChat(e.message, "[auto-PM] #G016");
 		}
-		if (board.gameType != "r" && !_allowWatcherChat) _client.privateChat(e.message, "[auto-PM] #G102");
+    */
+		if (board.game.gameType != "r" && !_allowWatcherChat) client.privateChat(name, "[auto-PM] #G102")
 	}
-	if (voiceButton.sendingDirect()) _client.privateChat(e.message, "[##VOICE]DIRECT," + voiceButton.nearID);
-	else if (voiceButton.sendingShared) _client.privateChat(e.message, "[##VOICE]SHARED");
-	else if (voiceButton.broadcastingSelf) _client.privateChat(e.message, "[##VOICE]BROADCAST");
-	if (_users[e.message]) _users[e.message].clearTags();
-	_updateStatusMarks(e.message);
-  */
+	//if (_users[e.message]) _users[e.message].clearTags();
+	//_updateStatusMarks(e.message);
 }
 
 function _handleLeave(name) {
@@ -1685,9 +1682,9 @@ function _handleGameChat(sender, message){
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#666666")
 		} else if (sender == me.name) {
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#0033DD")
-      /*
-		} else if (_isDuringMyGame() && !_allowWatcherChat) {
+		} else if (board.isPlaying() && !_allowWatcherChat) {
       return
+      /*
 		} else if (_favorite_list.indexOf(sender) >= 0) {
 			_writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#DD7700")
 		} else if (_colleague_list.indexOf(sender) >= 0) {

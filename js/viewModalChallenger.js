@@ -14,6 +14,10 @@ function _initModalChallenger(user){
   let count = 20
   $('#challengerTimerText').html(count)
   let timer = setInterval(function(){
+    if (!$('#modalChallenger').dialog('isOpen')) {
+      clearInterval(timer)
+      return
+    }
     count--
     $('#challengerTimerText').html(count)
     if (count <= 0) {
