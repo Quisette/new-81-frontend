@@ -121,7 +121,7 @@ class Movement{
   }
 
   toJapaneseNotation(forFile = false){
-		let alphabet = !forFile && options.notation == Movement.CONST.LIST_1TO1
+		let alphabet = !forFile && options.notation_style == Movement.CONST.LIST_1TO1
     let str
 		if (this.toX == this.previousMove.toX && this.toY == this.previousMove.toY) {
 			str = alphabet ? "x " : "同　";

@@ -2,6 +2,7 @@
 
 class BoardArrow{
   constructor(fromType, fromX, fromY, toX, toY, color, name, parentCanvas){
+    //integer, integer, integer, integer, integer, integer(long), string, canvas
     this._fromType = fromType
     this._fromX = fromX
     this._fromY = fromY
@@ -42,6 +43,7 @@ class BoardArrow{
 		ctx.lineTo(toX + BoardArrow.CONST.HEAD_LENGTH * Math.cos(theta - BoardArrow.CONST.HEAD_ANGLE), toY + BoardArrow.CONST.HEAD_LENGTH * Math.sin(theta - BoardArrow.CONST.HEAD_ANGLE))
 		ctx.lineTo(toX + BoardArrow.CONST.HEAD_LENGTH / 2 * Math.cos(theta - BoardArrow.CONST.HEAD_ANGLE * 0.4), toY + BoardArrow.CONST.HEAD_LENGTH / 2 * Math.sin(theta - BoardArrow.CONST.HEAD_ANGLE * 0.4))
 		ctx.lineTo(fromX, fromY)
+    ctx.strokeStyle = intToColorStyle(this._color)
     ctx.stroke()
   }
 

@@ -257,3 +257,7 @@ function debugLoop(){
 function restoreIdleConnections(n){
   return n > 30 ? Math.floor(n * 1.07) : n
 }
+
+function intToColorStyle(v) {
+  return '#' + (('000000' + v.toString(16).toUpperCase()).substr(-6))
+}

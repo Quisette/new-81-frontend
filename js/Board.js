@@ -18,6 +18,7 @@ class Board{
     this._theme = "ichiji"
     this._selectedSquare = null
     this._lastSquare = null
+    this._mouseDownSquare = null
     this._canMoveMyPiece = true
     this._canMoveHisPiece = true
     this.onListen = true
@@ -128,6 +129,12 @@ class Board{
     $('.square').on("click", function(){
       thisInstance._handleSquareClick($(this))
     })
+    $('.square').on("mousedown", function(){
+      thisInstance._handleSquareMouseDown($(this))
+    })
+    $('.square').on("mouseup", function(){
+      thisInstance._handleSquareMouseUp($(this))
+    })
   }
 
   _refreshSquare(sq){
@@ -160,6 +167,9 @@ class Board{
         let thisInstance = this
         sq.on("click", function(){
           thisInstance._handleSquareClick($(this))
+        })
+        sq.on("mousedown", function(){
+          thisInstance._handleSquareMouseDown($(this))
         })
         sq.appendTo(this._komadais[i])
       }, this)
@@ -295,6 +305,45 @@ class Board{
   refreshKifuGrid(){
   }
 
+  _handleSquareMouseDown(sq){
+    this._mouseDownSquare = sq
+  }
+
+  _handleSquareMouseUp(sq){
+    if (this._mouseDownSquare == null) return
+    if (!this._mouseDownSquare.is(sq)) {
+      if (this.onListen){
+        if (_studyBase != null || !this.isPostGame) this._addMyArrow(sq, true)
+      } else {
+        this._addMyArrow(sq, false)
+      }
+    }
+    this._mouseDownSquare = null
+  }
+
+  _addMyArrow(sqTo, isPublic){
+    let fromType = -1
+    let fromX = this._mouseDownSquare.data().x
+    let fromY = this._mouseDownSquare.data().y
+    let toX = sqTo.data().x
+    let toY = sqTo.data().y
+    if (fromX <= 0) {
+      fromType = fromX == 0 ? 0 : 1
+      fromX = fromY
+      fromY = 0
+      let thisInstance = this
+      this._komadais[fromType].find('.square').each(function(i, node){
+        if ($(node).is(thisInstance._mouseDownSquare)) {
+          return false
+        } else if ($(node).data().y == thisInstance._mouseDownSquare.data().y) {
+          fromY++
+        }
+      })
+    }
+    this.addArrow(fromType, fromX, fromY, toX, toY, options.arrow_color, isPublic, me.name)
+    if (isPublic) client.gameChat("[##ARROW]" + fromType + "," + fromX + "," + fromY + "," + toX + "," + toY + ",0x" + options.arrow_color.toString(16))
+  }
+
   _handleSquareClick(sq){
     if (!this._selectedSquare) {
       let koma = this._position.getPieceFromSquare(sq)
@@ -381,7 +430,7 @@ class Board{
       move.branch = true
       this.addMoveToKifuGrid(move)
       if (this.onListen && this.studyHostType >= 1) sendStudy()
-      else forceLocalMode()
+      else forceKifuMode(0)
     }
   }
 
@@ -440,8 +489,8 @@ class Board{
         this._canMoveHisPiece = false
       }
     } else {
-      this._canMoveMyPiece = true
-      this._canMoveHisPiece = true
+      this._canMoveMyPiece = !this.onListen
+      this._canMoveHisPiece = !this.onListen
     }
   }
 
@@ -529,11 +578,11 @@ class Board{
     let isFull = arrows.length >= BoardArrow.CONST.MAX_ARROWS
     if (isFull) {
       arrows.shift()
-      if (this.onListen) this.redrawAllArrows(isPublic)
+      if (this.onListen == isPublic) this.redrawAllArrows(isPublic)
     }
     let arrow = new BoardArrow(fromType, fromX, fromY, toX, toY, color, sender, this._arrowCanvas)
     arrows.push(arrow)
-    if (this.onListen) arrow.draw()
+    if (this.onListen == isPublic) arrow.draw()
   }
 
   clearArrows(isPublic, sender = "*"){

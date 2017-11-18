@@ -41,8 +41,8 @@ div.layer#layerLobby
           span#header-premium
         img src="img/favicon.gif"
     div.hbox#lobbyHBox style="flex:1;padding-top:7px"
-      div#playerListBox
-        div.grid-wrapper#playerGridWrapper style="height: 70%"
+      div.vbox#playerListBox
+        div.grid-wrapper#playerGridWrapper style="flex: 7 7 1px"
           table.stripe.hover#playerGrid
             tr
               thead
@@ -53,7 +53,7 @@ div.layer#layerLobby
                 th data-i18n="lobby.country"
                 th data-i18n="lobby.rate"
               tbody
-        div.grid-wrapper#waiterGridWrapper style="flex:1 1 1px"
+        div.grid-wrapper#waiterGridWrapper style="flex: 3 3 1px"
           table.stripe.hover#waiterGrid
             tr
               thead
@@ -62,7 +62,7 @@ div.layer#layerLobby
                 th data-i18n="lobby.rule"
                 th data-i18n="lobby.thinking_time"
               tbody
-      div#gameListBox
+      div.vbox#gameListBox
         div.grid-wrapper#gameGridWrapper
           table.stripe.hover#gameGrid
             tr
@@ -78,8 +78,8 @@ div.layer#layerLobby
                 th data-i18n="lobby.monitor"
                 th data-i18n="lobby.opening_short"
               tbody
-        div#lobbyChatBox style="flex:1"
-          div#lobbyMessageArea style="flex:1"
+        div#lobbyChatBox
+          div#lobbyMessageArea
           div.hbox style="margin-top:7px"
             span data-i18n="lobby.chat" style="margin-right:5px;white-space:nowrap"
             input type="text" id="lobbyChatInput" style="flex: 1"
