@@ -49,11 +49,12 @@ function _testFunction(phase){
       {id:2, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.47.133', port: 4081}
     ])
   } else if (phase == 1) { // After servers are loaded
-    return
+    //return
     serverGrid.row("#MERCURY").select()
     _loginButtonClick()
   } else if (phase == 2) { // After logged in
     //client.send("%%GAME hc2pd_test2-900-30 -")
+    _optionButtonClick()
   }
 }
 
@@ -257,6 +258,19 @@ $(function(){
       {id: "i18n-declare", click: function(){_handleImpasseDeclare()}}
     ]
   })
+  $('#modalOption').dialog({
+    modal: true,
+    autoOpen: false,
+    position: {my: 'center bottom'},
+    width: 400,
+    open: function(e, ui){
+      $('.ui-widget-overlay').hide().fadeIn()
+    },
+    show: 'fade',
+    buttons: [
+      {text: "OK", click: function(){_handleOptionClose()}},
+    ]
+  })
 
   // Sub menus
   $('.subMenu').hide()
@@ -276,7 +290,7 @@ $(function(){
   if (localStorage.save) $('#loginSave').prop('checked', localStorage.save == 'true')
 
   // Event listeners
-  document.ondragstart = function(){return false}
+  document.getElementById('layerBoard').ondragstart = function(){return false}
   $("#lobbyChatInput").on('keyup', function(e){
     if (e.keyCode == 13){
       if ($(this).val().length > 0) {
@@ -325,9 +339,10 @@ $(function(){
 
   // Do in every relogin
 
-  //  apiClient = new WebSystemApiClient("192.168.220.131", 3000)
+  //apiClient = new WebSystemApiClient("192.168.220.131", 3000)
   apiClient = new WebSystemApiClient("system.81dojo.com", 80)
   apiClient.setCallbackFunctions("SERVERS", _handleServers)
+  apiClient.setCallbackFunctions("OPTIONS", _handleOptions)
   if (!testMode) apiClient.getServers()
 
   if (testMode) _testFunction(0)
@@ -363,7 +378,7 @@ function _updateLanguage(){
   $("[data-i18n-value]").each(function(){
     $(this).val(i18next.t($(this).attr('data-i18n-value')))
   })
-  $("[data-i18n-title]").each(function(){
+  $("[data-i18n-title]").each(function(){ //TODO exclude modal dialogs
     $(this).attr('title', i18next.t($(this).attr('data-i18n-title')))
   })
   $('#newGameRuleSelect').empty()
@@ -373,7 +388,7 @@ function _updateLanguage(){
       $('#newGameRuleSelect').append($("<option />").val(key).text(HANDICAPS_JA[key]))
     })
   }
-  $('#modalNewGame, #modalChallenger, #modalImpasse').each(function(){
+  $('#modalNewGame, #modalChallenger, #modalImpasse, #modalOption').each(function(){
     $(this).dialog('option', 'title', i18next.t($(this).attr('data-i18n-title')))
   })
   $('[id^=i18n-]').each(function(){
@@ -598,7 +613,12 @@ function _giveHostButtonClick(){
 }
 
 function _optionButtonClick(){
-  writeUserMessage(EJ('No option available yet.', 'オプション機能は準備中です'), currentLayer, "#ff0000")
+  $('#modalOption').dialog('open')
+}
+
+function _handleOptionClose(){
+  $('#modalOption').dialog('close')
+  _setOptions()
 }
 
 function _allowWatcherChatClick(){
@@ -608,6 +628,7 @@ function _allowWatcherChatClick(){
 }
 
 function _closeBoard(){
+  if (board.isHost()) _giveHostButtonClick()
   if (board.isPlayer()) client.closeGame()
   else if (board.isWatcher()) client.monitor(board.game.gameId, false)
   client.who()
@@ -916,6 +937,7 @@ function _handleLoggedIn(str){
   mileage = parseInt(tokens[12])
   premium = makePremiumNum(parseInt(tokens[13]),tokens[14])
   hidden_prm = premium
+  apiClient.getOptions()
   _updateLobbyHeader()
   writeUserMessage(i18next.t("msg.html5_initial"), 1, "#008800")
   _hourMileCount = 0
@@ -1854,6 +1876,11 @@ function _handleServers(data){
   serverGrid.draw()
   serverGrid.row(0).select()
   if (testMode) _testFunction(1)
+}
+
+function _handleOptions(data){
+  options = Object.assign(options, data)
+  _loadOptions()
 }
 
 /* ====================================
