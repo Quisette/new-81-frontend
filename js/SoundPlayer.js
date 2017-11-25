@@ -26,7 +26,24 @@ class SoundPlayer{
   static get CONST(){
     return {
       SOUND_PATH: 'sound',
-      BYOYOMI_DIRECTORIES: ['', 'byoyomi01', 'byoyomi02', 'byoyomi03']
+      BYOYOMI_DIRECTORIES: ['', '', 'byoyomi01', 'byoyomi02', 'byoyomi03']
+    }
+  }
+
+  setByoyomiType(v){
+    this.byoyomiType = v
+    if (v != 1) {
+      let dir = SoundPlayer.CONST.BYOYOMI_DIRECTORIES[v]
+      for (let i = 1; i <= 9; i++) {
+        let key = (100 + i).toString().substr(1,2)
+        this._loadChannel(key, dir + "/" + key)
+      }
+      for (let i = 10; i <= 50; i += 10) {
+        let key = (100 + i).toString().substr(1,2)
+        this._loadChannel(key, dir + "/" + key)
+      }
+      this._loadChannel("TIME_UP", dir + "/timeup")
+      this._loadChannel("BYOYOMI_START", dir + "/byoyomi")
     }
   }
 
@@ -40,17 +57,20 @@ class SoundPlayer{
 
   sayByoyomi(){
     if (this.byoyomiType == 1) this.play("CHIME")
-
+    else this.play("BYOYOMI_START")
   }
 
   sayNumber(sec){
     //integer
     if (this.byoyomiType == 1) {
-      if (sec > 0 && sec <= 5 || sec == 7 || sec == 9) this.play("CHIME")
+      if (sec < 10 && sec >= 5 || sec == 3 || sec == 1) this.play("CHIME")
+    } else {
+      this.play((100 + sec).toString().substr(1,2))
     }
   }
 
   sayTimeUp(){
+    if (this.byoyomiType != 1) this.play("TIME_UP")
   }
 
   chatLobby(){

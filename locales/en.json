@@ -161,6 +161,7 @@
   "minutes": "minutes",
   "message": "message",
   "option": {
+    "pieces": "Piece",
     "sound": "Sound",
     "sound_piece": "Piece sound",
     "sound_end": "Game start/end sound",
@@ -168,8 +169,8 @@
     "sound_lobbychat": "Incoming lobby chat sound",
     "sound_gamechat": "Incoming game room chat sound",
     "sound_byoyomi": "Byoyomi sound",
-    "byoyomi_kitao": "Japanese (by Madoka Kitao)",
-    "byoyomi_yamato": "Japanese (by Yamato Takahashi)",
+    "byoyomi_kitao": "Ladies Professional Byoyomi (Madoka Kitao)",
+    "byoyomi_yamato": "Ladies Professional Byoyomi (Yamato Takahashi)",
     "byoyomi_noto": "yetAnother 萌えるチェスクロ voice sample",
     "sound_button": "Button sound",
     "byoyomi_chime": "Chime",

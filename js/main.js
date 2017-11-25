@@ -21,10 +21,10 @@ var _challengeUser = null
 var _gameAccepted = false
 var _allowWatcherChat = false
 var _greetState = 0 //0:not-active, 1:before-game, 2:during-game, 3:after-game, 4:post-game
-var premium;
+var premium = 0
 var countries = new Object();
 var board;
-var hidden_prm;
+var hidden_prm = 0
 var _hourMileCount
 var mouseX
 var mouseY
@@ -262,7 +262,7 @@ $(function(){
     modal: true,
     autoOpen: false,
     position: {my: 'center bottom'},
-    width: 400,
+    width: 410,
     open: function(e, ui){
       $('.ui-widget-overlay').hide().fadeIn()
     },
@@ -336,6 +336,7 @@ $(function(){
     receive_kifu_comment: 0,
     board_size: 0
   }
+  _enforceOptions()
 
   // Do in every relogin
 
@@ -618,7 +619,8 @@ function _optionButtonClick(){
 
 function _handleOptionClose(){
   $('#modalOption').dialog('close')
-  _setOptions()
+  _setOptionsFromDialog()
+  _enforceOptions()
 }
 
 function _allowWatcherChatClick(){
@@ -937,6 +939,7 @@ function _handleLoggedIn(str){
   mileage = parseInt(tokens[12])
   premium = makePremiumNum(parseInt(tokens[13]),tokens[14])
   hidden_prm = premium
+  _enforcePremium()
   apiClient.getOptions()
   _updateLobbyHeader()
   writeUserMessage(i18next.t("msg.html5_initial"), 1, "#008800")
@@ -1226,6 +1229,7 @@ function _handleGameEnd(lines, atReconnection = false){
     board.moves.push(move) //refresh list too
     if (!kifuGrid.row(':last').data().branch) board.addMoveToKifuGrid(move)
   }
+  if (gameEndType == "TIME_UP" && board.isPlayer() && !atReconnection) sp.sayTimeUp()
   writeUserMessage(move.toGameEndMessage(), 2, "#DD0088")
 	//if (GameTimer.soundType >= 2) Byoyomi.sayTimeUp();
   switch (result) {
@@ -1880,7 +1884,8 @@ function _handleServers(data){
 
 function _handleOptions(data){
   options = Object.assign(options, data)
-  _loadOptions()
+  _enforceOptions()
+  _loadOptionsToDialog()
 }
 
 /* ====================================
@@ -1905,6 +1910,10 @@ function clearGeneralTimeout(key){
     clearTimeout(timeouts[key])
     timeouts[key] = false
   }
+}
+
+function _enforceOptions(){
+  sp.setByoyomiType(options.timer_sound_type)
 }
 
 function _handleGeneralTimeout(key){
@@ -1945,4 +1954,13 @@ function _isFavorite(name){
 
 function _isColleague(name){
   return false
+}
+
+function getPremium(){
+  if (premium == hidden_prm) return premium
+  else return 0
+}
+
+function _enforcePremium(){
+  _DisableOptionsByPremium()
 }

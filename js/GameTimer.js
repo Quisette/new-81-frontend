@@ -106,7 +106,8 @@ class GameTimer {
 				if (this.myPlayingTimer) sendTimeout()
 			}
 		} else if (this._isByoyomi) {
-			if (this._timeLeft == 30 || this._timeLeft == 20 || this._timeLeft <= 10 && this._timeLeft > 0) sp.sayNumber(this._timeLeft)
+			if (this._timeLeft == 30 || this._timeLeft == 20 || this._timeLeft == 10) sp.sayNumber(this._byoyomi - this._timeLeft)
+			else if (this._timeLeft < 10 && this._timeLeft > 0) sp.sayNumber(10 - this._timeLeft)
 		}
 		this._display();
 	}
