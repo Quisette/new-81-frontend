@@ -4,6 +4,7 @@ function _loadOptionsToDialog(){
 }
 function _setOptionsFromDialog(){
   options.arrow_color = parseInt($('input#arrow_color').spectrum('get').toHex(), 16)
+  options.timer_sound_type = parseInt($('input[name=timer_sound_type]:checked').val())
 }
 function _DisableOptionsByPremium(){
   $('input[name=timer_sound_type]:gt(0)').prop({'disabled': getPremium() == 0, 'title': getPremium() == 0 ? i18next.t("option.for_premium") : ''})
@@ -15,4 +16,7 @@ $('input#arrow_color').spectrum({
   change: function(color){
     apiClient.postOption('arrow_color', parseInt(color.toHex(), 16))
   }
+})
+$('input[name=timer_sound_type]').change(function(){
+  apiClient.postOption('timer_sound_type', parseInt($('input[name=timer_sound_type]:checked').val()))
 })
