@@ -238,7 +238,7 @@
   "apply_dan": "JSA Certificate",
   "status": "Status",
   "msg": {
-    "html5_initial": "Welcome to HTML5 beta version. The available functions are still limited; no piece/voice options and no study/tournament mode. If you find any bug, please report to info@81dojo.com.",
+    "html5_initial": "Welcome to HTML5 beta version. The available functions are still limited; no piece design options and no study/tournament mode. If you find any bug, please report to info@81dojo.com.",
     "game_start": "Make kind greetings when starting and ending the game. The best way to improve your skill is Postgame Analysis. (However, it is not against manners to skip the analysis and leave immediately after exchanging greeting.)",
     "mute_chat": "You are receiving watcher's chat as this game is non-rated. (Switch off the checkbox above the wathcer list to disable it.)",
     "password_encrypted": "Password will be encrypted while being sent to the server.",

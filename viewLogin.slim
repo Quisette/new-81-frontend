@@ -16,11 +16,11 @@ div.layer#layerLogin
       p
         span.small data-i18n="login.loginname"
         br
-        input type="text" id="usernameInput"
+        input type="text" id="usernameInput" onkeydown="if (event.keyCode==13) _loginButtonClick()"
       p
         span.small data-i18n="login.password"
         br
-        input type="password" id="passwordInput" data-i18n-title="msg.password_encrypted"
+        input type="password" id="passwordInput" data-i18n-title="msg.password_encrypted" onkeydown="if (event.keyCode==13) _loginButtonClick()"
       p
         input type="checkbox" id="loginSave"
         span data-i18n="login.save"

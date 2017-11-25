@@ -410,7 +410,7 @@ function _loginButtonClick(){
     alert('Please select a server.')
     return
   }
-  $('#loginButton').attr('disabled', true)
+  $('#loginButton, #passwordInput, #usernameInput').attr('disabled', true)
   if (client != null) client.close();
   $('#loginAlert').text(i18next.t("login.connecting"))
   client = new WebSocketClient(server.name, server.host, server.port, isGuest ? 'guest' : $('#usernameInput').val(), isGuest ? 'dojo_guest' : $('#passwordInput').val());
@@ -958,8 +958,8 @@ function _updateLobbyHeader(){
 }
 
 function _handleLoginFailed(code){
-  $('#loginAlert').text(i18next.t(code))
-  $('#loginButton').attr('disabled', false)
+  $('#loginAlert').text(i18next.t("code." + code))
+  $('#loginButton, #passwordInput, #usernameInput').attr('disabled', false)
 }
 
 function _handleWho(str){
@@ -1801,7 +1801,7 @@ function _handleMile(result) {
 function _handleClosed(){
   _stopAllTimeouts()
   $('#loginAlert').text(i18next.t("login.closed"))
-  $('#loginButton').attr('disabled', false)
+  $('#loginButton, #passwordInput, #usernameInput').attr('disabled', false)
   $('#loginButton').attr('value', i18next.t("login.relogin"))
   _switchLayer(0)
   users = new Object()
