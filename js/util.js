@@ -213,7 +213,7 @@ const OPENING_NAME_EN = {
 function openingTypeObject(key){
   let short = ""
   let tip = ""
-  if (key.match(/opposition_(black|white)0/)) key = "unknown" // Countermeasure to shogi-server bug
+  if (key.match(/opposition_(black|white)[01]/)) key = "unknown" // Countermeasure to shogi-server bug
   if (key.match(/^(hc|va)/)) {  // key is gameType code for handicaps or variants
     switch (key) {
   		case "hctombonl":

@@ -16,6 +16,7 @@ class Board{
     this._position
     this._direction = Position.CONST.SENTE
     this._theme = "ichiji"
+    this.pieceDesignType = 0
     this._selectedSquare = null
     this._lastSquare = null
     this._mouseDownSquare = null
@@ -87,9 +88,10 @@ class Board{
   }
 
   _imagePath(){
-    this._ban.css('background-image', 'url(img/themes/' + this._theme + '/ban.jpg)')
-    this._komadais[0].css('background-image', 'url(img/themes/' + this._theme + '/Shand.jpg)')
-    this._komadais[1].css('background-image', 'url(img/themes/' + this._theme + '/Ghand.jpg)')
+    let dir = 'default'
+    this._ban.css('background-image', 'url(img/themes/' + dir + '/ban.jpg)')
+    this._komadais[0].css('background-image', 'url(img/themes/' + dir + '/Shand.jpg)')
+    this._komadais[1].css('background-image', 'url(img/themes/' + dir + '/Ghand.jpg)')
   }
 
   _partLayout(){
@@ -148,6 +150,7 @@ class Board{
   }
 
   _refreshPosition(){
+    if (this._position == null) return
     let thisInstance = this
     for (let i = 0; i < 2; i++){
       this._komadais[i].empty()
@@ -179,6 +182,13 @@ class Board{
       $('#sq' + this._position.lastMove.fromX + '_' + this._position.lastMove.fromY).addClass('square-last')
     }
     if ($("#modalImpasse").dialog('isOpen')) this.calcImpasse()
+  }
+
+  setPieceDesignType(v){
+    if (v <= 8) this._theme = ['ichiji', 'ninju', 'hidetchi', 'ichiji_ryoko', 'dobutsu', 'kinki', 'ryoko', 'kiyoyasu', 'shogicz'][v]
+    else if (v >= 100) this._theme = ['blind_middle', 'blind_hard', 'blind_extreme'][v - 100]
+    this._imagePath()
+    this._refreshPosition()
   }
 
   setGame(game){

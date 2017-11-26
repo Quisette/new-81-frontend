@@ -1914,6 +1914,7 @@ function clearGeneralTimeout(key){
 
 function _enforceOptions(){
   sp.setByoyomiType(options.timer_sound_type)
+  board.setPieceDesignType(options.piece_type)
 }
 
 function _handleGeneralTimeout(key){
