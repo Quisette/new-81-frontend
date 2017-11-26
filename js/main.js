@@ -290,6 +290,12 @@ $(function(){
   if (localStorage.save) $('#loginSave').prop('checked', localStorage.save == 'true')
 
   // Event listeners
+  window.onblur = function(){
+    if (board.isPlaying() && !testMode && board.game.isRated()) client.gameChat("[##M_OUT]0,0")
+  }
+  window.onfocus = function(){
+    if (board.isPlaying() && !testMode && board.game.isRated()) client.gameChat("[##M_IN]0,0")
+  }
   document.getElementById('layerBoard').ondragstart = function(){return false}
   $("#lobbyChatInput").on('keyup', function(e){
     if (e.keyCode == 13){
@@ -1294,11 +1300,6 @@ function _handleGameEnd(lines, atReconnection = false){
 	  board.isStudyHost = true;
 	  board.isSubHost = false;
   }
-  if (_pmGameLog != "") {
-	  _writeUserMessage(LanguageSelector.EJ("PM received during the game:\n", "対局中にPMが届いています\n"), 2, "#FF0000", true);
-	  _writeUserMessage(_pmGameLog, 2, "#FF0000");
-	  _pmGameLog = "";
-  }
   history += board.my_turn == 0 ? LanguageSelector.EJ("  Black:   ", "  ☗先手:  ") : LanguageSelector.EJ("  White:  ", "  ☖後手:  ");
   for each (var game:Object in _game_list) {
 	  if (game.id == _game_name) {
@@ -1322,6 +1323,8 @@ function _handleGameEnd(lines, atReconnection = false){
     if (board.game.gameType == "r") client.mileage(10, config.mileagePass)
     else client.mileage(5, config.mileagePass)
   }
+  board.playerNameClassChange(0, 'name-mouse-out', false)
+  board.playerNameClassChange(1, 'name-mouse-out', false)
   setBoardConditions()
   board.updateTurnHighlight()
   if (_greetState <= 2) _greetState = atReconnection ? 4 : 3
@@ -1649,27 +1652,12 @@ function _handleGameChat(sender, message){
 		//if (_ignore_list.indexOf(sender.toLowerCase()) >= 0) return;
 		if (!options.accept_arrow == 1 || sender == me.name) return
 		if (board.isPlaying()) return
-		//if (board.post_game && !board.studyOn) return;
 		if (sender == me.name) sender = ""
 		board.addArrow(parseInt(RegExp.$1), Number(RegExp.$2), Number(RegExp.$3), Number(RegExp.$4), Number(RegExp.$5), parseInt(RegExp.$6, 16), true, sender)
-    /*
-	} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##M_(IN|OUT)\](\d+),(\d+)$/))) {
-		if (sender != login_name) {
-			if (sender == board.name_labels[0].text) {
-				if (match[1] == "OUT") {
-					board.name_labels[0].setStyle("color", 0x777777);
-				} else {
-					board.name_labels[0].setStyle("color", undefined);
-				}
-			} else if (sender == board.name_labels[1].text) {
-				if (match[1] == "OUT") {
-					board.name_labels[1].setStyle("color", 0x777777);
-				} else {
-					board.name_labels[1].setStyle("color", undefined);
-				}
-			}
-		}
-    */
+	} else if (message.match(/^\[##M_(IN|OUT)\](\d+),(\d+)$/)) {
+    let isOut = RegExp.$1 == "OUT"
+    let turn = board.getPlayerRoleFromName(sender)
+    if (turn != null) board.playerNameClassChange(turn, 'name-mouse-out', isOut)
 	} else if (message.match(/^\[##GIVEHOST\](.+)$/)) {
 		if (RegExp.$1 == me.name) {
       sendStudy()
