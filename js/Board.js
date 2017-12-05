@@ -88,7 +88,7 @@ class Board{
   }
 
   _imagePath(){
-    let dir = 'default'
+    let dir = ['dobutsu', 'blind_extreme'].includes(this._theme) ? this._theme : 'default'
     this._ban.css('background-image', 'url(img/themes/' + dir + '/ban.jpg)')
     this._komadais[0].css('background-image', 'url(img/themes/' + dir + '/Shand.jpg)')
     this._komadais[1].css('background-image', 'url(img/themes/' + dir + '/Ghand.jpg)')

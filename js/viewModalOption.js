@@ -19,7 +19,6 @@ function _setOptionsFromDialog(){
 }
 function _DisableOptionsByPremium(){
   $('input[name=timer_sound_type]:gt(0), input[name=piece_type]:lt(9):gt(3)').prop({'disabled': getPremium() == 0, 'title': getPremium() == 0 ? i18next.t("option.for_premium") : ''})
-  $('input[name=piece_type]:eq(8)').prop('disabled', true)
 }
 
 _loadPieceDesignToDialog("ichiji", 0, true)
