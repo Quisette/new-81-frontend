@@ -297,50 +297,46 @@ class Position{
     return impasseStatus
 	}
 
+	toSFEN(url = false) {
+		let str = ""
+		let n = 0
+		for (let y = 0; y < 9; y++) {
+			for (let x = 8; x >= 0; x--) {
+				if (this._squares[x][y]) {
+					if (n > 0) str += n.toString()
+					n = 0
+					str += this._squares[x][y].toSFEN()
+				} else {
+					n += 1
+				}
+			}
+			if (n > 0) str += n.toString()
+			n = 0
+			if (y < 8) str += "/"
+		}
+		str += " " + (this.turn ? "b" : "w")
+		let hand = ""
+    let counts = {K:0, R:0, B:0, G:0, S:0, N:0, L:0, P:0, k:0, r:0, b:0, g:0, s:0, n:0, l:0, p:0}
+		for (let j = 0; j < 2; j++) {
+      this.komadais[j].forEach(function(piece){
+        counts[piece.toSFEN()] += 1
+      })
+		}
+    for (let key in counts) {
+      if (counts[key] > 0) hand += (counts[key] > 1 ? counts[key] : "") + key
+    }
+		if (hand == "") hand = "-"
+		str += " " + hand
+    return str
+//		return url ? encodeURIComponent(str) : str;
+	}
+
 }
 
 //	private static const koma_neutral_nums:Array = new Array(1, 1, 1, 2, 2, 2, 2, 9);
 //	private static const koma_material_points:Array = new Array(0, 8, 8, 5, 5, 3, 3, 1);
 
 /*
-
-	public function toSFEN(url:Boolean=false):String {
-		var str:String = "";
-		var n:int = 0;
-		for (var y:int = 0; y < 9; y++) {
-			for (var x:int = 0; x < 9; x++) {
-				if (_ban[x][y]) {
-					if (n > 0) str += n;
-					n = 0;
-					if (_ban[x][y].ownerPlayer == SENTE) {
-						str += koma_sfen_names[_ban[x][y].type];
-					} else {
-						str += koma_sfen_names[_ban[x][y].type].toLowerCase();
-					}
-				} else {
-					n += 1;
-				}
-			}
-			if (n > 0) str += n;
-			n = 0;
-			if (y < 8) str += "/";
-		}
-		str += " " + (turn == SENTE ? "b" : "w");
-		var hand:String = ""
-		for (var j:int = 0; j < 2;j++) {
-			for (var i:int = 0; i < 8; i++) {
-				n = _komadai[j].getNumOfKoma(i);
-				if (n > 0) hand += (n > 1 ? n : "") + (j == 0 ? koma_sfen_names[i] : koma_sfen_names[i].toLowerCase());
-			}
-		}
-		if (hand == "") hand = "-";
-		str += " " + hand;
-		return url ? encodeURIComponent(str) : str;
-	}
-
-		public function get impasseStatus():Array {
-			return this._impasseStatus;
-		}
 
 		public function mustPromote(from:Point, to:Point):Boolean {
 			if (koma_names == koma_names_zoo) return false;

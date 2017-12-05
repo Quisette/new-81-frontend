@@ -99,6 +99,7 @@ ul.subMenu
   margin: 0
   padding: 0
   list-style: none
+  box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.5)
   li
     background-color: $KeyColor
     width: 100%
@@ -111,6 +112,13 @@ ul.subMenu
       white-space: nowrap
       &:hover
         background-color: rgba(255,255,255,0.2)
+      img
+        vertical-align: middle
+        margin-right: 2px
+    a.submenu-button-disabled
+      pointer-events: none
+      background-color: $DarkKeyColor
+      opacity: 0.7
 img.avatar
   width: 128px
   height: 128px

@@ -10,6 +10,7 @@ class Piece{
     this.promotedCSA = null
     this._img = ""
     this._promotedImg = null
+    this._sfen = ""
   }
 
   normalMoves(){
@@ -60,6 +61,11 @@ class Piece{
   isPromotable(){
     return true
   }
+
+  toSFEN(){
+    let str = (this.isPromotable() && this.isPromoted() ? "+" : "") + this._sfen
+    return this.owner ? str : str.toLowerCase()
+  }
 //  kyotoConvert(){
 //  		 kyoto_conversion:Array = new Array(0, 7, 4, 5, 2, 3, 15, 1, 8, 9, 10, 11, 12, 13, 14, 6);
 //  }
@@ -75,6 +81,7 @@ class PieceOU extends Piece{
     this.promotedCSA = "OU"
     this._img = "gyoku"
     this._promotedImg = "ou"
+    this._sfen = "K"
   }
   normalMoves(){
     return [[0, +1], [+1, +1], [-1, +1], [+1, +0], [-1, +0], [0, -1], [+1, -1], [-1, -1]]
@@ -99,6 +106,7 @@ class PieceHI extends Piece{
     this.promotedCSA = "RY"
     this._img = "hi"
     this._promotedImg = "ryu"
+    this._sfen = "R"
   }
   promotedMoves(){
     return [[+1, +1], [-1, +1], [+1, -1], [-1, -1]]
@@ -117,6 +125,7 @@ class PieceKA extends Piece{
     this.promotedCSA = "UM"
     this._img = "kaku"
     this._promotedImg = "uma"
+    this._sfen = "B"
   }
   promotedMoves(){
     return [[0, +1], [+1, 0], [-1, 0], [0, -1]]
@@ -133,6 +142,7 @@ class PieceKI extends Piece{
     this.type = 3
     this.CSA = "KI"
     this._img = "kin"
+    this._sfen = "G"
   }
   normalMoves(){
     return [[0, +1], [+1, +1], [-1, +1], [+1, +0], [-1, +0], [0, -1]]
@@ -151,6 +161,7 @@ class PieceGI extends Piece{
     this.promotedCSA = "NG"
     this._img = "gin"
     this._promotedImg = "ngin"
+    this._sfen = "S"
   }
   normalMoves(){
     return [[0, +1], [+1, +1], [-1, +1], [+1, -1], [-1, -1]]
@@ -169,6 +180,7 @@ class PieceKE extends Piece{
     this.promotedCSA = "NK"
     this._img = "kei"
     this._promotedImg = "nkei"
+    this._sfen = "N"
   }
   normalMoves(){
     return [[+1, +2], [-1, +2]]
@@ -187,6 +199,7 @@ class PieceKY extends Piece{
     this.promotedCSA = "NY"
     this._img = "kyo"
     this._promotedImg = "nkyo"
+    this._sfen = "L"
   }
   promotedMoves(){
     return [[0, +1], [+1, +1], [-1, +1], [+1, +0], [-1, +0], [0, -1]]
@@ -205,6 +218,7 @@ class PieceFU extends Piece{
     this.promotedCSA = "TO"
     this._img = "fu"
     this._promotedImg = "to"
+    this._sfen = "P"
   }
   normalMoves(){
     return [[0, +1]]

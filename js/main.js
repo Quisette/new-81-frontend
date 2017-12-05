@@ -619,6 +619,10 @@ function _giveHostButtonClick(){
   }
 }
 
+function _KyokumenpediaClick(){
+  window.open("http://kyokumen.jp/positions/" + board.position.toSFEN(), "_blank")
+}
+
 function _optionButtonClick(){
   $('#modalOption').dialog('open')
 }
