@@ -350,6 +350,7 @@ $(function(){
   apiClient = new WebSystemApiClient("system.81dojo.com", 80)
   apiClient.setCallbackFunctions("SERVERS", _handleServers)
   apiClient.setCallbackFunctions("OPTIONS", _handleOptions)
+  apiClient.setCallbackFunctions("PLAYER", _handlePlayerDetail)
   if (!testMode) apiClient.getServers()
 
   if (testMode) _testFunction(0)
@@ -633,6 +634,10 @@ function _handleOptionClose(){
   _enforceOptions()
 }
 
+function _playerNameDblClick(name){
+  _openPlayerInfo(users[name])
+}
+
 function _allowWatcherChatClick(){
   _allowWatcherChat = $('#receiveWatcherChatCheckBox').is(':checked')
   if (_allowWatcherChat) _sendAutoChat("#G101")
@@ -822,7 +827,7 @@ function _openPlayerInfo(user, doOpen = true){
       title: user.name,
       html: '<div id="player-info-layer-1" class="hbox" style="pointer-events:none">\
         <div class="avatar-wrapper"><img class="avatar"/></div>\
-        <div style="flex:1;margin-left:10px"><p id="p1"></p><p id="p2"></p><p id="p3"></p><p id="p4"></p></div>\
+        <div style="flex:1;margin-left:10px"><p id="p1"></p><p id="p2"></p><p id="p3"></p><p id="p4"></p><p id="p5"></p></div>\
         </div>\
         <div id="player-info-layer-2" style="margin-top:-128px;opacity:0">\
         <div id="privateMessageArea"></div>\
@@ -853,7 +858,10 @@ function _openPlayerInfo(user, doOpen = true){
       }
     })
   }
-  if (doOpen) element.dialog('open')
+  if (doOpen) {
+    element.dialog('open')
+    apiClient.getPlayerDetail(user)
+  }
   element.find("img.avatar").attr("src", user.avatarURL())
   element.find("p#p1").html(user.country.flagImgTag27() + ' ' + user.country.toString())
   element.find("p#p2").html('R: ' + user.rate + ' (' + makeRankFromRating(user.rate) + ')')
@@ -1878,6 +1886,17 @@ function _handleOptions(data){
   options = Object.assign(options, data)
   _enforceOptions()
   _loadOptionsToDialog()
+}
+
+function _handlePlayerDetail(data, name){
+  let element = $("#player-info-window-" + name)
+  if (element[0]) {
+    let percentage = 0
+    if (data.wins + data.losses > 0) percentage = 100.0 * data.wins / (data.wins + data.losses)
+    element.find("p#p3").html(playingStyleName(data.style_id))
+    element.find("p#p4").html(data.wins + " " + i18next.t("player_info.win") + " " + data.losses + " " + i18next.t("player_info.loss") + " (" + percentage.toFixed(1) + "%)")
+    element.find("p#p5").html(i18next.t("player_info.streak") + ": " + data.streak_best + " (" + i18next.t("player_info.current") + ": " + Math.max(0, data.streak) + ")")
+  }
 }
 
 /* ====================================

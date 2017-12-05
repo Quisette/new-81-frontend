@@ -261,3 +261,11 @@ function restoreIdleConnections(n){
 function intToColorStyle(v) {
   return '#' + (('000000' + v.toString(16).toUpperCase()).substr(-6))
 }
+
+function playingStyleName(i) {
+  if (i18next.language == "ja") {
+    return ['棋風 未登録', '居飛車党', '純粋居飛車党', '振り飛車党', '純粋振り飛車党', 'オールラウンダー', '真正オールラウンダー', '対抗形志向', '対抗形マニア', '力戦派', '矢倉マニア', '角換りマニア', '横歩取りマニア', '三間飛車党', '三間飛車マニア', '四間飛車党', '四間飛車マニア', '中飛車党', '中飛車マニア'][i]
+  } else {
+    return ['Playing style unknown', 'Static Rook Player', 'Pure Static Rook Player', 'Swinging Rook Player', 'Pure Swinging Rook Player', 'All-rounder', 'Genuine All-rounder', 'Opposition Seeker', 'Opposition Enthusiast', 'Free-style Player', 'Yagura Enthusiast', 'Bishop Exchange Enthusiast', 'Side Pawn Picker Enthusiast', '3rd-file Rook Player', '3rd-file Rook Enthusiast', '4th-file Rook Player', '4th-file Rook Enthusiast', 'Central Rook Player', 'Central Rook Enthusiast'][i]
+  }
+}

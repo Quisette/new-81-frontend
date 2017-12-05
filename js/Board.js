@@ -46,6 +46,7 @@ class Board{
     for (let i = 0; i < 2; i++){
       this.playerInfos[i].append('<div class="avatar-wrapper" style="margin:5px 15px;"><img class="avatar"/></div><span id="player-info-mark" style="font-size:15px">' + (i == 0 ? '☗' : '☖') + '</span><span id="player-info-name"></span><br><span id="player-info-rate"></span>')
     }
+    $('[id=player-info-name]').dblclick(function(){_playerNameDblClick($(this).text())})
     this._arrowCanvas = $('<canvas></canvas>', {id: 'boardCanvas'}).attr({width: this._div.width(), height: this._div.height()}).appendTo(this._div)
   }
 

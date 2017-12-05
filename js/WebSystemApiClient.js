@@ -31,6 +31,10 @@ class WebSystemApiClient {
     this._callJsonApi("OPTIONS", "options.json?name=" + me.name.toLowerCase())
   }
 
+  getPlayerDetail(user){
+    this._callJsonApi("PLAYER", "players/detail/" + user.name + ".json", user.name)
+  }
+
   postOption(key, val){
     //TODO return if guest
     $.post(this._path + "options", {name: me.name.toLowerCase(), key: key, value: val}, function(){})
