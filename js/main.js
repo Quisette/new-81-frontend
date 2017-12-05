@@ -456,8 +456,7 @@ function _loginButtonClick(){
 ===================================== */
 
 function _refreshButtonClick(){
-  client.who()
-  client.list()
+  _refreshLobby()
   $("#refreshButton").addClass("button-disabled")
   setGeneralTimeout("REFRESH", 10000)
 }
@@ -471,7 +470,10 @@ function _navigateToWebSystem(path){
 }
 
 function _enterGame(game){
-  if (board.game) return
+  if (board.game) {
+    if (board.myRoleType == null) board.close()
+    else return
+  }
   if (game.isVariant()) {
     writeUserMessage(EJ("This game rule is not supported by HTML client yet.", "この対局ルールはHTML版アプリでは未対応です。"), 1, "#ff0000")
     return
@@ -648,8 +650,7 @@ function _closeBoard(){
   if (board.isHost()) _giveHostButtonClick()
   if (board.isPlayer()) client.closeGame()
   else if (board.isWatcher()) client.monitor(board.game.gameId, false)
-  client.who()
-  client.list()
+  _refreshLobby()
   board.close()
   _switchLayer(1)
   $('#boardMessageArea').empty()
@@ -963,8 +964,7 @@ function _handleLoggedIn(str){
   writeUserMessage(i18next.t("msg.html5_initial"), 1, "#008800")
   _hourMileCount = 0
   setGeneralTimeout("HOUR_MILE", 3600000)
-  client.who(true)
-  client.list()
+  _refreshLobby(true)
   if (testMode) _testFunction(2)
 }
 
@@ -1910,9 +1910,12 @@ function _switchLayer(n){
   currentLayer = n
 }
 
-function setGeneralTimeout(key, ms){
+function setGeneralTimeout(key, ms, force = false){
   //string, integer
-  if (timeouts[key]) return
+  if (timeouts[key]) {
+    if (force) clearGeneralTimeout(key)
+    else return
+  }
   timeouts[key] = setTimeout(_handleGeneralTimeout, ms, key)
 }
 
@@ -1941,12 +1944,15 @@ function _handleGeneralTimeout(key){
     case "REFRESH":
       $("#refreshButton").removeClass("button-disabled")
       break
+    case "AUTO_REFRESH":
+      if (currentLayer == 1) _refreshLobby()
     case "HOUR_MILE":
 			client.mileage([5, 8, 10, 10, 12, 12, 12, 12][_hourMileCount], config.mileagePass)
       if (_hourMileCount < 7) {
         _hourMileCount++
         setGeneralTimeout("HOUR_MILE", 3600000)
       }
+      break
   }
 }
 
@@ -1975,4 +1981,10 @@ function getPremium(){
 
 function _enforcePremium(){
   _DisableOptionsByPremium()
+}
+
+function _refreshLobby(first = false){
+  client.who(first)
+  client.list()
+  setGeneralTimeout("AUTO_REFRESH", 180000, true)
 }
