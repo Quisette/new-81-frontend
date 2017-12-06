@@ -365,7 +365,20 @@ window.onresize = function () {
 }
 
 function _resize(){
-  $("div.menuBar").find("a.button").css('min-width', window.innerWidth / 12.)
+  $("#layerLogin").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 12.)
+  $("#layerBoard").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 15.)
+	if (window.innerWidth > 1550) {
+    $("#lobbyChatBox").insertAfter($("#playerListBox")).css('flex', 'initial')
+	} else {
+    $("#lobbyChatBox").insertAfter($("#gameGridWrapper")).css('flex', '11 11 1px')
+	}
+	if (window.innerWidth >= board.actualWidth() + 400 && window.innerHeight < board.actualHeight() + 230) {
+    $("#boardChatBox").insertBefore($("#boardRightBottomHBox"))
+    $("#watcherBox").insertAfter($("#kifuBox"))
+	} else {
+    $("#watcherBox").prependTo($("#boardLeftBottomHBox"))
+    $("#boardChatBox").insertAfter($("#watcherBox"))
+	}
   $("#playerGridWrapper, #waiterGridWrapper, #gameGridWrapper, #watcherGridWrapper, #kifuGridWrapper").each(function(){
     $(this).find('.dataTables_scrollBody').css('height', $(this).height() - $(this).find($("thead")).height())
   })
@@ -1929,6 +1942,11 @@ function clearGeneralTimeout(key){
 function _enforceOptions(){
   sp.setByoyomiType(options.timer_sound_type)
   board.setPieceDesignType(options.piece_type)
+  let scale = [1, 1.5, 2][options.board_size]
+  if (board.setScale(scale)) {
+    $('#boardLeftBottomHBox').width(scale * board.div.width())
+    _resize()
+  }
 }
 
 function _handleGeneralTimeout(key){

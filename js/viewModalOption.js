@@ -11,11 +11,13 @@ function _loadOptionsToDialog(){
   $('input#arrow_color').spectrum('set', intToColorStyle(options.arrow_color))
   $('input[name=timer_sound_type]').val([options.timer_sound_type])
   $('input[name=piece_type]').val([options.piece_type])
+  $('input[name=board_size]').val([options.board_size])
 }
 function _setOptionsFromDialog(){
   options.arrow_color = parseInt($('input#arrow_color').spectrum('get').toHex(), 16)
   options.timer_sound_type = parseInt($('input[name=timer_sound_type]:checked').val())
   options.piece_type = parseInt($('input[name=piece_type]:checked').val())
+  options.board_size = parseInt($('input[name=board_size]:checked').val())
 }
 function _DisableOptionsByPremium(){
   $('input[name=timer_sound_type]:gt(0), input[name=piece_type]:lt(9):gt(3)').prop({'disabled': getPremium() == 0, 'title': getPremium() == 0 ? i18next.t("option.for_premium") : ''})

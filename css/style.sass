@@ -84,6 +84,7 @@ div.menuBar
         display: inline-block
         color: white
         font-size: 14px
+        padding: 0 3px
         &:hover
           background-color: rgba(255,255,255,0.2)
         img
@@ -188,6 +189,7 @@ div#gameGridWrapper
 
 div#lobbyChatBox
   display: flex
+  width: $GameListWidth
   flex-direction: column
   padding-bottom: $LobbyGap
   margin-left: $LobbyGap
@@ -222,6 +224,7 @@ div#boardChatBox
   margin-bottom: $boardGap
 div#boardRightVBox
   margin-left: $boardGap
+  max-width: 394px
 div#boardBox
   position: relative
   width: $BoardBoxWidth

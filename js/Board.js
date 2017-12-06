@@ -8,6 +8,8 @@ class Board{
     this.studyHostType = 0  // 0: not host, 1: Sub-host, 2: Host
     // Properties
     this._div = div
+    this._originalWidth = div.width()
+    this._originalHeight = div.height()
     this._komadais = new Array(2)
     this.playerInfos = new Array(2)
     this._timers = new Array(2)
@@ -31,6 +33,7 @@ class Board{
     this._arrowsPublic = []
     this._generateParts()
     this._setTheme()
+    this._scale = 1
   }
 
   _generateParts(){
@@ -47,7 +50,7 @@ class Board{
       this.playerInfos[i].append('<div class="avatar-wrapper" style="margin:5px 15px;"><img class="avatar"/></div><span id="player-info-mark" style="font-size:15px">' + (i == 0 ? '☗' : '☖') + '</span><span id="player-info-name"></span><br><span id="player-info-rate"></span>')
     }
     $('[id=player-info-name]').dblclick(function(){_playerNameDblClick($(this).text())})
-    this._arrowCanvas = $('<canvas></canvas>', {id: 'boardCanvas'}).attr({width: this._div.width(), height: this._div.height()}).appendTo(this._div)
+    this._arrowCanvas = $('<canvas></canvas>', {id: 'boardCanvas'}).attr({width: this._originalWidth, height: this._originalHeight}).appendTo(this._div)
   }
 
   _setTheme(){
@@ -190,6 +193,24 @@ class Board{
     else if (v >= 100) this._theme = ['blind_middle', 'blind_hard', 'blind_extreme'][v - 100]
     this._imagePath()
     this._refreshPosition()
+  }
+
+  setScale(scale){
+    if (scale == this._scale) return false // Not changed
+    this._div.css('transform', 'scale(' + scale + ')')
+    let hMargin = (scale - 1) * this._originalHeight / 2
+    let wMargin = (scale - 1) * this._originalWidth / 2
+    this._div.css('margin', hMargin + 'px ' + wMargin + 'px')
+    this._scale = scale
+    return true // Changed
+  }
+
+  actualWidth(){
+    return this._div.width() * this._scale
+  }
+
+  actualHeight(){
+    return this._div.height() * this._scale
   }
 
   setGame(game){
