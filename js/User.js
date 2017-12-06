@@ -3,6 +3,7 @@
 class User{
   constructor(name){
     this.name = name
+    this.isGuest = name.match(/^GUEST_[0-9a-z]{6}$/)
     this.rate = 0
     this._countryCode = 0
     this.status = 0
@@ -106,15 +107,19 @@ class User{
       ruleStr = getHandicapShort(game_info[1])
 			timeStr = (parseInt(game_info[3]) / 60) + "-" + game_info[4]
 		}
+    let rateStr = this.rate
+    if (this.provisional) rateStr = "*" + this.rate
+    if (this.rate == 0) rateStr = "????"
+    let rankStr = this.provisional ? "-" : coloredSpan(makeRankFromRating(this.rate), makeColorFromRating(this.rate))
 
     return {
       statStr: statStr,
       title: "",
-      rank: coloredSpan(makeRankFromRating(this.rate), makeColorFromRating(this.rate)),
+      rank: rankStr,
       name: this.name,
       nameStr: this.idle ? coloredSpan(this.name, '#00f') : this.name,
       country: this.country.flagImgTag16() + ' ' + this.country.name3Tag(),
-      rate: this.rate,
+      rate: rateStr,
       waiter: this.country.flagImgTag27() + ' ' + coloredSpan('■', makeColorFromRating(this.rate)) + ' ' + (this.idle ? coloredSpan(this.name, '#00f') : this.name),
       ruleStr: ruleStr,
       timeStr: timeStr
@@ -127,6 +132,13 @@ class User{
     } else {
       return "http://system.81dojo.com/players/" + this.name + "/avatar"
     }
+  }
+
+  static rateStrToRate(v){ // Restore rate as integer back from rateStr
+    let str = v.toString()
+    if (str == "????") return 0
+    if (str.match(/^\*(\d+)$/)) str = RegExp.$1
+    return parseInt(str)
   }
 
   set countryCode(v){

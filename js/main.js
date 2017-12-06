@@ -100,6 +100,16 @@ $(function(){
   })
 
   // Prepare Datatables
+  $.fn.dataTableExt.oSort['rate-str-asc'] = function(a, b) {
+    a = User.rateStrToRate(a)
+    b = User.rateStrToRate(b)
+    return ((a < b) ? -1 : ((a > b) ?  1 : 0))
+  }
+  $.fn.dataTableExt.oSort['rate-str-desc'] = function(a, b) {
+    a = User.rateStrToRate(a)
+    b = User.rateStrToRate(b)
+    return ((a < b) ? 1 : ((a > b) ?  -1 : 0))
+  }
   serverGrid = $('#serverGrid').DataTable({
     data: [],
     columns: [
@@ -124,7 +134,7 @@ $(function(){
       {data: "rank", width: "14%", bSortable: false},
       {data: "nameStr", width: "40%", className: "dt-body-left"},
       {data: "country", width: "12%", className: "dt-body-left"},
-      {data: "rate", width: "10%", className: "dt-body-right"}
+      {data: "rate", width: "10%", className: "dt-body-right", type: "rate-str"}
     ],
     rowId: "name",
     searching: false, paging: false, info: false,
@@ -859,6 +869,7 @@ function _openPlayerInfo(user, doOpen = true){
         {text: "PM", click: function(){_playerPMClick(this)}}
       ]
     })
+    if (user.isGuest) element.find("#privateChatInput").prop('disabled', true)
     element.find("#privateChatInput").on('keyup', function(e){
       if (e.keyCode == 13){
         if ($(this).val().length > 0) {
@@ -874,7 +885,7 @@ function _openPlayerInfo(user, doOpen = true){
   }
   if (doOpen) {
     element.dialog('open')
-    apiClient.getPlayerDetail(user)
+    if (!user.isGuest) apiClient.getPlayerDetail(user)
   }
   element.find("img.avatar").attr("src", user.avatarURL())
   element.find("p#p1").html(user.country.flagImgTag27() + ' ' + user.country.toString())
@@ -923,6 +934,7 @@ function _playerChallengeClick(user){
 }
 
 function _playerDetailClick(user){
+  if (user.isGuest) return
   window.open("http://system.81dojo.com/" + EJ('en', 'ja') + "/players/show/" + user.name)
 }
 

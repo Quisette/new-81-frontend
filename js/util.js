@@ -43,17 +43,17 @@ const RANK_NAMES_JA = ['プロ', '七段',
 	'六段', '五段', '四段', '三段', '二段', '初段',
 	'1級', '2級', '3級', '4級', '5級',
 	'6級', '7級', '8級', '9級', '10級',
-	'11級', '12級', '13級', '14級', '15級']
+	'11級', '12級', '13級', '14級', '15級', '-']
 const RANK_NAMES_EN = ['PRO', '7-Dan',
 	'6-Dan', '5-Dan', '4-Dan', '3-Dan', '2-Dan', '1-Dan',
 	'1-kyu', '2-kyu', '3-kyu', '4-kyu', '5-kyu',
 	'6-kyu', '7-kyu', '8-kyu', '9-kyu', '10-kyu',
-	'11-kyu', '12-kyu', '13-kyu', '14-kyu', '15-kyu']
+	'11-kyu', '12-kyu', '13-kyu', '14-kyu', '15-kyu', '-']
 const RANK_THRESHOLDS = [3500, 2300,
 	2150, 2000, 1875, 1750, 1625, 1500,
 	1425, 1350, 1300, 1250, 1200,
 	1150, 1100, 1050, 1000, 900,
-	800, 700, 600, 500, 0]
+	800, 700, 600, 500, 1, 0]
 function makeRankFromRating(v){
 	for (let i = 0; i < RANK_THRESHOLDS.length; i++) {
 		if (v >= RANK_THRESHOLDS[i]) return EJ(RANK_NAMES_EN[i], RANK_NAMES_JA[i])
