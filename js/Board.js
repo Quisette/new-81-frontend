@@ -238,6 +238,7 @@ class Board{
     this.setDirection(!this._direction)
     this._generateSquares()
     this._refreshPosition()
+    this.redrawAllArrows(this.onListen)
   }
 
   loadNewPosition(str = Position.CONST.INITIAL_POSITION){
@@ -614,7 +615,7 @@ class Board{
     }
     let arrow = new BoardArrow(fromType, fromX, fromY, toX, toY, color, sender, this._arrowCanvas)
     arrows.push(arrow)
-    if (this.onListen == isPublic) arrow.draw()
+    if (this.onListen == isPublic) arrow.draw(this._scale)
   }
 
   clearArrows(isPublic, sender = "*"){
@@ -637,8 +638,8 @@ class Board{
     let arrows = isPublic ? this._arrowsPublic : this._arrowsSelf
     this.clearCanvas()
     arrows.forEach(function(arrow){
-      arrow.draw()
-    })
+      arrow.draw(this._scale)
+    }, this)
   }
 
   clearCanvas(){

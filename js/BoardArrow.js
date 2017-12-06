@@ -22,13 +22,17 @@ class BoardArrow{
     }
   }
 
-  draw(){
+  draw(scale){
     let fromSq = this._findSquare(this._fromType, this._fromX, this._fromY)
     let toSq = this._findSquare(-1, this._toX, this._toY)
-		let fromX = fromSq.offset().left + fromSq.width()/2 - this._parentCanvas.offset().left
-    let fromY = fromSq.offset().top + fromSq.height()/2 - this._parentCanvas.offset().top
-		let toX = toSq.offset().left + fromSq.width()/2 - this._parentCanvas.offset().left
-    let toY = toSq.offset().top + fromSq.height()/2 - this._parentCanvas.offset().top
+    let fromX = fromSq.offset().left + scale * fromSq.width()/2 - this._parentCanvas.offset().left
+    let fromY = fromSq.offset().top + scale * fromSq.height()/2 - this._parentCanvas.offset().top
+    let toX = toSq.offset().left + scale * fromSq.width()/2 - this._parentCanvas.offset().left
+    let toY = toSq.offset().top + scale * fromSq.height()/2 - this._parentCanvas.offset().top
+    fromX = fromX / scale
+    fromY = fromY / scale
+    toX = toX / scale
+    toY = toY / scale
 		let theta = Math.atan2(fromY - toY, fromX - toX)
 		fromX -= BoardArrow.CONST.OFFSET * Math.cos(theta)
     fromY -= BoardArrow.CONST.OFFSET * Math.sin(theta)
