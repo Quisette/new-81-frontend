@@ -1798,7 +1798,7 @@ function _handleStudy() {
     if (kifuGrid.row(':last').data().branch) _restorePublicKifu()
     kifuGrid.rows().deselect()
     kifuGrid.row(_studyBase).select()
-    scrollGridToSelected(kifuGrid)
+    if (!board.isHost()) scrollGridToSelected(kifuGrid)
     board.replayMoves(kifuGrid.rows(Array.from(Array(_studyBase + 1).keys())).data())
 	} else {
     kifuGrid.clear()
@@ -1815,7 +1815,7 @@ function _handleStudy() {
     board.refreshPosition()
     kifuGrid.draw()
     kifuGrid.row(':last').select()
-    scrollGridToSelected(kifuGrid)
+    if (!board.isHost()) scrollGridToSelected(kifuGrid)
 		// if (name != login_name && board.study_list.length >= old_length) board.showLastSquareLabel(name);
 	}
 }
