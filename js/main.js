@@ -1375,6 +1375,9 @@ function _handleGameEnd(lines, atReconnection = false){
 function _handleResult(str){
   let tokens = str.split(",")
   loadResult(tokens[0], tokens[1], tokens[2], tokens[3])
+  me.rate = parseInt(tokens[1])
+  let opponent = board.myRoleType == 0 ? board.game.white : board.game.black
+  users[opponent.name].rate = parseInt(tokens[3])
 }
 
 function _handleMonitor(str){

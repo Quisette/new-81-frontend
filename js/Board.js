@@ -346,7 +346,9 @@ class Board{
     if (this._mouseDownSquare == null) return
     if (!this._mouseDownSquare.is(sq)) {
       if (this.onListen){
-        if (_studyBase != null || !this.isPostGame) this._addMyArrow(sq, true)
+        if (!board.isPlaying()) {
+          if (_studyBase != null || !this.isPostGame) this._addMyArrow(sq, true)
+        }
       } else {
         this._addMyArrow(sq, false)
       }
