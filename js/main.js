@@ -427,6 +427,11 @@ function _loginButtonClick(){
     Lobby View functions
 ===================================== */
 
+function _logoutButtonClick(){
+  _switchLayer(0)
+  client.close()
+}
+
 function _refreshButtonClick(){
   _refreshLobby()
   $("#refreshButton").addClass("button-disabled")
@@ -1813,7 +1818,10 @@ function _handleClosed(){
   _stopAllTimeouts()
   $('#loginAlert').text(i18next.t("login.closed"))
   $('#loginButton, #passwordInput, #usernameInput').attr('disabled', false)
-  $('#loginButton').attr('value', i18next.t("login.relogin"))
+  if (currentLayer != 0) showAlertDialog("disconnect", _backToEntrance)
+}
+
+function _backToEntrance(){
   _switchLayer(0)
   users = new Object()
   playerGrid.clear().draw()

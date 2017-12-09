@@ -155,7 +155,6 @@ class WebSocketClient {
 
   _handleSocketOpen(){
     console.log('connected');
-    console.log(this._socket)
   }
 
   _login(clientPass, encrypt = true){

@@ -269,3 +269,15 @@ function playingStyleName(i) {
     return ['Playing style unknown', 'Static Rook Player', 'Pure Static Rook Player', 'Swinging Rook Player', 'Pure Swinging Rook Player', 'All-rounder', 'Genuine All-rounder', 'Opposition Seeker', 'Opposition Enthusiast', 'Free-style Player', 'Yagura Enthusiast', 'Bishop Exchange Enthusiast', 'Side Pawn Picker Enthusiast', '3rd-file Rook Player', '3rd-file Rook Enthusiast', '4th-file Rook Player', '4th-file Rook Enthusiast', 'Central Rook Player', 'Central Rook Enthusiast'][i]
   }
 }
+
+function showAlertDialog(i18nextCode, handler){
+  //string, string, function
+  let alertWindow = $('<div></div>', {class: 'alert-dialog'}).html('<div style="padding:10px">'+ i18next.t("alert." + i18nextCode) + '</div>').appendTo($('body'))
+  alertWindow.dialog({
+    modal: true,
+    dialogClass: 'no-close',
+    close: function(e){$(this).dialog('destroy').remove()},
+    title: i18next.t("alert." + i18nextCode + "_title"),
+    buttons: [{text: "OK", click: function(){$(this).dialog("close");handler()}}]
+  })
+}

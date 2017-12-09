@@ -259,6 +259,10 @@
   "data_table": "Data Table",
   "apply_dan": "JSA Certificate",
   "status": "Status",
+  "alert": {
+    "disconnect": "Your network has disonnected from the server.",
+    "disconnect_title": "Disconnection"
+  },
   "msg": {
     "html5_initial": "Welcome to HTML5 beta version. The available functions are still limited; no study mode and tournament support. If you find any bug, please report to info@81dojo.com.",
     "game_start": "Make kind greetings when starting and ending the game. The best way to improve your skill is Postgame Analysis. (However, it is not against manners to skip the analysis and leave immediately after exchanging greeting.)",
