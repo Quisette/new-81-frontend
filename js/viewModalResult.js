@@ -1,7 +1,7 @@
 function openResult(result){
   //integer (-1:Lose, 0:Draw, 1:Win)
   let div = $("#modalResult")
-  div.css({left: board.div.offset().left + board.div.width()/2 - div.width()/2, top: board.div.offset().top + board.div.height()/2 - div.height()/2})
+  div.css({left: board.div.offset().left + board.actualWidth()/2 - div.width()/2, top: board.div.offset().top + board.actualHeight()/2 - div.height()/2})
   if (result > 0) {
     div.css('background-image', 'url(img/fan_win.png)').find("#resultBanner").css('color', 'red').html(EJ('You Win', '勝利'))
   } else {
