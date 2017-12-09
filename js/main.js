@@ -230,58 +230,6 @@ $(function(){
     }
   })
 
-  // Prepare modal windows
-  $('#modalNewGame').dialog({
-    modal: true,
-    dialogClass: 'no-close',
-    autoOpen: false,
-    position: {my: 'left top', at:'left+100 top+100'},
-    open: function(e, ui){
-      $('.ui-widget-overlay').hide().fadeIn()
-    },
-    show: 'fade',
-    buttons: [
-      {text: "OK", click: function(){_handleNewGame()}},
-      {id: "i18n-cancel", click: function(){$(this).dialog('close')}}
-    ]
-  })
-  $('#modalChallenger').dialog({
-    modal: true,
-    dialogClass: 'no-close',
-    autoOpen: false,
-    position: {my: 'center bottom'},
-    open: function(e, ui){
-      $('.ui-widget-overlay').hide().fadeIn()
-    },
-    show: 'fade'
-  })
-  $('#modalImpasse').dialog({
-    modal: true,
-    autoOpen: false,
-    position: {my: 'center bottom'},
-    width: 250,
-    open: function(e, ui){
-      $('.ui-widget-overlay').hide().fadeIn()
-    },
-    show: 'fade',
-    buttons: [
-      {id: "i18n-declare", click: function(){_handleImpasseDeclare()}}
-    ]
-  })
-  $('#modalOption').dialog({
-    modal: true,
-    autoOpen: false,
-    position: {my: 'center bottom'},
-    width: 410,
-    open: function(e, ui){
-      $('.ui-widget-overlay').hide().fadeIn()
-    },
-    show: 'fade',
-    buttons: [
-      {text: "OK", click: function(){_handleOptionClose()}},
-    ]
-  })
-
   // Sub menus
   $('.subMenu').hide()
   $('.menuBar > ul > li').hover(function(){
@@ -419,7 +367,7 @@ function _updateLanguage(){
       $('#newGameRuleSelect').append($("<option />").val(key).text(HANDICAPS_JA[key]))
     })
   }
-  $('#modalNewGame, #modalChallenger, #modalImpasse, #modalOption').each(function(){
+  $('#modalNewGame, #modalChallenger, #modalImpasse, #modalOption, #modalChatTemplate').each(function(){
     $(this).dialog('option', 'title', i18next.t($(this).attr('data-i18n-title')))
   })
   $('[id^=i18n-]').each(function(){
@@ -607,7 +555,14 @@ function _greetButtonClick(){
       client.gameChat("<(_ _)> 有難うございました。(Arigatou-gozaimashita.)")
       _greetState = 4
       break
+    case 4:
+      $('#modalChatTemplate').dialog('open')
+      break
   }
+}
+
+function _sendChatTemplate(code){
+  client.gameChat("[##TEMPLATE]" + code)
 }
 
 function _flipButtonClick(){
@@ -1720,10 +1675,8 @@ function _handleGameChat(sender, message){
 		} else {
 			writeUserMessage(EJ("Study Sub-host status given to " + _name2link(RegExp.$1), _name2link(RegExp.$1) + "さんに、感想戦サブ・ホスト権限が付与されました。"), 2, "#008800")
 		}
-    /*
-	} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##TEMPLATE\]([A-Z]\d{3})/))) {
-		_handleGameChat(new ServerMessageEvent("template", "##[GAMECHAT][" + sender + LanguageSelector.EJ("] <Template> ", "] <定型> ") + LanguageSelector.lan[match[1]]));
-    */
+	} else if (message.match(/^\[##TEMPLATE\]([A-Z]\d{3})/)) {
+		_handleGameChat(sender, EJ("<Template> ", "<定型> ") + i18next.t("code." + RegExp.$1))
 	} else if (message.match(/^\[##REMATCH\]$/)) {
     board.rematch(board.getPlayerRoleFromName(sender))
     _interpretCommunicationCode(sender, "G050", 2, true, true)
@@ -1976,6 +1929,7 @@ function _handleGeneralTimeout(key){
       break
     case "AUTO_REFRESH":
       if (currentLayer == 1) _refreshLobby()
+      break
     case "HOUR_MILE":
 			client.mileage([5, 8, 10, 10, 12, 12, 12, 12][_hourMileCount], config.mileagePass)
       if (_hourMileCount < 7) {

@@ -47,3 +47,17 @@ $('div#optionTabs').find('input[type=radio]').change(function(){
   let key = $(this).prop('name')
   apiClient.postOption(key, parseInt($('input[name=' + key + ']:checked').val()))
 })
+
+$('#modalOption').dialog({
+  modal: true,
+  autoOpen: false,
+  position: {my: 'center bottom'},
+  width: 410,
+  open: function(e, ui){
+    $('.ui-widget-overlay').hide().fadeIn()
+  },
+  show: 'fade',
+  buttons: [
+    {text: "OK", click: function(){_handleOptionClose()}},
+  ]
+})

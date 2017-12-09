@@ -27,3 +27,14 @@ function _initModalChallenger(user){
     }
   }, 1000)
 }
+
+$('#modalChallenger').dialog({
+  modal: true,
+  dialogClass: 'no-close',
+  autoOpen: false,
+  position: {my: 'center bottom'},
+  open: function(e, ui){
+    $('.ui-widget-overlay').hide().fadeIn()
+  },
+  show: 'fade'
+})

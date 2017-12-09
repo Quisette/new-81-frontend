@@ -12,3 +12,17 @@ function _updateImpasseWindow(impasseStatus, myTurn = null){
     $("#modalImpasse").dialog('widget').find(".ui-dialog-buttonpane button:eq(0)").button('enable')
   }
 }
+
+$('#modalImpasse').dialog({
+  modal: true,
+  autoOpen: false,
+  position: {my: 'center bottom'},
+  width: 250,
+  open: function(e, ui){
+    $('.ui-widget-overlay').hide().fadeIn()
+  },
+  show: 'fade',
+  buttons: [
+    {id: "i18n-declare", click: function(){_handleImpasseDeclare()}}
+  ]
+})

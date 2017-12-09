@@ -77,7 +77,6 @@
     "check_lobby_tip": "対局室を出ずに一時的にロビーの状況を確認します。ロビー右上に「対局室へ戻る」のボタンが出現します。",
     "clear": "消去",
     "greet": "挨拶",
-    "chat_template": "自動翻訳定型文",
     "allow": "感想戦の権限を付与",
     "give_host": "ホスト権限を移譲",
     "give_subhost": "サブ・ホスト権限を付与",
@@ -239,6 +238,9 @@
     "private_room": "プライベート対局室",
     "enter_pass": "入室パスワードを入力して下さい",
     "stop": "対局待を止める"
+  },
+  "chat_template": {
+    "title": "自動翻訳定型文"
   },
   "pass_invalid": "パスワードが一致しないため入室できません。",
   "impasse": {

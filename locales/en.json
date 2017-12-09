@@ -77,7 +77,6 @@
     "position_query": "Look up the position",
     "clear": "Clear",
     "greet": "Greet",
-    "chat_template": "Auto-translated templates",
     "allow": "Give Study-mode rights",
     "give_host": "Hand over Host status",
     "give_subhost": "Allow Sub-host status",
@@ -237,6 +236,9 @@
     "private_room": "Private game room",
     "enter_pass": "Enter password.",
     "stop": "Stop Waiting"
+  },
+  "chat_template": {
+    "title": "Auto-translated templates"
   },
   "pass_invalid": "Wrong password. Cannot enter the room.",
   "impasse": {
