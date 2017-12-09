@@ -169,7 +169,7 @@ function coloredSpan(text, color, width = 0){
 function scrollGridToSelected(grid){
   if (grid.row('.selected').node()) {
     let scrollBody = $(grid.table().container()).find('.dataTables_scrollBody')
-    scrollBody.scrollTop(grid.row('.selected').node().offsetTop - scrollBody.height() + 80)
+    scrollBody.scrollTop(grid.row('.selected').node().offsetTop - scrollBody.height() * 0.5)
   }
 }
 

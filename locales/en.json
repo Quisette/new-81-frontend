@@ -87,6 +87,10 @@
     "listen": "Follow latest position",
     "replay_tip": "Replay/analyze only on own PC. The board is not shared unless you are the host of post-game discussion.",
     "listen_tip": "Latest position is shown when watching; and host's board is shown in post-game. Arrows will be also shared.",
+    "replay_first": "Initial position",
+    "replay_back": "Previous",
+    "replay_forward": "Next",
+    "replay_last": "Last move",
     "move": "Move",
     "move_time": "Time"
   },

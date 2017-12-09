@@ -171,6 +171,7 @@ div#playerListBox
   display: flex
   flex-direction: column
   padding-bottom: $LobbyGap
+  cursor: default
 
 table#playerGrid
   background: white
@@ -180,6 +181,7 @@ div#gameListBox
   width: $GameListWidth + $LobbyGap
   display: flex
   flex-direction: column
+  cursor: default
 
 div#gameGridWrapper
   width: $GameListWidth
@@ -305,14 +307,22 @@ div#watcherBox
   margin-right: $boardGap
   background-color: $GreyCanvasColor
   margin-bottom: $boardGap
+  cursor: default
 
 div#kifuBox
   width: 170px
   margin-right: $boardGap
   margin-bottom: $boardGap
   background-color: $GreyCanvasColor
+  cursor: default
 .local-kifu
   color: $LocalKifuColor
+div#replayButtons
+  text-align: center
+  input
+    height: 25px
+    line-height: 25px
+    width: 42px
 
 p#disconnectTimer
   margin: 0

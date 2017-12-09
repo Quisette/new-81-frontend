@@ -33,6 +33,7 @@ var config = null
 var options = new Object()
 var _studyBase = null
 var _studyBranch = null
+var _sendStudyBuffer = null
 
 /* ====================================
     On document.ready
@@ -704,6 +705,35 @@ function _kifuSelected(index){
   }
 }
 
+function _replayButtonClick(v){
+  let index = kifuGrid.row({selected: true}).index()
+  if (v < 0 && index <= 0) return
+  if (v > 0 && index >= kifuGrid.rows().count() - 1) {
+    if (!board.isPostGame && !board.onListen) {
+      forceKifuMode(1)
+      _kifuModeRadioChange()
+    }
+    return
+  }
+  switch(v){
+    case -2:
+      index = 0
+      break
+    case -1:
+      index--
+      break
+    case 1:
+      index++
+      break
+    case 2:
+      index = kifuGrid.rows().count() - 1
+      break
+  }
+  kifuGrid.row(index).select()
+  scrollGridToSelected(kifuGrid)
+  _kifuSelected(index)
+}
+
 function _restorePublicKifu(){
   kifuGrid.clear()
   kifuGrid.rows.add(board.moves)
@@ -722,12 +752,14 @@ function setBoardConditions(){
     $("#greetButton").prop('disabled', false)
     if (board.isPostGame) {
       kifuGrid.select.style('single')
+      $("#replayButtons").find("input").prop("disabled", false)
       $("input[name=kifuModeRadio]").prop("disabled", board.isHost())
       $("#resignButton").addClass("button-disabled")
       $("#clearArrowsButton, #positionMenuButton, #kifuMenuButton, #rematchButton, #closeGameButton").removeClass("button-disabled")
       $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: true})
     } else {
       kifuGrid.select.style('api')
+      $("#replayButtons").find("input").prop("disabled", true)
       $("input[name=kifuModeRadio]").prop("disabled", true)
       $("#resignButton").removeClass("button-disabled")
       $("#clearArrowsButton, #positionMenuButton, #kifuMenuButton, #rematchButton, #closeGameButton").addClass("button-disabled")
@@ -739,6 +771,7 @@ function setBoardConditions(){
     }
   } else if (board.isWatcher()){
     kifuGrid.select.style('single')
+    $("#replayButtons").find("input").prop("disabled", false)
     $("input[name=kifuModeRadio]").prop("disabled", board.isHost())
     $("#greetButton").prop('disabled', 'true')
     $("#resignButton, #rematchButton").addClass("button-disabled")
@@ -1633,7 +1666,7 @@ function _handleGameChat(sender, message){
   	}
     */
 		if (!(board.isPostGame && board.onListen)) return
-		_handleStudy()
+    if (sender != me.name) _handleStudy()
     /*
 		var old_length:int = board.study_list.length;
 		if (old_length == 0) _writeUserMessage(name + LanguageSelector.EJ(": Studying a branch from move #" + base + "\n", ": " + base + "手目からの分岐手順を検討\n"), 2, "#008800");
@@ -1730,7 +1763,7 @@ function _handlePrivateChat(sender, message){
     _studyBase = parseInt(RegExp.$1)
     _studyBranch = RegExp.$2
 		if (!(board.isPostGame && board.onListen)) return
-		_handleStudy()
+    if (sender != me.name) _handleStudy()
 		return
 	} else if (message.match(/^\[\#\#FITNESS\](\d),(\d)$/)) {
 //		let str = EJ("Opponent's ", "対局相手の") + LanguageSelector.lan.study_level + ": " + (match[1] == 0 ? ("<" + LanguageSelector.lan.not_defined + ">") : (LanguageSelector.EJ("Level ", "レベル") + (parseInt(match[1]) - 1)));
@@ -1793,12 +1826,13 @@ function _handleClosed(){
 ===================================== */
 
 function _handleStudy() {
+  _sendStudyBuffer = null
   if (_studyBase == null) return
 	if (_studyBranch == "*") {
     if (kifuGrid.row(':last').data().branch) _restorePublicKifu()
     kifuGrid.rows().deselect()
     kifuGrid.row(_studyBase).select()
-    if (!board.isHost()) scrollGridToSelected(kifuGrid)
+    scrollGridToSelected(kifuGrid)
     board.replayMoves(kifuGrid.rows(Array.from(Array(_studyBase + 1).keys())).data())
 	} else {
     kifuGrid.clear()
@@ -1815,7 +1849,7 @@ function _handleStudy() {
     board.refreshPosition()
     kifuGrid.draw()
     kifuGrid.row(':last').select()
-    if (!board.isHost()) scrollGridToSelected(kifuGrid)
+    scrollGridToSelected(kifuGrid)
 		// if (name != login_name && board.study_list.length >= old_length) board.showLastSquareLabel(name);
 	}
 }
@@ -1836,7 +1870,16 @@ function _generateStudyText(index){
 }
 
 function sendStudy(index = kifuGrid.row({selected: true}).data().num){
-  client.gameChat("[##STUDY]" + _generateStudyText(index))
+  _sendStudyBuffer = _generateStudyText(index)
+  if (timeouts["SEND_STUDY"]) return
+  _sendStudyExecute()
+}
+
+function _sendStudyExecute(){
+  if (_sendStudyBuffer == null) return
+  client.gameChat("[##STUDY]" + _sendStudyBuffer)
+  _sendStudyBuffer = null
+  setGeneralTimeout("SEND_STUDY", 700)
 }
 
 function _sendAutoChat(str) {
@@ -1936,6 +1979,9 @@ function _handleGeneralTimeout(key){
         _hourMileCount++
         setGeneralTimeout("HOUR_MILE", 3600000)
       }
+      break
+    case "SEND_STUDY":
+      _sendStudyExecute()
       break
   }
 }

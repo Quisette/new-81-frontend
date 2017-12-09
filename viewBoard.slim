@@ -3,7 +3,7 @@ div.layer#layerBoard
     div.hbox.menuBar#boardMenu
       ul style="flex:1"
         li
-          a.button href="#" onclick=""
+          a.button.button-disabled href="#" onclick=""
             img src="img/icon_left.png"
             span data-i18n="board.check_lobby"
         li
@@ -103,6 +103,12 @@ div.layer#layerBoard
               p
                 input type="radio" name="kifuModeRadio" value="1" onchange="_kifuModeRadioChange()"
                 span data-i18n="board.listen"
+              div#replayButtons
+                input id="replayButtonFirst" data-i18n-title="board.replay_first" type="button" onclick="_replayButtonClick(-2)" value="|<"
+                input id="replayButtonBack" data-i18n-title="board.replay_back" type="button" onclick="_replayButtonClick(-1)" value="<"
+                input id="replayButtonForward" data-i18n-title="board.replay_forward" type="button" onclick="_replayButtonClick(1)" value=">"
+                input id="replayButtonLast" data-i18n-title="board.replay_last" type="button" onclick="_replayButtonClick(2)" value=">|"
+                
             div.grid-wrapper#kifuGridWrapper style="flex:1 1 1px"
               table.stripe.hover#kifuGrid
                 tr
