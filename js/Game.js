@@ -8,6 +8,7 @@ class Game{
 		this.gameName = this.gameId.split("+")[1]
 		let game_info = this.gameName.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/)
 		this.gameType = game_info[1]
+    this._ownerName = game_info[2].split(".")[0]
 		this.total = parseInt(game_info[3])
 		this.byoyomi = parseInt(game_info[4])
 		this.black = black
@@ -118,6 +119,10 @@ class Game{
 
   isStudy(){
     return this.gameId.match(/^STUDY/)
+  }
+
+  isMyRoom(){
+    return this._ownerName == me.name
   }
 
 }

@@ -37,8 +37,15 @@ div#modalNewGame data-i18n-title="new_game.title"
     input type="radio" name="newGameType" value="6" disabled="true"
     span data-i18n="new_game.tournament"
   p
-    input type="radio" name="newGameType" value="7" disabled="true"
+    input type="radio" name="newGameType" value="7"
     span data-i18n="new_game.study_room"
+  p style="margin-left:25px"
+    select#newGameStudyRuleSelect disabled="true"
+  p style="margin-left:25px"
+    |☗
+    input type="text" size="7" id="newGameStudyBlack" value="Black" disabled="true"
+    |&nbsp;☖
+    input type="text" size="7" id="newGameStudyWhite" value="White" disabled="true"  
   p
     input type="radio" name="newGameType" value="8"
     span data-i18n="new_game.stop"

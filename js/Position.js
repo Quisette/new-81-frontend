@@ -64,6 +64,7 @@ class Position{
   }
 
   loadFromString(position_str){
+    this.lastMove = null
     let lines = position_str.split("\n")
     if (lines[0].substr(2) == "+") {
   	  this.turn = Position.CONST.SENTE;
@@ -256,6 +257,7 @@ class Position{
       FU: {x: 10, y: 145, n: 0, dx: 0}
     }
     this.komadais[i].forEach(function(piece){
+      if (hash[piece.CSA] == null) return
       hash[piece.CSA].n += 1
       hash[piece.CSA].dx = (piece.CSA == "FU" ? 107.0 : 50.0) / hash[piece.CSA].n
     })

@@ -213,6 +213,11 @@ class WebSocketClient {
     this.send("%%GAME " + wait_gamename + ' ' + side_code)
   }
 
+  study(rule, black, white, password = "*"){
+    //string, string, string, string
+    this.send("%%%STUDY " + rule + " " + black + " " + white + " * " + password)
+  }
+
   challenge(user){
     this.send("%%CHALLENGE " + user.name)
   }

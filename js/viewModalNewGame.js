@@ -4,6 +4,11 @@ $('#modalNewGame').find('[name="newGameType"]').change(function(){
   } else {
     $('#newGameRuleSelect, #newGameTotalSelect, #newGameByoyomiSelect').attr('disabled', true)
   }
+  if ($('#modalNewGame').find('[name="newGameType"]:checked').val() == 7) {
+    $('#newGameStudyRuleSelect, #newGameStudyBlack, #newGameStudyWhite').attr('disabled', false)
+  } else {
+    $('#newGameStudyRuleSelect, #newGameStudyBlack, #newGameStudyWhite').attr('disabled', true)
+  }
 })
 
 $('#modalNewGame').dialog({

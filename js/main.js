@@ -361,11 +361,11 @@ function _updateLanguage(){
   $("[data-i18n-title]").each(function(){ //TODO exclude modal dialogs
     $(this).attr('title', i18next.t($(this).attr('data-i18n-title')))
   })
-  $('#newGameRuleSelect').empty()
+  $('#newGameRuleSelect, #newGameStudyRuleSelect').empty()
   if (i18next.language == "ja") {
     Object.keys(HANDICAPS_JA).forEach(function(key){
       if (key == "r" || key.match(/^va/)) return true
-      $('#newGameRuleSelect').append($("<option />").val(key).text(HANDICAPS_JA[key]))
+      $('#newGameRuleSelect, #newGameStudyRuleSelect').append($("<option />").val(key).text(HANDICAPS_JA[key]))
     })
   }
   $('#modalNewGame, #modalChallenger, #modalImpasse, #modalOption, #modalChatTemplate').each(function(){
@@ -594,11 +594,14 @@ function _clearArrowsButtonClick(){
 function _giveHostButtonClick(){
   if (!board.isHost()) return
   let user = null
-  if (board.game.white.name != me.name && board.isPlayerPresent(1)) {
-    user = board.game.white
-  } else if (board.game.black.name != me.name && board.isPlayerPresent(0)) {
-    user = board.game.black
+  if (!board.game.isStudy()) {
+    if (board.game.white.name != me.name && board.isPlayerPresent(1)) {
+      user = board.game.white
+    } else if (board.game.black.name != me.name && board.isPlayerPresent(0)) {
+      user = board.game.black
+    }
   }
+  // TODO give host to one of the watchers is there is no player
   if (user) {
 		client.gameChat("[##GIVEHOST]" + user.name)
     board.studyHostType = 1
@@ -813,7 +816,11 @@ function _handleNewGame(){
   } else if (val == 6) {
 
   } else if (val == 7) {
-
+    client.stopWaiting()
+    let ruleType = $("#newGameStudyRuleSelect option:selected").val()
+    let blackName = $("#newGameStudyBlack").val()
+    let whiteName = $("#newGameStudyWhite").val()
+    client.study(ruleType, blackName, whiteName)
   } else if (val == 8) {
     client.stopWaiting()
   }
@@ -1387,12 +1394,15 @@ function _handleMonitor(str){
   let since_last_move = 0
   let positionStr = ""
   let gameEndStr = ""
+  let studyReset = false
   board.clearArrows(true)
   lines.forEach(function(line){
     if(line.match(/^([-+][0-9]{4}[A-Z]{2}|%TORYO)$/)) {
       move_strings.push(RegExp.$1)
     } else if (line.match(/^T(\d+)$/)){
       move_strings[move_strings.length - 1] += "," + RegExp.$1
+    } else if (line == "MONITOR_RESET") {
+      studyReset = true
     } else if (line.match(/^kifu_id:(.+)$/)) {
       kifu_id = RegExp.$1
     } else if (line.match(/^\$SINCE_LAST_MOVE:(\d+)$/)) {
@@ -1406,10 +1416,13 @@ function _handleMonitor(str){
     }
   })
   if (kifu_id) { // Start of watching game
+    if (studyReset) forceKifuMode(1)
     board.startGame(positionStr, 2, move_strings, since_last_move)
     setBoardConditions()
     _switchLayer(2)
-		writeUserMessage(board.game.gameType == "r" ? i18next.t("msg.rated") : i18next.t("msg.nonrated"), 2, "#008800")
+    if (!board.game.isStudy()) {
+  		writeUserMessage(board.game.gameType == "r" ? i18next.t("msg.rated") : i18next.t("msg.nonrated"), 2, "#008800")
+    }
     /*
 		  var match:Array;
 		  if ((match = game_info[2].match(/\-\-(\d+)$/))) {
@@ -1547,7 +1560,7 @@ function _startDisconnectTimer(){
   _disconnectTimer = setInterval(function(){
     count++
     $("span#disconnectCount").text(count)
-    if (count == 60) {
+    if (count == 60) { //TODO count has to be 1 if disconnected twice
       $('<input id="disconnectDeclareButton" type="button" value="' + i18next.t("declare") + '" style="height:20px;margin-left:5px">').appendTo(p)
       $("#disconnectDeclareButton").click(function(){
         _handleDisconnectDeclare()
@@ -1568,18 +1581,18 @@ function _handleStart(game_id){
 	let tokens = game_id.split("+")
 	let game_info = tokens[1].match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/)
   let game
-//	var autoEnterStudy:Boolean = false;
 	if (tokens[0] == "STUDY") {
-    /*
-		_writeUserMessage("<a href=\"event:game," + e.message + "\">" + game_info[2].split(".")[0] + LanguageSelector.EJ(" CREATED STUDY ROOM.</a>\n", " さんが検討室を作成しました。</a>\n"), 1, "#008800");
-		if (_chat_sound1_play && mainViewStack.selectedIndex == 1) _sound_chat1.play();
-    */
+		writeUserMessage(game_info[2].split(".")[0] + EJ(" CREATED STUDY ROOM.", " さんが検討室を作成しました。"), 1, "#008800")
+    sp.chatLobby()
 		let black = new User(tokens[2])
 		black.setFromStudy(true)
 		var white = new User(tokens[3])
 		white.setFromStudy(false)
 		game = new Game(0, game_id, black, white);
-//		if (game_info[2].split(".")[0] == login_name) autoEnterStudy = true;
+    if (game.isMyRoom()) {
+      board.studyHostType = 2
+      _enterGame(game)
+    }
 	} else {
     /*
 		var gameKind:String;
@@ -1604,12 +1617,6 @@ function _handleStart(game_id){
 	}
   gameGrid.row.add(game)
   drawGridMaintainScroll(gameGrid)
-  /*
-	if (autoEnterStudy) {
-		_watch_game = _games[e.message];
-		_execute_watch();
-	}
-  */
 }
 
 function _handleChat(sender, message){
@@ -1713,6 +1720,7 @@ function _handleGameChat(sender, message){
 		if (RegExp.$1 == me.name) {
 			writeUserMessage(i18next.t("msg.subhost_given"), 2, "#008800", true)
 			board.studyHostType = 1
+      setBoardConditions()
 		} else {
 			writeUserMessage(EJ("Study Sub-host status given to " + _name2link(RegExp.$1), _name2link(RegExp.$1) + "さんに、感想戦サブ・ホスト権限が付与されました。"), 2, "#008800")
 		}
@@ -1772,6 +1780,7 @@ function _handlePrivateChat(sender, message){
     _studyBranch = RegExp.$2
 		if (!(board.isPostGame && board.onListen)) return
     if (sender != me.name) _handleStudy()
+    // TODO If the user has been forced to become Host after entering room, he should be demoted to subHost as soon as receiving this private message
 		return
 	} else if (message.match(/^\[\#\#FITNESS\](\d),(\d)$/)) {
 //		let str = EJ("Opponent's ", "対局相手の") + LanguageSelector.lan.study_level + ": " + (match[1] == 0 ? ("<" + LanguageSelector.lan.not_defined + ">") : (LanguageSelector.EJ("Level ", "レベル") + (parseInt(match[1]) - 1)));
@@ -1822,10 +1831,15 @@ function _handleClosed(){
   $('#loginAlert').text(i18next.t("login.closed"))
   $('#loginButton, #passwordInput, #usernameInput').attr('disabled', false)
   if (currentLayer != 0) showAlertDialog("disconnect", _backToEntrance)
+  else _clearAllParams()
 }
 
 function _backToEntrance(){
   _switchLayer(0)
+  _clearAllParams()
+}
+
+function _clearAllParams(){
   users = new Object()
   playerGrid.clear().draw()
   waiterGrid.clear().draw()

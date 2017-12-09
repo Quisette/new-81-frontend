@@ -74,7 +74,7 @@ class SoundPlayer{
   }
 
   chatLobby(){
-    if (this.chatLobbyEnabled) this.play("CHAT1")
+    if (currentLayer == 1 && this.chatLobbyEnabled) this.play("CHAT1")
   }
 
   chatBoard(){

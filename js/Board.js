@@ -5,7 +5,7 @@ class Board{
     // Board Condition parameters
     this.myRoleType = null // 0: sente as player, 1: gote as player, 2: watcher
     this.isPostGame = false
-    this.studyHostType = 0  // 0: not host, 1: Sub-host, 2: Host
+    this.studyHostType = null  // 0: not host, 1: Sub-host, 2: Host
     // Properties
     this._div = div
     this._originalWidth = div.width()
@@ -163,9 +163,11 @@ class Board{
       thisInstance._refreshSquare($(this))
     })
     $(".square-selected").removeClass("square-selected")
+//    $(".square-last").removeClass("square-last")
     for (let i = 0; i < 2; i++){
       let hash = this._position.handCoordinateHash(i)
       this._position.komadais[i].forEach(function(piece){
+        if (hash[piece.CSA] == null) return
         let sq = $('<div></div>', {id: 'sq' + (piece.owner ? 0 : -1) + '_' + piece.getType(), class: 'square'}).data({x: piece.owner ? 0 : -1, y: piece.getType()})
         sq.css({width: this._komaW + 'px', height: this._komaH + 'px'})
         sq.css({left: hash[piece.CSA].x + 'px', top: hash[piece.CSA].y + 'px'})
@@ -277,7 +279,7 @@ class Board{
     else this.setDirection(myRoleType == 0)
     this.loadNewPosition(positionStr)
     this.isPostGame = false
-    this.studyHostType = 0
+    if (this.studyHostType == null) this.studyHostType = 0 // Keep the same host level as before even if startGame() is newly called
     this.onListen = true
     this._timers[0].initialize(this.game.total, this.game.byoyomi)
     this._timers[1].initialize(this.game.total, this.game.byoyomi)
@@ -515,17 +517,12 @@ class Board{
   }
 
   setBoardConditions(){
-    if (this.isPlayer()) {
-      if (this.isPostGame){
-        this._canMoveMyPiece = true
-        this._canMoveHisPiece = true
-      } else {
-        this._canMoveMyPiece = true
-        this._canMoveHisPiece = false
-      }
+    if (this.isPlaying()) {
+      this._canMoveMyPiece = true
+      this._canMoveHisPiece = false
     } else {
-      this._canMoveMyPiece = !this.onListen
-      this._canMoveHisPiece = !this.onListen
+      this._canMoveMyPiece = !this.onListen || this.studyHostType >= 1
+      this._canMoveHisPiece = !this.onListen || this.studyHostType >= 1
     }
   }
 
@@ -568,6 +565,7 @@ class Board{
 
   close(){
     this.myRoleType = null
+    this.studyHostType = null
     this.game = null
     this.playerInfos[0].find("#player-info-name").removeClass("name-winner name-left name-mouse-out")
     this.playerInfos[1].find("#player-info-name").removeClass("name-winner name-left name-mouse-out")
