@@ -239,6 +239,9 @@ $(function(){
   }, function(){
     $("ul",this).slideUp()
   })
+  $('.subMenu').find('a').click(function(){
+    $(this).closest('ul').slideUp('fast')
+  })
 
   // Hide all layers other than login
   _switchLayer(0)
@@ -613,6 +616,13 @@ function _KyokumenpediaClick(){
   window.open("http://kyokumen.jp/positions/" + board.position.toSFEN(), "_blank")
 }
 
+function _kifuCopyButtonClick(){
+  let textArea = $('<textarea></textarea>', {id: 'clip-board-area'}).text(_generateKIF()).appendTo($('body'))
+  $("#clip-board-area").select()
+	document.execCommand("copy")
+  $("#clip-board-area").remove()
+}
+
 function _optionButtonClick(){
   $('#modalOption').dialog('open')
 }
@@ -743,6 +753,7 @@ function _replayButtonClick(v){
 }
 
 function _restorePublicKifu(){
+  if (board.moves.length <= 1) return
   kifuGrid.clear()
   kifuGrid.rows.add(board.moves)
   drawGridMaintainScroll(kifuGrid)
@@ -2042,4 +2053,35 @@ function _refreshLobby(first = false){
   client.who(first)
   client.list()
   setGeneralTimeout("AUTO_REFRESH", 180000, true)
+}
+
+function _generateKIF(){
+  let rule = gameTypeToKIF(board.game.gameType)
+  if (rule == null) return ""
+  let lines = []
+  lines.push("#KIF version=2.0 encoding=UTF-8")
+  let tmp = board.game.gameId.split("+")[4]
+  lines.push("開始日時：" + tmp.substr(0,4) + "/" + tmp.substr(4,2) + "/" + tmp.substr(6,2))
+  lines.push("場所：81Dojo")
+  lines.push("持ち時間：" + Math.floor(board.game.total/60) + "分+" + board.game.byoyomi + "秒")
+  lines.push("手合割：" + rule)
+  lines.push("先手：" + board.game.black.name)
+  lines.push("後手：" + board.game.white.name)
+  lines.push("手数----指手---------消費時間")
+  board.moves.forEach(function(move){
+    let kif = move.toKIF()
+    if (kif != null) lines.push(kif)
+  })
+  let branchStarted = false
+  kifuGrid.rows().data().each(function(move,i){
+    if (move.branch) {
+      if (!branchStarted) {
+        branchStarted = true
+        lines.push("")
+        lines.push("変化：" + move.num + "手")
+      }
+      lines.push(move.toKIF())
+    }
+  })
+  return lines.join("\r\n")
 }

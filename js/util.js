@@ -250,6 +250,16 @@ function openingTypeObject(key){
   return {short: short, tip: tip}
 }
 
+function gameTypeToKIF(str){
+  if (["r", "nr", "hcfixed", "hclance", "hcbishop", "hcrook", "hcrooklance", "hc2p", "hc4p", "hc6p", "hc8p", "hc10p"].includes(str)) {
+    if (str == "r" || str == "nr" || str == "hcfixed") return "平手"
+    else return HANDICAPS_JA[str]
+
+  } else {
+    return null
+  }
+}
+
 function debugLoop(){
   window.addEventListener('devtoolschange', function(){while(true) debugger})
 }

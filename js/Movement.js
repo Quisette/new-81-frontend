@@ -141,8 +141,26 @@ class Movement{
 			} else if (!forFile && this.promotable){
 				str += alphabet ? "=" : "不成"
 			}
+			if (forFile) {
+				str += "(" + this.fromX.toString() + this.fromY.toString() + ")"
+			}
 		}
-	  return (this.owner == Position.CONST.SENTE ? "☗" : "☖") + str
+    if (!forFile) str = (this.owner == Position.CONST.SENTE ? "☗" : "☖") + str
+    return str
+  }
+
+  toKIF(){
+    let str = ""
+    if (this.num == 0) return null
+    if (this.endTypeKey) {
+      if (this.endTypeKey == "RESIGN") str = "投了"
+      else return null
+    } else {
+      str = this.toJapaneseNotation(true)
+    }
+    str = this.num.toString() + "\t" + str
+    if (this.time != null) str = str + "\t(" + Math.floor(this.time/60) + ":" + (this.time % 60) + "/)"
+    return str
   }
 
   replayable(){
