@@ -69,9 +69,10 @@ class User{
     this.rate = tokens[1]
   }
 
-	setFromLobbyIn(rate, country_code) {
-    //int, int,
+	setFromLobbyIn(rate, provisional, country_code) {
+    //int, string, int,
 		this.rate = rate
+    this.provisional = provisional == "true"
 		this._countryCode = country_code
   }
 

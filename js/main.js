@@ -1103,7 +1103,7 @@ function _handleLobbyIn(line){
 	} else {
 		// TODO users[name].initialize();
 	}
-	users[name].setFromLobbyIn(parseInt(tokens[1]), parseInt(tokens[3]))
+	users[name].setFromLobbyIn(parseInt(tokens[1]), tokens[2], parseInt(tokens[3]))
 	// TODO if (isMobile) _users[tokens[0]].isMobile = true;
 	// TODO if (isFavorite) _users[tokens[0]].markFavorite();
 	// TODO if (isColleague) _users[tokens[0]].markColleague();
