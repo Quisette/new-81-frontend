@@ -1855,7 +1855,7 @@ function _handlePrivateChat(sender, message){
 }
 
 function _handleMile(result) {
-	//if (_isGuest) return;
+  if (me.isGuest) return
   result = parseInt(result)
   if (result == -1) return
   let diff = result - mileage
@@ -2093,10 +2093,12 @@ function _handleGeneralTimeout(key){
       if (currentLayer == 1) _refreshLobby()
       break
     case "HOUR_MILE":
-			client.mileage([5, 8, 10, 10, 12, 12, 12, 12][_hourMileCount], config.mileagePass)
-      if (_hourMileCount < 7) {
-        _hourMileCount++
-        setGeneralTimeout("HOUR_MILE", 3600000)
+      if (client.serverName == "EARTH") {
+        client.mileage([5, 8, 10, 10, 12, 12, 12, 12][_hourMileCount], config.mileagePass)
+        if (_hourMileCount < 7) {
+          _hourMileCount++
+          setGeneralTimeout("HOUR_MILE", 3600000)
+        }
       }
       break
     case "SEND_STUDY":
