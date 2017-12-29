@@ -60,6 +60,14 @@ class Game{
       str = "NR: "
     }
     str += this.total/60 + ' - ' + this.byoyomi
+    if (this.isTournament()) {
+      let tournament = this.getTournament()
+      if (tournament) {
+        str = '<span title="' + tournament.name() + '">' + tournament.nameShort() + '</span>'
+      } else {
+        str = EJ('Tournament', '大会')
+      }
+    }
     return str
   }
 
