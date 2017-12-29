@@ -271,9 +271,16 @@ $(function(){
   $("#boardChatInput").on('keyup', function(e){
     if (e.keyCode == 13){
       if ($(this).val().length > 0) {
+        clearGeneralTimeout("SEND_TYPE")
         client.gameChat($(this).val())
         $(this).val('')
       }
+    } else if (board.isPlayer()) {
+			if (e.keyCode == 8) {
+        if ($(this).val() == "") clearGeneralTimeout("SEND_TYPE")
+			} else {
+        if ($(this).val().length > 0) setGeneralTimeout("SEND_TYPE", 2500)
+			}
     }
   })
   $("#passwordInput").tooltip()
@@ -488,7 +495,7 @@ function writeUserMessage(str, layer, clr = null, bold = false, lineChange = tru
     area = $('#lobbyMessageArea')
   } else if (layer == 2) {
     area = $('#boardMessageArea')
-    p = $("p#disconnectTimer")
+    p = $("p#disconnectTimer, p#typingIndicator-0, p#typingIndicator-1")
     if (p.length) p.detach()
   }
 	str = str.replace(/</g, "&lt;")
@@ -1676,16 +1683,10 @@ function _handleGameChat(sender, message){
 		//if (sender != login_name && board.onListen) board.handleHover(match[1], match[2]);
 	} else if (message.match(/\[##GRAB\](\d+),(\d+)$/)) {
 		if (sender != me.name && board.onListen) board.handleGrab(RegExp.$1, RegExp.$2)
-    /*
-	} else if (e.message.match(/\[\#\#TYPE\]$/)) {
-		if (sender != login_name) {
-			if (sender == board.name_labels[0].text) {
-				board.typingIndicatorStart(0);
-			} else if (sender == board.name_labels[1].text) {
-				board.typingIndicatorStart(1);
-			}
+	} else if (message.match(/\[##TYPE\]$/)) {
+		if (sender != me.name) {
+      _runTypingIndicator(sender)
 		}
-    */
 	} else if (message.match(/\[\#\#STUDY\](\d+)\/(.+)$/)) {
     _studyBase = parseInt(RegExp.$1)
     _studyBranch = RegExp.$2
@@ -1775,10 +1776,10 @@ function _handleGameChat(sender, message){
     */
 //		if (_ignore_list.indexOf(sender.toLowerCase()) >= 0) return;
 		if (sender == board.game.black.name) {
-//			board.typingIndicatorStop(0);
+      _stopTypingIndicator(0)
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#000000")
 		} else if (sender == board.game.white.name) {
-//			board.typingIndicatorStop(1);
+      _stopTypingIndicator(1)
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#666666")
 		} else if (sender == me.name) {
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#0033DD")
@@ -1939,6 +1940,32 @@ function _sendAutoChat(str) {
 	}
 }
 
+function _runTypingIndicator(name){
+  let turn = board.getPlayerRoleFromName(name)
+  if (turn == null) return
+  let elem_id = "typingIndicator-" + turn
+  let elem = $('#' + elem_id)
+  if (!elem.length) {
+    elem = $('<p></p>', {id: elem_id, class: 'typingIndicator'})
+    let area = $("#boardMessageArea")
+    area.append(elem)
+    elem.text('[' + name + '] ' + EJ('is typing...', '(タイピング中...)'))
+    area.animate({scrollTop: area[0].scrollHeight}, 'fast')
+  }
+  setGeneralTimeout("TYPE_" + turn, 5000, true)
+}
+
+function _stopTypingIndicator(turn, fade = false){
+  if (fade) {
+    $('#typingIndicator-' + turn).fadeOut('fast', function(){
+      $('#typingIndicator-' + turn).remove()
+    })
+  } else {
+    $('#typingIndicator-' + turn).remove()
+  }
+  clearGeneralTimeout("TYPE_" + turn)
+}
+
 /* ====================================
     Web System API response handlers
 ===================================== */
@@ -2052,6 +2079,15 @@ function _handleGeneralTimeout(key){
       break
     case "SEND_STUDY":
       _sendStudyExecute()
+      break
+    case "SEND_TYPE":
+      client.gameChat("[##TYPE]")
+      break
+    case "TYPE_0":
+      _stopTypingIndicator(0, true)
+      break
+    case "TYPE_1":
+      _stopTypingIndicator(1, true)
       break
   }
 }

@@ -333,6 +333,21 @@ p#disconnectTimer
   padding: 0
   color: red
   font-weight: bold
+p.typingIndicator
+  margin: 0
+  padding: 0
+  font-style: oblique
+  animation-name: sway
+  animation-duration: 0.8s
+  animation-iteration-count: infinite
+  animation-direction: alternate
+p#typingIndicator-1
+  color: #666
+@keyframes sway
+  from
+    margin-left: 0px
+  to
+    margin-left: 4px
 
 // -------------------------------
 // Modal windows
