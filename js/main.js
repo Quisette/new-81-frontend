@@ -1067,6 +1067,7 @@ function _handleList(str){
   let lines = str.trim().split("\n")
   gameGrid.clear()
   let games = []
+  let autoReconnectedGame = null
   lines.forEach(function(line){
     if (line == "") return
     n += 1
@@ -1085,6 +1086,7 @@ function _handleList(str){
 		}
 		let game = new Game(n, tokens[0], black, white);
 		game.setFromList(parseInt(tokens[1]), tokens[6], tokens[7] == "true", tokens[8] == "true", parseInt(tokens[9]), tokens[10])
+    if (game.isMyDisconnectedGame()) autoReconnectedGame = game
     games.push(game)
   })
   games.sort(function(a, b){
@@ -1094,6 +1096,7 @@ function _handleList(str){
   })
   gameGrid.rows.add(games)
   gameGrid.draw()
+  if (autoReconnectedGame) _enterGame(autoReconnectedGame)
 }
 
 function _handleWatchers(str){

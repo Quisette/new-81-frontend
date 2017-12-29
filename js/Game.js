@@ -131,4 +131,13 @@ class Game{
     return this._ownerName == me.name
   }
 
+  isMyDisconnectedGame(){
+    if (!this.isBlackIn && this.black.name == me.name || !this.isWhiteIn && this.white.name == me.name) {
+      if (this.status == "game") return true
+      else return false
+    } else {
+      return false
+    }
+  }
+
 }
