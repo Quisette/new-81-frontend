@@ -13,6 +13,7 @@ var gameGrid;
 var watcherGrid;
 var kifuGrid;
 var users = new Object();
+var tournaments = new Object()
 var playerInfoWindows = new Object();
 var timeouts = new Object()
 var _disconnectTimer
@@ -313,6 +314,8 @@ $(function(){
   apiClient.setCallbackFunctions("SERVERS", _handleServers)
   apiClient.setCallbackFunctions("OPTIONS", _handleOptions)
   apiClient.setCallbackFunctions("PLAYER", _handlePlayerDetail)
+  apiClient.setCallbackFunctions("TOURNAMENTS", _handleTournaments)
+  apiClient.setCallbackFunctions("CHECK_OPPONENT", _handleCheckOpponent)
   if (!testMode) apiClient.getServers()
 
   if (testMode) _testFunction(0)
@@ -825,7 +828,8 @@ function _handleNewGame(){
     let ruleType = $("#newGameRuleSelect option:selected").val()
     client.wait(ruleType, 60 * $("#newGameTotalSelect option:selected").val(), $("#newGameByoyomiSelect option:selected").val(), ruleType.match(/^hc/) ? -1 : 0)
   } else if (val == 6) {
-
+    let tournamentId = $("#newGameTournamentSelect option:selected").val()
+    if (tournaments[tournamentId]) tournaments[tournamentId].wait()
   } else if (val == 7) {
     client.stopWaiting()
     let ruleType = $("#newGameStudyRuleSelect option:selected").val()
@@ -867,7 +871,8 @@ function _openPlayerInfo(user, doOpen = true){
         <div id="player-info-layer-2" style="margin-top:-128px;opacity:0">\
         <div id="privateMessageArea"></div>\
         <div class="hbox" style="margin-top:5px"><span style="margin-right:5px;white-space:nowrap">PM:</span><input id="privateChatInput" style="flex:1"></div>\
-        </div>'
+        </div>\
+        <div class="check-game" id="check-game-' + user.name + '"></div>'
     }).dialog({
       autoOpen: false,
       position: {at:'left+'+mouseX+' top+'+mouseY},
@@ -897,6 +902,7 @@ function _openPlayerInfo(user, doOpen = true){
   if (doOpen) {
     element.dialog('open')
     if (!user.isGuest) apiClient.getPlayerDetail(user)
+    if (user.waitingChallengeableTournament()) apiClient.checkTournamentOpponent(user.waitingTournamentId, user.name)
   }
   element.find("img.avatar").attr("src", user.avatarURL())
   element.find("p#p1").html(user.country.flagImgTag27() + ' ' + user.country.toString())
@@ -909,7 +915,9 @@ function _playerChallengeClick(user){
   if (_challengeUser) {
 	  writeUserMessage(EJ("You can only challenge one player at a time.", "挑戦は一度に一人に対してしか行えません。"), 1, "#008800")
   } else if (user.listAsWaiter()) {
-    if (user.rate >= RANK_THRESHOLDS[2] && me.provisional && user.waitingGameName.match(/^r_/)) {
+    if (user.waitingTournamentId && !user.waitingChallengeableTournament()) {
+  	  writeUserMessage(EJ("You are not registered to this tournament.", "この大会には参加していません。"), 1, "#ff0000")
+    } else if (user.rate >= RANK_THRESHOLDS[2] && me.provisional && user.waitingGameName.match(/^r_/)) {
   	  writeUserMessage(EJ("New player with a provisional rating cannot challenge 6-Dan or higher for rated games.", "レート未確定の新鋭棋士は六段以上とのレーティング対局には挑戦出来ません。"), 1, "#008800")
     } else if (user.waitingGameName.match(/_automatch\-/)) {
 		  client.seek(user)
@@ -996,6 +1004,7 @@ function _handleLoggedIn(str){
   hidden_prm = premium
   _enforcePremium()
   apiClient.getOptions()
+  apiClient.getTournaments()
   _updateLobbyHeader()
   writeUserMessage(i18next.t("msg.html5_initial"), 1, "#008800")
   _hourMileCount = 0
@@ -1163,6 +1172,7 @@ function _handleChallenger(name){
   sp.play("CHALLENGER")
   $('#modalChallenger').dialog('open')
   _initModalChallenger(users[name])
+  if (me.waitingTournamentId) apiClient.checkTournamentOpponent(me.waitingTournamentId, name)
 }
 
 function _handleAccept(str){
@@ -1332,6 +1342,7 @@ function _handleGameEnd(lines, atReconnection = false){
       sp.gameEnd(true)
       break
   }
+  // Set host status
   if (board.isPlayer() && board.game.gameType == "hc") {
 	  if (board.myRoleType == 0) board.studyHostType = 1
     else board.studyHostType = 2
@@ -1367,9 +1378,15 @@ function _handleGameEnd(lines, atReconnection = false){
   if (board.gameType == "r") _games_session.push(history);
   _notifyOnCloseGame = true;
   */
-  if (board.isPlayer() && !atReconnection) {
-    if (board.game.gameType == "r") client.mileage(10, config.mileagePass)
-    else client.mileage(5, config.mileagePass)
+  if (board.isPlayer()) {
+    if (!atReconnection) {
+      if (board.game.gameType == "r") client.mileage(10, config.mileagePass)
+      else client.mileage(5, config.mileagePass)
+    }
+    let tournament = board.game.getTournament()
+    if (tournament) {
+      writeUserMessage(EJ('Tournament status: ', 'イベント対局結果の確認: ') + tournament.url(), 2, "#FF3388")
+    }
   }
   board.playerNameClassChange(0, 'name-mouse-out', false)
   board.playerNameClassChange(1, 'name-mouse-out', false)
@@ -1434,15 +1451,10 @@ function _handleMonitor(str){
     if (!board.game.isStudy()) {
   		writeUserMessage(board.game.gameType == "r" ? i18next.t("msg.rated") : i18next.t("msg.nonrated"), 2, "#008800")
     }
-    /*
-		  var match:Array;
-		  if ((match = game_info[2].match(/\-\-(\d+)$/))) {
-			_writeUserMessage(LanguageSelector.EJ('This game belongs to "', "イベント対局: 「") + InfoFetcher.getSystemTournamentName(parseInt(match[1])) + LanguageSelector.EJ('"\n', "」\n"), 2, "#FF3388", true);
-			_writeUserMessage("( http://system.81dojo.com/" + LanguageSelector.EJ("en", "ja") + "/tournaments/" + match[1] + " )\n", 2, "#FF3388");
-		  }
-		  _shareKifuEnabled = false;
-		  _study_notified = false;
-      */
+    let tournament = board.game.getTournament()
+    if (tournament) {
+      writeUserMessage(EJ('This game belongs to: "', 'イベント対局: 「') + tournament.name() + EJ('" ', '」 ') + tournament.url(), 2, "#FF3388", true)
+    }
   } else {
     move_strings.forEach(function(move_str){
       if (move_str.match(/^%TORYO/)) return
@@ -1852,6 +1864,7 @@ function _backToEntrance(){
 
 function _clearAllParams(){
   users = new Object()
+  tournaments = new Object()
   playerGrid.clear().draw()
   waiterGrid.clear().draw()
   gameGrid.clear().draw()
@@ -1945,6 +1958,27 @@ function _handleOptions(data){
   _loadOptionsToDialog()
 }
 
+function _handleTournaments(data){
+  tournaments = new Object()
+  data.forEach(function(dat){
+    tournaments[dat.id] = new Tournament(dat)
+  })
+  $('#newGameTournamentSelect').empty()
+  Object.keys(tournaments).forEach(function(id){
+    if (tournaments[id].amJoined()) $('#newGameTournamentSelect').append($("<option/>").val(id).text(tournaments[id].name()))
+  })
+}
+
+function _handleCheckOpponent(data, opponent){
+  if (data.to_play == null) return
+  let elem = $('[id=check-game-' + opponent + ']').css('display', 'block')
+  if (data.to_play) {
+    elem.text(EJ("You haven't played with this opponent", "未対局の大会参加者です"))
+  } else {
+    elem.text(EJ("You have already played with this opponent", "この大会参加者とは対局済です"))
+  }
+}
+
 function _handlePlayerDetail(data, name){
   let element = $("#player-info-window-" + name)
   if (element[0]) {
@@ -2000,7 +2034,7 @@ function _handleGeneralTimeout(key){
   		if (_challengeUser) {
   			_challengeUser = null
   			writeUserMessage(EJ("Communication could not be established with this opponent. The challenge is canceled.", "相手との通信が確認できないため挑戦をキャンセルします。"), 1, "#008800", true)
-  			client.decline("C006")
+  			client.decline("C031")
   		}
       break
     case "REFRESH":

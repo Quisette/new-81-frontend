@@ -326,6 +326,7 @@
     "C022": "The opponent rejected your challenge. (Rating is out of preferred range)",
     "C023": "The opponent rejected your challenge. (Waiting for someone else)",
     "C030": "The selected rule has been canceled.",
+    "C031": "The challenge has been canceled.",
     "G000": ": Leaving Host's position.",
     "G001": ": Back to Host's position.",
     "G002": "",

@@ -3,6 +3,7 @@
 class WebSystemApiClient {
   constructor(host, port){
     this._path = "http://" + host + ":" + port + "/api/v2/"
+    //this._path = "http://192.168.220.131:3000/api/v2/"
     this._callbackFunctions = new Object();
   }
 
@@ -33,6 +34,14 @@ class WebSystemApiClient {
 
   getPlayerDetail(user){
     this._callJsonApi("PLAYER", "players/detail/" + user.name + ".json", user.name)
+  }
+
+  getTournaments(){
+    this._callJsonApi("TOURNAMENTS", "tournaments.json?player_name=" + me.name)
+  }
+
+  checkTournamentOpponent(tournamentId, opponent){
+    this._callJsonApi("CHECK_OPPONENT", "tournaments/" + tournamentId + "/check_game.json?name=" + me.name + "&opponent=" + opponent, opponent)
   }
 
   postOption(key, val){

@@ -117,6 +117,12 @@ class Game{
 		return this.gameName.match(/\-\-(\d+)\-(\d)/)
   }
 
+  getTournament(){
+		if (this.gameName.match(/\-\-(\d+)\-(\d)/)) {
+      return tournaments[parseInt(RegExp.$1)]
+    } else return null
+  }
+
   isStudy(){
     return this.gameId.match(/^STUDY/)
   }

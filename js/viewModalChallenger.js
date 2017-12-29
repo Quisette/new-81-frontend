@@ -1,6 +1,7 @@
 function _initModalChallenger(user){
   $('p#challengerName').html(coloredSpan('■', makeColorFromRating(user.rate)) + ' ' + user.name + '&emsp;' + user.country.flagImgTagMovie())
   $('span#challengerRate').html(': ' + user.rate + ' (' + makeRankFromRating(user.rate) + ')')
+  $('#modalChallenger').find('div.check-game').attr('id', 'check-game-' + user.name).css('display', 'none').text('')
   $('#challengerAcceptButton').unbind().click(function(){
     clearInterval(timer)
     _handleAcceptChallenge()

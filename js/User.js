@@ -15,6 +15,7 @@ class User{
     this._waitingGameName = ""
     this._waitingTurn = "*"
     this._waitingComment = ""
+    this._waitingTournamentId = null
   }
 
   setFromWho(tokens){
@@ -31,6 +32,7 @@ class User{
       this._waitingGameName = waiting_token.shift()
       this._waitingTurn = waiting_token.shift()
       this._waitingComment = waiting_token.join("|")
+      this._setTournamentId()
     } else {
       this._waitingGameName = ""
       this._waitingTurn = "*"
@@ -53,6 +55,7 @@ class User{
 		this._waitingGameName = game_name
 		this._waitingTurn = turn;
 		this._waitingComment = comment;
+    this._setTournamentId()
 		if (game_name == "*") this.status = 0
 		else this.status = 1
 	}
@@ -89,6 +92,24 @@ class User{
     return this.status == 4 || this.status == 5
   }
 
+  _setTournamentId(){
+    this._waitingTournamentId = null
+    if (this._waitingGameName == "") return
+    let game_info = this._waitingGameName.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/)
+		if (game_info[2].match(/\-\-(\d+)$/)) { // If tournament
+      this._waitingTournamentId = parseInt(RegExp.$1)
+    }
+  }
+
+  waitingChallengeableTournament(){
+    if (this._waitingTournamentId) {
+      if (tournaments[this._waitingTournamentId] && tournaments[this._waitingTournamentId].amJoined()) return true
+      else return false
+    } else {
+      return false
+    }
+  }
+
   gridObject(){
 		let statStr =  (this._monitorGame != "*") ? EJ("M ", "観") : ""
 		if (this.listAsWaiter()) {
@@ -103,9 +124,14 @@ class User{
     let timeStr = ""
 		if (this.listAsWaiter()) {
       let game_info = this._waitingGameName.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/)
-			if (game_info[2].match(/\-\-(\d+)$/)) {}
-//	return InfoFetcher.getSystemTournamentName(parseInt(match[1]));
       ruleStr = getHandicapShort(game_info[1])
+			if (this._waitingTournamentId) {
+        if (tournaments[this._waitingTournamentId]){
+          ruleStr = '<span title="' + tournaments[this._waitingTournamentId].name() + '">' + tournaments[this._waitingTournamentId].nameShort() + '</span>'
+        } else {
+          ruleStr = EJ('Tournament', '大会')
+        }
+      }
 			timeStr = (parseInt(game_info[3]) / 60) + "-" + game_info[4]
 		}
     let rateStr = this.rate
@@ -157,6 +183,10 @@ class User{
 
   get waitingTurn(){
     return this._waitingTurn
+  }
+
+  get waitingTournamentId(){
+    return this._waitingTournamentId
   }
 
 }
