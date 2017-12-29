@@ -697,9 +697,19 @@ class Board{
     this._kid = kid
   }
 
-  toKifuURL(){
-    if (this._kid) return "http://system.81dojo.com/" + EJ('en', 'ja') + "/kifus/" + this._kid
-    else return ""
+  toKifuURL(withOption = false){
+    if (this._kid == null || this._kid == 0) {
+      return ""
+    } else {
+      let url = "http://system.81dojo.com/" + EJ('en', 'ja') + "/kifus/" + this._kid
+      if (withOption) {
+        let vars = []
+        if (!this._direction) vars.push("turn=1")
+        if (kifuGrid.row({selected: true}).index() != 0) vars.push("moves=" + kifuGrid.row({selected: true}).index())
+      	if (vars.length > 0) url += "?" + vars.join("&")
+      }
+      return url
+    }
   }
 
   get runningTimer(){

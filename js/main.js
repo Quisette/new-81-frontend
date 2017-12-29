@@ -635,6 +635,11 @@ function _kifuCopyButtonClick(){
   $("#clip-board-area").remove()
 }
 
+function _shareKifuButtonClick(mode){
+  if (board.toKifuURL() != "") shareKifu(mode)
+  else writeUserMessage(EJ('This board does not have a kifu URL.', 'この盤面には棋譜URLの設定がありません'), 2, "#FF0000")
+}
+
 function _optionButtonClick(){
   $('#modalOption').dialog('open')
 }
@@ -784,7 +789,6 @@ function sendTimeout(){
 }
 
 function setBoardConditions(){
-  $("#lobbyOptionButton")
   if (board.isPlayer()) {
     $("#flipButton").addClass("button-disabled")
     $("#greetButton").prop('disabled', false)
@@ -820,8 +824,10 @@ function setBoardConditions(){
   else $("#logoutButton").addClass("button-disabled")
   if (board.onListen) $("input[name=kifuModeRadio]:eq(1)").prop("checked", true)
   else $("input[name=kifuModeRadio]:eq(0)").prop("checked", true)
-  $("#giveHostButton").removeClass("button-disabled")
   if (!board.isHost()) $("#giveHostButton").addClass("button-disabled")
+  else $("#giveHostButton").removeClass("button-disabled")
+  if (board.isPostGame) $("#shareKifuTwitterButton, #shareKifuFacebookButton").removeClass("submenu-button-disabled")
+  else $("#shareKifuTwitterButton, #shareKifuFacebookButton").addClass("submenu-button-disabled")
   _allowWatcherChat = $("#receiveWatcherChatCheckBox").is(":checked")
   _kifuModeRadioChange()
 }
@@ -1885,6 +1891,7 @@ function _clearAllParams(){
   playerGrid.clear().draw()
   waiterGrid.clear().draw()
   gameGrid.clear().draw()
+  board.close()
 }
 
 /* ====================================

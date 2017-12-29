@@ -94,7 +94,7 @@ class User{
 
   _setTournamentId(){
     this._waitingTournamentId = null
-    if (this._waitingGameName == "") return
+    if (this._waitingGameName.length <= 1) return
     let game_info = this._waitingGameName.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/)
 		if (game_info[2].match(/\-\-(\d+)$/)) { // If tournament
       this._waitingTournamentId = parseInt(RegExp.$1)

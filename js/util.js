@@ -291,3 +291,40 @@ function showAlertDialog(i18nextCode, handler){
     buttons: [{text: "OK", click: function(){$(this).dialog("close");handler()}}]
   })
 }
+
+function shareKifu(mode){
+	let str = ""
+  let url = ""
+	let opening = openingTypeObject(board.game.hasNoOpeningTypes() ? board.game.gameType : board.game.opening).tip
+	let black = board.game.black
+	let white = board.game.white
+  /*
+    //TODO Load opening name from the game list when isPlayer()
+		for each (var game:Object in _game_list) {
+			if (game.id == _game_name) {
+				opening = game.openingTip;
+				break;
+			}
+		}
+  */
+	if (mode == "FB") {
+		url = "http://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(board.toKifuURL(true))
+	} else if (mode == "TW") {
+		if (i18next.language == "ja") {
+			str = "81道場 対局譜: "
+			if (opening != "") str += " 【" + opening.replace(/☗/,"▲").replace(/☖/,"△") + "】 "
+			str += "▲" + black.name + " (" + black.country.name_ja + ", " + makeRankFromRating(black.rate) + ") 対 "
+			str += "△" + white.name + " (" + white.country.name_ja + ", " + makeRankFromRating(white.rate) +")"
+			str += " #81dojo #shogi"
+		} else {
+			str = "81Dojo Kifu: [";
+			str += black.name + "(" + black.country.name3 + ", " + makeRankFromRating(black.rate) + ") vs "
+			str += white.name + "(" + white.country.name3 + ", " + makeRankFromRating(white.rate) + ")]"
+			if (opening != "") str += ", " + opening
+			str += ". #81dojo"
+		}
+		url = "http://twitter.com/share?text=" + encodeURIComponent(str) + "&url=" + encodeURIComponent(board.toKifuURL(true))
+	}
+  window.open(url, "_blank")
+	//TODO _handleSNSClick(mode)
+}

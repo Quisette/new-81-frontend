@@ -38,7 +38,7 @@ div.layer#layerBoard
           a.button#kifuMenuButton href="#" data-i18n="board.kifu" onclick=""
           ul.subMenu
             li
-              a href="#" onclick="_kifuCopyButtonClick()"
+              a#kifuCopyButton href="#" onclick="_kifuCopyButtonClick()"
                 img src="img/icon_copy.png"
                 span data-i18n="submenu.kifu_copy"
             li
@@ -46,11 +46,11 @@ div.layer#layerBoard
                 img src="img/icon_save.png"
                 span data-i18n="submenu.kifu_save"
             li
-              a.submenu-button-disabled href="#" onclick=""
+              a#shareKifuTwitterButton href="#" onclick="_shareKifuButtonClick('TW')"
                 img src="img/icon_twitter.png"
                 span data-i18n="submenu.twitter"
             li
-              a.submenu-button-disabled href="#" onclick=""
+              a#shareKifuFacebookButton href="#" onclick="_shareKifuButtonClick('FB')"
                 img src="img/icon_facebook.png"
                 span data-i18n="submenu.facebook"
             li
