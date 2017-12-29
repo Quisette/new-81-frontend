@@ -44,8 +44,17 @@ class WebSystemApiClient {
     this._callJsonApi("CHECK_OPPONENT", "tournaments/" + tournamentId + "/check_game.json?name=" + me.name + "&opponent=" + opponent, opponent)
   }
 
+	getEvaluation(name){
+    this._callJsonApi("EVALUATION", "players/get_evaluation.json?name=" + name)
+	}
+
+  postEvaluation(name, like){
+    if (me.isGuest) return
+    $.post(this._path + "players/evaluate.xml", {like: like, name: me.name.toLowerCase(), opponent: name.toLowerCase()}, function(){})
+  }
+
   postOption(key, val){
-    //TODO return if guest
+    if (me.isGuest) return
     $.post(this._path + "options", {name: me.name.toLowerCase(), key: key, value: val}, function(){})
   }
 

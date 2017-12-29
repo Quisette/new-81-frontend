@@ -35,6 +35,7 @@ var options = new Object()
 var _studyBase = null
 var _studyBranch = null
 var _sendStudyBuffer = null
+var _dialogOnBoardClose = false
 
 /* ====================================
     On document.ready
@@ -323,6 +324,7 @@ $(function(){
   apiClient.setCallbackFunctions("PLAYER", _handlePlayerDetail)
   apiClient.setCallbackFunctions("TOURNAMENTS", _handleTournaments)
   apiClient.setCallbackFunctions("CHECK_OPPONENT", _handleCheckOpponent)
+  apiClient.setCallbackFunctions("EVALUATION", _handleEvaluation)
   if (!testMode) apiClient.getServers()
 
   if (testMode) _testFunction(0)
@@ -655,7 +657,14 @@ function _allowWatcherChatClick(){
 
 function _closeBoard(){
   if (board.isHost()) _giveHostButtonClick()
-  if (board.isPlayer()) client.closeGame()
+  if (board.isPlayer()) {
+    client.closeGame()
+    if (_dialogOnBoardClose) {
+		  writeUserMessage(EJ("Kifu URL of your last game: ", "先ほどの対局の棋譜URL: ") + board.toKifuURL(), 1, "#008800")
+		  _askEvaluation(board.getOpponent().name)
+    }
+    _dialogOnBoardClose = false
+  }
   else if (board.isWatcher()) client.monitor(board.game.gameId, false)
   _refreshLobby()
   board.close()
@@ -910,10 +919,11 @@ function _openPlayerInfo(user, doOpen = true){
     element.dialog('open')
     if (!user.isGuest) apiClient.getPlayerDetail(user)
     if (user.waitingChallengeableTournament()) apiClient.checkTournamentOpponent(user.waitingTournamentId, user.name)
+    if (getPremium() >= 1) apiClient.getEvaluation(user.name)
   }
   element.find("img.avatar").attr("src", user.avatarURL())
   element.find("p#p1").html(user.country.flagImgTag27() + ' ' + user.country.toString())
-  element.find("p#p2").html('R: ' + user.rate + ' (' + makeRankFromRating(user.rate) + ')')
+  element.find("p#p2").html('R: ' + user.rate + ' (' + makeRankFromRating(user.rate) + ') <img class="icon-evaluation" src="img/icon_like.png"><span class="get-evaluation" id="get-evaluation-' + user.name + '">?</span>')
   return element
 }
 
@@ -1232,10 +1242,11 @@ function _handleGameSummary(str){
   _challengeUser = null
 //	  _waiting = false;
 //	  _rematching = false;
-    //  var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
     if (board.game) _closeBoard()
 	  board.setGame(new Game(0, gameId, black, white))
     board.startGame(initialPosition, myTurn ? 0 : 1)
+    board.setKifuId(kid)
+    _dialogOnBoardClose = false
     $("#kifuGridWrapper").find(".dataTables_scrollBody").removeClass("local-kifu")
     setBoardConditions()
     _switchLayer(2)
@@ -1383,16 +1394,16 @@ function _handleGameEnd(lines, atReconnection = false){
   if (openingName.match(/\(/)) openingName += ")";
   history += openingName;
   if (board.gameType == "r") _games_session.push(history);
-  _notifyOnCloseGame = true;
   */
   if (board.isPlayer()) {
     if (!atReconnection) {
+      _dialogOnBoardClose = true
       if (board.game.gameType == "r") client.mileage(10, config.mileagePass)
       else client.mileage(5, config.mileagePass)
-    }
-    let tournament = board.game.getTournament()
-    if (tournament) {
-      writeUserMessage(EJ('Tournament status: ', 'イベント対局結果の確認: ') + tournament.url(), 2, "#FF3388")
+      let tournament = board.game.getTournament()
+      if (tournament) {
+        writeUserMessage(EJ('Tournament status: ', 'イベント対局結果の確認: ') + tournament.url(), 2, "#FF3388")
+      }
     }
   }
   board.playerNameClassChange(0, 'name-mouse-out', false)
@@ -1418,8 +1429,7 @@ function _handleResult(str){
   let tokens = str.split(",")
   loadResult(tokens[0], tokens[1], tokens[2], tokens[3])
   me.rate = parseInt(tokens[1])
-  let opponent = board.myRoleType == 0 ? board.game.white : board.game.black
-  users[opponent.name].rate = parseInt(tokens[3])
+  users[board.getOpponent().name].rate = parseInt(tokens[3])
 }
 
 function _handleMonitor(str){
@@ -1453,6 +1463,7 @@ function _handleMonitor(str){
   if (kifu_id) { // Start of watching game
     if (studyReset) forceKifuMode(1)
     board.startGame(positionStr, 2, move_strings, since_last_move)
+    board.setKifuId(kifu_id)
     setBoardConditions()
     _switchLayer(2)
     if (!board.game.isStudy()) {
@@ -1499,6 +1510,7 @@ function _handleReconnect(str){
     }
   })
   board.startGame(positionStr, board.getPlayerRoleFromName(me.name), move_strings, since_last_move)
+  if (kifu_id) board.setKifuId(kifu_id)
   setBoardConditions()
   _switchLayer(2)
   _greetState = 2
@@ -1854,6 +1866,7 @@ function _handleClosed(){
   _stopAllTimeouts()
   $('#loginAlert').text(i18next.t("login.closed"))
   $('#loginButton, #passwordInput, #usernameInput').attr('disabled', false)
+  $('#userEvaluationDialog').remove()
   if (currentLayer != 0) showAlertDialog("disconnect", _backToEntrance)
   else _clearAllParams()
 }
@@ -2006,6 +2019,12 @@ function _handleCheckOpponent(data, opponent){
   }
 }
 
+function _handleEvaluation(data){
+  let elem = $('[id=get-evaluation-' + data.name + ']')
+  let diff = Math.max(data.good - data.bad, 0)
+  if (elem.length) elem.text(diff)
+}
+
 function _handlePlayerDetail(data, name){
   let element = $("#player-info-window-" + name)
   if (element[0]) {
@@ -2123,6 +2142,22 @@ function _refreshLobby(first = false){
   client.who(first)
   client.list()
   setGeneralTimeout("AUTO_REFRESH", 180000, true)
+}
+
+function _askEvaluation(name){
+	if (me.isGuest || name.match(/^GUEST_/)) return
+  $('#userEvaluationDialog').remove()
+  let elem = $('<p></p>', {id: 'userEvaluationDialog'})
+  elem.html(EJ("Evaluate ", "対局相手") + name + EJ("'s game manner -> ", "さんの対局マナーを評価して下さい → "))
+  $('<a></a>', {href: '#', 'data-answer': '1'}).text(EJ('[Good]', '[良い]')).appendTo(elem)
+  $('<a></a>', {href: '#', 'data-answer': '-1'}).text(EJ('[Bad]', '[悪い]')).appendTo(elem)
+  elem.find("a").click(function(){
+    $('#userEvaluationDialog').remove()
+    apiClient.postEvaluation(name, parseInt($(this).data('answer')) > 0)
+  })
+  let area = $("#lobbyMessageArea")
+  area.append(elem)
+  area.animate({scrollTop: area[0].scrollHeight}, 'fast')
 }
 
 function _generateKIF(){

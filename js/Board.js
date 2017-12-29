@@ -28,6 +28,7 @@ class Board{
     this._initialPositionStr = null
     this.moves = new Array()
     this.game = null
+    this._kid = null
     this._rematchReady = [false, false]
     this._arrowsSelf = []
     this._arrowsPublic = []
@@ -684,6 +685,21 @@ class Board{
 
   getPlayersTimer(sente){
     return this._timers[sente ? 0 : 1]
+  }
+
+  getOpponent(){
+    if (this.myRoleType == 0) return this.game.white
+    else if (this.myRoleType == 1) return this.game.black
+    else return null
+  }
+
+  setKifuId(kid){
+    this._kid = kid
+  }
+
+  toKifuURL(){
+    if (this._kid) return "http://system.81dojo.com/" + EJ('en', 'ja') + "/kifus/" + this._kid
+    else return ""
   }
 
   get runningTimer(){
