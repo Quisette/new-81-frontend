@@ -104,11 +104,15 @@ div.layer#layerBoard
                 input type="radio" name="kifuModeRadio" value="1" onchange="_kifuModeRadioChange()"
                 span data-i18n="board.listen"
               div#replayButtons
-                input id="replayButtonFirst" data-i18n-title="board.replay_first" type="button" onclick="_replayButtonClick(-2)" value="|<"
-                input id="replayButtonBack" data-i18n-title="board.replay_back" type="button" onclick="_replayButtonClick(-1)" value="<"
-                input id="replayButtonForward" data-i18n-title="board.replay_forward" type="button" onclick="_replayButtonClick(1)" value=">"
-                input id="replayButtonLast" data-i18n-title="board.replay_last" type="button" onclick="_replayButtonClick(2)" value=">|"
-                
+                button id="replayButtonFirst" data-i18n-title="board.replay_first" type="button" onclick="_replayButtonClick(-2)"
+                  i.fa.fa-step-backward
+                button id="replayButtonBack" data-i18n-title="board.replay_back" type="button" onclick="_replayButtonClick(-1)"
+                  i.fa.fa-chevron-left
+                button id="replayButtonForward" data-i18n-title="board.replay_forward" type="button" onclick="_replayButtonClick(1)"
+                  i.fa.fa-chevron-right
+                button id="replayButtonLast" data-i18n-title="board.replay_last" type="button" onclick="_replayButtonClick(2)"
+                  i.fa.fa-step-forward
+
             div.grid-wrapper#kifuGridWrapper style="flex:1 1 1px"
               table.stripe.hover#kifuGrid
                 tr
@@ -117,5 +121,5 @@ div.layer#layerBoard
                     th data-i18n="board.move"
                     th data-i18n="board.move_time"
                   tbody
-                  
+
   include viewModalResult

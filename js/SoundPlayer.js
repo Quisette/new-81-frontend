@@ -9,6 +9,8 @@ class SoundPlayer{
     this.byoyomiType = 1
 
     this._channels = new Object()
+    this._loadChannel("OPENING", "opening")
+    this._channels["OPENING"].loop = true
     this._loadChannel("PIECE_NORMAL", "piece")
     this._loadChannel("PIECE_DOUBLE", "piece_double")
     this._loadChannel("CHALLENGER", "challenger")
@@ -97,6 +99,24 @@ class SoundPlayer{
   door(open){
     //boolean
     if (this.chatBoardEnabled) this.play(open ? "DOOR_OPEN" : "DOOR_CLOSE")
+  }
+
+  startOpening(){
+    this._channels["OPENING"].volume = 0
+    this.play("OPENING")
+    $(this._channels["OPENING"]).animate({volume: 0.8}, 3000)
+  }
+
+  stopOpening(){
+    let audio = this._channels["OPENING"]
+    $(audio).animate({volume: 0}, 4000, function(){
+      audio.pause()
+      audio.currentTime = 0
+    })
+  }
+
+  muteOpening(toggle){
+    this._channels["OPENING"].muted = toggle
   }
 
   play(key){

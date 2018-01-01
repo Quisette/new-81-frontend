@@ -1,5 +1,6 @@
 "use strict";
 const IMAGE_DIRECTORY = "http://81dojo.com/dojo/images/"
+var args = new Object()
 var client = null;
 var apiClient = null;
 var sp;
@@ -63,6 +64,14 @@ function _testFunction(phase){
 }
 
 $(function(){
+  // Load URL params
+  if (location.search != "") {
+    location.search.substring(1).split('&').forEach(function(pair){
+      let tokens = pair.split('=')
+      args[tokens[0]] = tokens[1]
+    })
+  }
+
   // Load version InfoFetcher
   $('p#versionText').text('ver. ' + version)
 
@@ -87,10 +96,10 @@ $(function(){
   })
 
   // Internationalization
-  i18next.language = "ja"
+  i18next.language = localStorage.locale || args["locale"] || "ja"
   i18next.use(i18nextXHRBackend).init({
-    lng: 'ja',
-    fallbackLng: 'ja',
+    lng: localStorage.locale || args["locale"] || 'ja',
+    fallbackLng: args["locale"] || 'ja',
     debug: true,
     backend: {
       loadPath: "locales/{{lng}}.json?" + version
@@ -119,7 +128,8 @@ $(function(){
     columns: [
       {data: "name", width: "35%", className: "dt-body-left", bSortable: false,
         render: function(data){return '<img class="inline" src="img/' + data + '.png"> ' + data}},
-      {data: "description_ja", width: "35%", bSortable: false},
+      {width: "35%", bSortable: false,
+        render: function(data, type, row){return EJ(row.description_en, row.description_ja)}},
       {data: "population", width: "35%", bSortable: false}
     ],
     rowId: "name",
@@ -156,7 +166,7 @@ $(function(){
     data: [],
     columns: [
       {data: "waiter", width: "50%", className: "dt-body-left"},
-      {data: "rate", width: "10%", className: "dt-body-right"},
+      {data: "rate", width: "10%", className: "dt-body-right", type: "rate-str"},
       {data: "ruleStr", width: "27%"},
       {data: "timeStr", width: "13%"}
     ],
@@ -165,7 +175,7 @@ $(function(){
     select: "single",
     order: [[1, 'desc']],
     scrollY: true,
-    oLanguage: {sEmptyTable: EJ("No player is waiting", "対局待プレーヤがいません")}
+    oLanguage: {sEmptyTable: EJ("No waiting player", "対局待プレーヤがいません")}
   })
   waiterGrid.clear()
   $('#waiterGrid tbody').on('dblclick', 'tr', function () {
@@ -187,7 +197,7 @@ $(function(){
     select: "single",
     order: false,
     scrollY: true,
-    oLanguage: {sEmptyTable: EJ("No game room found.", "対局がありません")}
+    oLanguage: {sEmptyTable: EJ("Waiting for games...", "待機中...")}
   })
   gameGrid.clear()
   $('#gameGrid tbody').on('dblclick', 'tr', function () {
@@ -199,7 +209,7 @@ $(function(){
     columns: [
       {data: "name", width: "55%", className: "dt-body-left"},
       {data: "country", width: "25%", className: "dt-body-left"},
-      {data: "rate", width: "20%", className: "dt-body-right"}
+      {data: "rate", width: "20%", className: "dt-body-right", type: "rate-str"}
     ],
     rowId: "name",
     searching: false, paging: false, info: false,
@@ -248,11 +258,17 @@ $(function(){
 
   // Hide all layers other than login
   _switchLayer(0)
+  _fadeInLoginView()
 
   // Load localStorage
   if (localStorage.login) $('#usernameInput').val(localStorage.login)
   if (localStorage.dat) $('#passwordInput').val(decaesar(decaesar(localStorage.dat, 81), 3))
   if (localStorage.save) $('#loginSave').prop('checked', localStorage.save == 'true')
+  $('#languageSelector').val(localStorage.locale || args["locale"] || 'ja')
+  if (localStorage.openingMusic) {
+    $('#openingMusicCheckBox').prop('checked', localStorage.openingMusic == 'true')
+    sp.muteOpening(!(localStorage.openingMusic == 'true'))
+  }
 
   // Event listeners
   window.onblur = function(){
@@ -326,9 +342,12 @@ $(function(){
   apiClient.setCallbackFunctions("TOURNAMENTS", _handleTournaments)
   apiClient.setCallbackFunctions("CHECK_OPPONENT", _handleCheckOpponent)
   apiClient.setCallbackFunctions("EVALUATION", _handleEvaluation)
-  if (!testMode) apiClient.getServers()
 
-  if (testMode) _testFunction(0)
+  if (testMode) {
+    _testFunction(0)
+  } else {
+    _prepareForLogin()
+  }
 });
 
 /* ====================================
@@ -363,11 +382,27 @@ function _resize(){
     Login View functions
 ===================================== */
 
+function _fadeInLoginView(){
+  $('#layerLoginContents').css('opacity', 0).animate({'opacity': 1}, 3000)
+}
+
+function _prepareForLogin(){
+  sp.startOpening()
+  $('input[name=loginType], input#usernameInput, input#passwordInput, input#loginSave, input#loginButton').prop('disabled', true)
+  serverGrid.clear().draw()
+  $('p#loginAlert').text('')
+  apiClient.getServers()
+}
+
 function _languageSelected(){
   i18next.changeLanguage($('#languageSelector').val())
+  localStorage.locale = $('#languageSelector').val()
 }
 
 function _updateLanguage(){
+  serverGrid.rows().invalidate()
+  $('span#languageFlag').html(countries[$('#languageSelector option:selected').data('code')].flagImgTag16())
+  $('p#loginAlert').text('')
   $("[data-i18n]").each(function(){
     $(this).text(i18next.t($(this).attr('data-i18n')))
   })
@@ -391,6 +426,11 @@ function _updateLanguage(){
     $(this).button('option', 'label', i18next.t($(this).attr('id').split("-")[1]))
   })
   $('#passwordInput').tooltip()
+}
+
+function _openingMusicCheckBoxClick(){
+  localStorage.openingMusic = $('#openingMusicCheckBox').prop('checked')
+  sp.muteOpening(!$('#openingMusicCheckBox').prop('checked'))
 }
 
 function _loginTypeChange(){
@@ -439,12 +479,20 @@ function _loginButtonClick(){
   client.connect();
 }
 
+function _reloginButtonClick(){
+  $('input#reloginButton').css('display', 'none')
+  $('img#entrance-img').prop('src', 'img/entrance_ja.jpg')
+  _prepareForLogin()
+  _fadeInLoginView()
+}
+
 /* ====================================
     Lobby View functions
 ===================================== */
 
 function _logoutButtonClick(){
-  _switchLayer(0)
+  $('img#entrance-img').prop('src', 'img/81Dojo_bye.jpg')
+  _backToEntrance()
   client.close()
 }
 
@@ -795,14 +843,14 @@ function setBoardConditions(){
     $("#greetButton").prop('disabled', false)
     if (board.isPostGame) {
       kifuGrid.select.style('single')
-      $("#replayButtons").find("input").prop("disabled", false)
+      $("#replayButtons").find("button").prop("disabled", false)
       $("input[name=kifuModeRadio]").prop("disabled", board.isHost())
       $("#resignButton").addClass("button-disabled")
       $("#clearArrowsButton, #positionMenuButton, #kifuMenuButton, #rematchButton, #closeGameButton").removeClass("button-disabled")
       $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: true})
     } else {
       kifuGrid.select.style('api')
-      $("#replayButtons").find("input").prop("disabled", true)
+      $("#replayButtons").find("button").prop("disabled", true)
       $("input[name=kifuModeRadio]").prop("disabled", true)
       $("#resignButton").removeClass("button-disabled")
       $("#clearArrowsButton, #positionMenuButton, #kifuMenuButton, #rematchButton, #closeGameButton").addClass("button-disabled")
@@ -814,7 +862,7 @@ function setBoardConditions(){
     }
   } else if (board.isWatcher()){
     kifuGrid.select.style('single')
-    $("#replayButtons").find("input").prop("disabled", false)
+    $("#replayButtons").find("button").prop("disabled", false)
     $("input[name=kifuModeRadio]").prop("disabled", board.isHost())
     $("#greetButton").prop('disabled', 'true')
     $("#resignButton, #rematchButton").addClass("button-disabled")
@@ -1009,13 +1057,19 @@ function _handleGeneralResponse(tokens){
 }
 
 function _handleLoggedIn(str){
+  sp.stopOpening()
   $('#loginAlert').text(i18next.t("login.successfull"))
   if (!isGuest) {
     localStorage.login = $('#usernameInput').val()
     localStorage.dat = caesar(caesar($('#passwordInput').val(), 3), 81)
     localStorage.save = $('#loginSave').prop('checked')
   }
-  _switchLayer(1)
+  $('div#layerLoginContents').animate({opacity: 0}, 1000, function(){
+    _switchLayer(1)
+    _refreshLobby(true)
+    $('div#layerLoginContents').css('opacity', 1)
+    if (testMode) _testFunction(2)
+  })
   $('#serverLogo').prop('src', 'img/' + client.serverName + '.png')
   $('#header-serverName').text(client.serverName + " : ")
   let tokens = str.split(":")
@@ -1030,11 +1084,14 @@ function _handleLoggedIn(str){
   apiClient.getOptions()
   apiClient.getTournaments()
   _updateLobbyHeader()
-  writeUserMessage(i18next.t("msg.html5_initial"), 1, "#008800")
+  _writeWelcomeMessage()
   _hourMileCount = 0
   setGeneralTimeout("HOUR_MILE", 3600000)
-  _refreshLobby(true)
-  if (testMode) _testFunction(2)
+}
+
+function _writeWelcomeMessage(){
+  writeUserMessage(i18next.t("msg.html5_initial"), 1, "#008800")
+  if (getPremium()) writeUserMessage(EJ("You have " + makePremiumName(getPremium()) + " status. Thank you for choosing 81Dojo.", makePremiumName(getPremium()) + "クラス" + me.name + "様、いつもご利用有難うございます。＜(_ _)＞"), 1, "#FFBB00", true)
 }
 
 function _updateLobbyHeader(){
@@ -1857,13 +1914,13 @@ function _handleMile(result) {
 function _handleClosed(){
   _stopAllTimeouts()
   $('#loginAlert').text(i18next.t("login.closed"))
-  $('#loginButton, #passwordInput, #usernameInput').attr('disabled', false)
   $('#userEvaluationDialog').remove()
   if (currentLayer != 0) showAlertDialog("disconnect", _backToEntrance)
-  else _clearAllParams()
 }
 
 function _backToEntrance(){
+  $('input[name=loginType], input#usernameInput, input#passwordInput, input#loginSave, input#loginButton').prop('disabled', true)
+  $('input#reloginButton').css('display', 'initial')
   _switchLayer(0)
   _clearAllParams()
 }
@@ -1875,6 +1932,7 @@ function _clearAllParams(){
   waiterGrid.clear().draw()
   gameGrid.clear().draw()
   board.close()
+  $('#lobbyMessageArea').empty()
 }
 
 /* ====================================
@@ -2009,10 +2067,11 @@ function _stopTypingIndicator(turn, fade = false){
 
 function _handleServers(data){
   data[0].population = restoreIdleConnections(data[0].population)
-  serverGrid.clear()
   serverGrid.rows.add(data)
   serverGrid.draw()
   serverGrid.row(0).select()
+  //$('input[name=loginType], input#usernameInput, input#passwordInput, input#loginSave').prop('disabled', false)
+  $('input#usernameInput, input#passwordInput, input#loginSave, input#loginButton').prop('disabled', false)
   if (testMode) _testFunction(1)
 }
 
