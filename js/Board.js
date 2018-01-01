@@ -189,6 +189,7 @@ class Board{
       $('#sq' + this._position.lastMove.fromX + '_' + this._position.lastMove.fromY).addClass('square-last')
     }
     if ($("#modalImpasse").dialog('isOpen')) this.calcImpasse()
+    $(".name-popup").remove()
   }
 
   setPieceDesignType(v){
@@ -502,8 +503,8 @@ class Board{
     this._refreshPosition()
   }
 
-  handleBranchMove(move){
-    return this._position.makeMove(move, false)
+  handleBranchMove(move, withSound = false){
+    return this._position.makeMove(move, withSound)
   }
 
   handleGrab(x, y){
@@ -616,7 +617,10 @@ class Board{
     }
     let arrow = new BoardArrow(fromType, fromX, fromY, toX, toY, color, sender, this._arrowCanvas)
     arrows.push(arrow)
-    if (this.onListen == isPublic) arrow.draw(this._scale)
+    if (this.onListen == isPublic) {
+      arrow.draw(this._scale)
+      if (sender != me.name) this.popupName(toX, toY, sender, color)
+    }
   }
 
   clearArrows(isPublic, sender = "*"){
@@ -635,12 +639,25 @@ class Board{
     return found
   }
 
-  redrawAllArrows(isPublic, withLable = false){
+  redrawAllArrows(isPublic, withLabel = false){
     let arrows = isPublic ? this._arrowsPublic : this._arrowsSelf
     this.clearCanvas()
     arrows.forEach(function(arrow){
       arrow.draw(this._scale)
+      if (withLabel) this.popupName(arrow.toX, arrow.toY, arrow.name, arrow.color)
     }, this)
+  }
+
+  popupName(x, y, name, color){
+    let sq = $('#sq' + x + '_' + y)
+    let posX = (sq.offset().left - this._div.offset().left) / this._scale + 0.56 * sq.width()
+    let posY = (sq.offset().top - this._div.offset().top) / this._scale + 0.66 * sq.height()
+    let element = $("<div></div>",{
+      class: 'name-popup',
+      html: '<span>' + name + '</span>'
+    }).css({left: posX, top: posY, color: intToColorStyle(color)})
+    this._div.append(element)
+    element.delay(1500).animate({top: (posY - 15) + 'px', opacity: 0}, 1500, function(){$(this).remove()})
   }
 
   clearCanvas(){

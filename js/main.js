@@ -33,7 +33,8 @@ var testMode = false
 var config = null
 var options = new Object()
 var _studyBase = null
-var _studyBranch = null
+var _studyBranchMoves = null
+var _studySender = null
 var _sendStudyBuffer = null
 var _dialogOnBoardClose = false
 
@@ -679,7 +680,7 @@ function _closeBoard(){
   kifuGrid.clear().draw()
   _greetState = 0
   _studyBase = null
-  _studyBranch = null
+  _studyBranchMoves = null
   forceKifuMode(1)
   _kifuModeRadioChange()
 }
@@ -713,7 +714,6 @@ function _kifuModeRadioChange(){
       $("#kifuGridWrapper").find(".dataTables_scrollBody").removeClass("local-kifu")
       if (board.isSubHost()) _sendAutoChat("#G001")
       board.clearArrows(false)
-      board.redrawAllArrows(true, true)
       if (board.isPostGame && _studyBase != null) _handleStudy()
       if (!board.isPostGame) {
         if (kifuGrid.rows().count() > 0 && kifuGrid.row(':last').data().branch) _restorePublicKifu()
@@ -721,6 +721,7 @@ function _kifuModeRadioChange(){
         scrollGridToSelected(kifuGrid)
         board.replayMoves(board.moves)
       }
+      board.redrawAllArrows(true, true)
     }
   }
   board.setBoardConditions()
@@ -1709,28 +1710,11 @@ function _handleGameChat(sender, message){
       _runTypingIndicator(sender)
 		}
 	} else if (message.match(/\[\#\#STUDY\](\d+)\/(.+)$/)) {
-    _studyBase = parseInt(RegExp.$1)
-    _studyBranch = RegExp.$2
-    /*
-  	if (!board.studyOn) {
-  		board.studyOn = true;
-  		_users[name].isHost = true;
-  		_updateStatusMarks();
-  	}*/
+    let singleMove = _updateStudyState(sender, parseInt(RegExp.$1), RegExp.$2)
   	board.clearArrows(true)
   	if (board.isHost() && name == me.name) return
-    /*
-  	if (!_study_notified && board.post_game && !board.onListen && !board.isStudyHost) {
-  		_writeUserMessage(LanguageSelector.lan.msg_study_notify + "\n", 2, "#008800");
-  		_study_notified = true;
-  	}
-    */
 		if (!(board.isPostGame && board.onListen)) return
-    if (sender != me.name) _handleStudy()
-    /*
-		var old_length:int = board.study_list.length;
-		if (old_length == 0) _writeUserMessage(name + LanguageSelector.EJ(": Studying a branch from move #" + base + "\n", ": " + base + "手目からの分岐手順を検討\n"), 2, "#008800");
-    */
+    if (sender != me.name) _handleStudy(singleMove)
 	} else if (message.match(/^\[##ARROW\]CLEAR$/)) {
 		if (sender != me.name) board.clearArrows(true, sender)
 	} else if (message.match(/^\[##ARROW\](.+),(.+),(.+),(.+),(.+),(.+)$/)) {
@@ -1821,8 +1805,7 @@ function _handleGameChat(sender, message){
 
 function _handlePrivateChat(sender, message){
 	if (message.match(/^\[\#\#STUDY\](\d+)\/(.+)$/)) {
-    _studyBase = parseInt(RegExp.$1)
-    _studyBranch = RegExp.$2
+    _updateStudyState(sender, parseInt(RegExp.$1), RegExp.$2)
 		if (!(board.isPostGame && board.onListen)) return
     if (sender != me.name) _handleStudy()
     // TODO If the user has been forced to become Host after entering room, he should be demoted to subHost as soon as receiving this private message
@@ -1898,10 +1881,40 @@ function _clearAllParams(){
     Post-game communication
 ===================================== */
 
-function _handleStudy() {
+function _updateStudyState(sender, base, branch = "*"){
+  // integer, string
+  let singleMove = false
+  _studyBase = base
+  _studySender = sender
+  if (branch == "*") {
+    _studyBranchMoves = null
+  } else {
+    let branchMoves = branch.split("/")
+    if (_studyBranchMoves == null) {
+      writeUserMessage(sender + ": " + EJ("Studying a branch from move #" + base, base + "手目からの分岐手順を検討"), 2, "#008800")
+      if (branchMoves.length == 1) singleMove = true
+    } else {
+      if (branchMoves.length == _studyBranchMoves.length + 1) singleMove = true
+    }
+    _studyBranchMoves = branch.split("/")
+  }
+  return singleMove
+  /*
+	if (!board.studyOn) { //TODO check what 'studyOn' had been used in Flahs ver.
+		board.studyOn = true;
+		_users[name].isHost = true;
+		_updateStatusMarks();
+	if (!_study_notified && board.post_game && !board.onListen && !board.isStudyHost) {
+		_writeUserMessage(LanguageSelector.lan.msg_study_notify + "\n", 2, "#008800");
+		_study_notified = true;
+	}
+  */
+}
+
+function _handleStudy(singleMove = false) {
   _sendStudyBuffer = null
   if (_studyBase == null) return
-	if (_studyBranch == "*") {
+	if (_studyBranchMoves == null) {
     if (kifuGrid.row(':last').data().branch) _restorePublicKifu()
     kifuGrid.rows().deselect()
     kifuGrid.row(_studyBase).select()
@@ -1912,14 +1925,15 @@ function _handleStudy() {
     kifuGrid.rows.add(board.moves.slice(0, _studyBase + 1))
     board.replayMoves(kifuGrid.rows(Array.from(Array(_studyBase + 1).keys())).data())
     let prevMove = board.moves[_studyBase]
-    _studyBranch.split("/").forEach(function(csa){
+    _studyBranchMoves.forEach(function(csa, index){
       let move = new Movement(prevMove)
       move.setFromCSA(csa)
       move.branch = true
-      prevMove = board.handleBranchMove(move)
+      prevMove = board.handleBranchMove(move, singleMove && index == _studyBranchMoves.length - 1)
       kifuGrid.rows.add([prevMove])
     })
     board.refreshPosition()
+    if (singleMove) board.popupName(prevMove.toX, prevMove.toY, _studySender, 52224)
     kifuGrid.draw()
     kifuGrid.row(':last').select()
     scrollGridToSelected(kifuGrid)

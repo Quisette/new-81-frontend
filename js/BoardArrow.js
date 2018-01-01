@@ -58,4 +58,14 @@ class BoardArrow{
       return $('[id=sq' + (areaType == 0 ? '0' : '-1') + '_' + x + ']:eq(' + y +')')
     }
   }
+
+  get toX(){
+    return this._toX
+  }
+  get toY(){
+    return this._toY
+  }
+  get color(){
+    return this._color
+  }
 }
