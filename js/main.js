@@ -46,20 +46,23 @@ var _dialogOnBoardClose = false
 function _testFunction(phase){
   //phase:integer
   if (phase == 0) { // After creation
-    //board.loadNewPosition()
-    //_switchLayer(2)
-    //return
+    if (false) {
+      board.loadNewPosition()
+      _switchLayer(2)
+      return
+    }
     _handleServers([
-      {id:1, name:'MERCURY', description_en: 'test', description_ja: 'テスト', enabled: true, population: 0, host: 'shogihub.com', port: 4084},
-      {id:2, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.47.133', port: 4081}
+      {id:1, name:'MERCURY', description_en: 'test', description_ja: 'テスト', enabled: true, population: 0, host: 'shogihub.com', port: 4084}
+      //{id:1, name:'EARTH', description_en: 'main', description_ja: 'メイン', enabled: true, population: 0, host: 'shogihub.com', port: 4081}
+      //{id:1, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.47.133', port: 4081}
     ])
   } else if (phase == 1) { // After servers are loaded
     //return
-    serverGrid.row("#MERCURY").select()
+    serverGrid.row(0).select()
     _loginButtonClick()
   } else if (phase == 2) { // After logged in
     //client.send("%%GAME hc2pd_test2-900-30 -")
-    _optionButtonClick()
+    //_optionButtonClick()
   }
 }
 
@@ -360,7 +363,7 @@ window.onresize = function () {
 
 function _resize(){
   $("#layerLogin").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 12.)
-  $("#layerBoard").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 15.)
+  $("#layerBoard").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 12.5)
 	if (window.innerWidth > 1550) {
     $("#lobbyChatBox").insertAfter($("#playerListBox")).css('flex', 'initial')
 	} else {
@@ -383,7 +386,7 @@ function _resize(){
 ===================================== */
 
 function _fadeInLoginView(){
-  $('#layerLoginContents').css('opacity', 0).animate({'opacity': 1}, 3000)
+  $('#layerLoginContents').css('opacity', 0).animate({'opacity': 1}, testMode ? 0 : 3000)
 }
 
 function _prepareForLogin(){
@@ -574,6 +577,26 @@ function _interpretCommunicationCode(name, code, n, bold, sound) {
     Board View functions
 ===================================== */
 
+function _checkLobbyButtonClick(forceDefault = false){
+  if ($('#boardContents').css('pointer-events') == 'none') { // Back to normal
+    $('#checkLobbyButton').addClass("button-disabled")
+    $('#boardContents').css('pointer-events', 'initial').animate({'opacity': 1}, forceDefault ? 0 : 1500)
+    $('#layerBoard').animate({'height': '100%'}, forceDefault ? 0 : 1500, function(){
+      $('#layerBoard').css('border-bottom', 'none')
+      $('#checkLobbyButton').removeClass("button-disabled")
+      $('#checkLobbyButton').html('<i class="fa fa-eye fa-2x"></i>')
+    })
+  } else if (!forceDefault) { // Start checking lobby
+    _refreshLobby()
+    $('#checkLobbyButton').addClass("button-disabled")
+    $('#boardContents').css('pointer-events', 'none').animate({'opacity': 0}, 1500)
+    $('#layerBoard').css('border-bottom', '5px ridge orange').animate({'height': '40px'}, 1500, function(){
+      $('#checkLobbyButton').removeClass("button-disabled")
+      $('#checkLobbyButton').html('<i class="fa fa-eye-slash fa-2x"></i>')
+    })
+  }
+}
+
 function _resignButtonClick(){
   if (board.myRoleType == 0 && board.position.turn == true || board.myRoleType == 1 && board.position.turn == false) {
 		client.gameChat("<(_ _)> 負けました。(Makemashita.)")
@@ -720,6 +743,7 @@ function _closeBoard(){
     _dialogOnBoardClose = false
   }
   else if (board.isWatcher()) client.monitor(board.game.gameId, false)
+  _checkLobbyButtonClick(true) //Cancel see lobby button if activated
   _refreshLobby()
   board.close()
   _switchLayer(1)
@@ -984,7 +1008,9 @@ function _openPlayerInfo(user, doOpen = true){
 
 function _playerChallengeClick(user){
   if (user == me) return
-  if (_challengeUser) {
+  if (board.isPlayer()) {
+	  writeUserMessage(EJ("You are still in a game.", "現在対局者であるため別の対局を開始できません"), 1, "#008800")
+  } else if (_challengeUser) {
 	  writeUserMessage(EJ("You can only challenge one player at a time.", "挑戦は一度に一人に対してしか行えません。"), 1, "#008800")
   } else if (user.listAsWaiter()) {
     if (user.waitingTournamentId && !user.waitingChallengeableTournament()) {
@@ -1064,7 +1090,7 @@ function _handleLoggedIn(str){
     localStorage.dat = caesar(caesar($('#passwordInput').val(), 3), 81)
     localStorage.save = $('#loginSave').prop('checked')
   }
-  $('div#layerLoginContents').animate({opacity: 0}, 1000, function(){
+  $('div#layerLoginContents').animate({opacity: 0}, testMode ? 0 : 1000, function(){
     _switchLayer(1)
     _refreshLobby(true)
     $('div#layerLoginContents').css('opacity', 1)
@@ -1366,6 +1392,7 @@ function _handleMove(csa, time){
 
 function _handleGameEnd(lines, atReconnection = false){
   board.pauseAllTimers()
+  _checkLobbyButtonClick(true) //Cancel see lobby button if activated
   let gameEndType = lines.split("\n")[0]
   let result = lines.split("\n")[1]
   //var adviseIllegal:Boolean = false;
@@ -1932,6 +1959,7 @@ function _clearAllParams(){
   waiterGrid.clear().draw()
   gameGrid.clear().draw()
   board.close()
+  _checkLobbyButtonClick(true) //Cancel see lobby button if activated
   $('#lobbyMessageArea').empty()
 }
 
@@ -2125,7 +2153,7 @@ function _handlePlayerDetail(data, name){
 
 function _switchLayer(n){
   $('div#layerLogin').css({'z-index': n == 0 ? 2 : 1, opacity: n == 0 ? 1 : 0})
-  $('div#layerLobby').css({'z-index': n == 1 ? 2 : 1, opacity: n == 1 ? 1 : 0})
+  $('div#layerLobby').css({'z-index': n == 1 ? 2 : 1, opacity: (n == 1 || n == 2) ? 1 : 0})
   $('div#layerBoard').css({'z-index': n == 2 ? 2 : 1, opacity: n == 2 ? 1 : 0})
   currentLayer = n
 }
