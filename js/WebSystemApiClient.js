@@ -29,15 +29,18 @@ class WebSystemApiClient {
   }
 
   getOptions(){
+    if (me.isGuest) return
     this._callJsonApi("OPTIONS", "options.json?name=" + me.name.toLowerCase())
   }
 
   getPlayerDetail(user){
+    if (user.isGuest) return
     this._callJsonApi("PLAYER", "players/detail/" + user.name + ".json", user.name)
   }
 
   getTournaments(){
-    this._callJsonApi("TOURNAMENTS", "tournaments.json?player_name=" + me.name)
+    let name = me.isGuest ? "GUEST" : me.name
+    this._callJsonApi("TOURNAMENTS", "tournaments.json?player_name=" + name)
   }
 
   checkTournamentOpponent(tournamentId, opponent){
@@ -45,6 +48,8 @@ class WebSystemApiClient {
   }
 
 	getEvaluation(name){
+    if (me.isGuest) return
+    if (/^GUEST_[0-9a-z]{6}$/.test(name)) return
     this._callJsonApi("EVALUATION", "players/get_evaluation.json?name=" + name)
 	}
 

@@ -5,7 +5,6 @@ var client = null;
 var apiClient = null;
 var sp;
 var currentLayer = 0;
-var isGuest = false;
 var mileage;
 var serverGrid;
 var playerGrid;
@@ -313,29 +312,7 @@ $(function(){
   _resize()
 
   // Define default options
-  options = {
-    timer_sound_type: 2,
-    piece_type: 0,
-    piece_type_34: 1,
-    button_sound_play: 1,
-    lobbychat_sound_play: 1,
-    gamechat_sound_play: 1,
-    end_sound_play: 1,
-    hold_piece: 1,
-    highlight_movable: 0,
-    notation_style: 1,
-    pm_auto_open: 0,
-    accept_arrow: 1,
-    arrow_color: 52224,
-    history_length: 50,
-    postgame_study_level: 0,
-    english_level: 0,
-    receive_kifu_comment: 0,
-    board_size: 0
-  }
-  _enforceOptions()
-
-  // Do in every relogin
+  _loadDefaultOptions()
 
   //apiClient = new WebSystemApiClient("192.168.220.131", 3000)
   apiClient = new WebSystemApiClient("system.81dojo.com", 80)
@@ -362,7 +339,7 @@ window.onresize = function () {
 }
 
 function _resize(){
-  $("#layerLogin").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 12.)
+  $("#layerLobby").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 8.5)
   $("#layerBoard").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 12.5)
 	if (window.innerWidth > 1550) {
     $("#lobbyChatBox").insertAfter($("#playerListBox")).css('flex', 'initial')
@@ -437,9 +414,7 @@ function _openingMusicCheckBoxClick(){
 }
 
 function _loginTypeChange(){
-  isGuest = $('input[name=loginType]:checked').val() == 1
-  $('#usernameInput').attr('disabled', isGuest)
-  $('#passwordInput').attr('disabled', isGuest)
+  $('#usernameInput, #passwordInput').attr('disabled', $('input[name=loginType]:checked').val() == 1)
 }
 
 function _loginButtonClick(){
@@ -451,7 +426,8 @@ function _loginButtonClick(){
   $('#loginButton, #passwordInput, #usernameInput').attr('disabled', true)
   if (client != null) client.close();
   $('#loginAlert').text(i18next.t("login.connecting"))
-  client = new WebSocketClient(server.name, server.host, server.port, isGuest ? 'guest' : $('#usernameInput').val(), isGuest ? 'dojo_guest' : $('#passwordInput').val());
+  let isGuest = $('input[name=loginType]:checked').val() == 1
+  client = new WebSocketClient(server.name, server.host, server.port, isGuest ? 'guest' : $('#usernameInput').val(), isGuest ? 'dojo_guest' : $('#passwordInput').val())
   client.setCallbackFunctions("LOGGED_IN", _handleLoggedIn)
   client.setCallbackFunctions("LOGIN_FAILED", _handleLoginFailed)
   client.setCallbackFunctions("LOBBY_IN", _handleLobbyIn)
@@ -506,6 +482,7 @@ function _refreshButtonClick(){
 }
 
 function _waitButtonClick(){
+  _disableNewGameOptions(me.isGuest)
   $('#modalNewGame').dialog('open')
 }
 
@@ -580,17 +557,17 @@ function _interpretCommunicationCode(name, code, n, bold, sound) {
 function _checkLobbyButtonClick(forceDefault = false){
   if ($('#boardContents').css('pointer-events') == 'none') { // Back to normal
     $('#checkLobbyButton').addClass("button-disabled")
-    $('#boardContents').css('pointer-events', 'initial').animate({'opacity': 1}, forceDefault ? 0 : 1500)
-    $('#layerBoard').animate({'height': '100%'}, forceDefault ? 0 : 1500, function(){
+    $('#boardContents').css('pointer-events', 'initial').animate({'opacity': 1}, forceDefault ? 0 : 1200)
+    $('#layerBoard').animate({'height': '100%'}, forceDefault ? 0 : 1200, function(){
       $('#layerBoard').css('border-bottom', 'none')
       $('#checkLobbyButton').removeClass("button-disabled")
       $('#checkLobbyButton').html('<i class="fa fa-eye fa-2x"></i>')
     })
   } else if (!forceDefault) { // Start checking lobby
-    _refreshLobby()
     $('#checkLobbyButton').addClass("button-disabled")
-    $('#boardContents').css('pointer-events', 'none').animate({'opacity': 0}, 1500)
-    $('#layerBoard').css('border-bottom', '5px ridge orange').animate({'height': '40px'}, 1500, function(){
+    $('#boardContents').css('pointer-events', 'none').animate({'opacity': 0}, 1200)
+    $('#layerBoard').css('border-bottom', '5px ridge orange').animate({'height': '40px'}, 1200, function(){
+      _refreshLobby()
       $('#checkLobbyButton').removeClass("button-disabled")
       $('#checkLobbyButton').html('<i class="fa fa-eye-slash fa-2x"></i>')
     })
@@ -610,11 +587,7 @@ function _rematchButtonClick(){
   if (board.isPlayer()) {
     if (!board.rematchAgreed()){
   		client.gameChat("[##REMATCH]")
-      /*
-  		if (_isGuest && _guestGamesExpired()) {
-  			Alert.show(LanguageSelector.lan.msg_guest_expire, LanguageSelector.lan.error, 4);
-  			return;
-  		} */
+  		if (_checkGuestGamesExpired()) return
     }
   } else {
     let newGameName = ""
@@ -1017,16 +990,22 @@ function _playerChallengeClick(user){
   	  writeUserMessage(EJ("You are not registered to this tournament.", "この大会には参加していません。"), 1, "#ff0000")
     } else if (user.rate >= RANK_THRESHOLDS[2] && me.provisional && user.waitingGameName.match(/^r_/)) {
   	  writeUserMessage(EJ("New player with a provisional rating cannot challenge 6-Dan or higher for rated games.", "レート未確定の新鋭棋士は六段以上とのレーティング対局には挑戦出来ません。"), 1, "#008800")
+    } else if (_checkGuestGamesExpired()) {
     } else if (user.waitingGameName.match(/_automatch\-/)) {
 		  client.seek(user)
     } else if (user.waitingGameName.match(/^va/)) {
   	  writeUserMessage(EJ("This game rule is not supported yet.", "HTML版は特殊ルールには未対応です。"), 1, "#ff0000")
+    } else if (me.isGuest && user.waitingGameName.match(/^r_/)) {
+			writeUserMessage(EJ("Guests cannot play rated games.", "ゲストはレーティング対局に参加できません"), 1, "#ff0000")
 	  } else {
 		  _challengeUser = user
-		  writeUserMessage(EJ("Challenging " + _challengeUser.name + "..... (Must wait for 20 seconds max)\n", _challengeUser.name + "さんに挑戦中..... (待ち時間 最大で20秒)\n"), 1, "#008800", true)
+		  writeUserMessage(EJ("Challenging " + _challengeUser.name + "..... (Must wait for 20 seconds max)", _challengeUser.name + "さんに挑戦中..... (待ち時間 最大で20秒)"), 1, "#008800", true)
 		  client.challenge(_challengeUser)
       setGeneralTimeout("CHALLENGE", 30000)
 	  }
+  // Opponent is not waiting -> Send invitation if possible
+  } else if (me.isGuest || user.isMobile) {
+		writeUserMessage(EJ("The opponent is not waiting with own game rule.", "相手は対局待をしていません。"), 1, "#008800")
   } else if (!me.listAsWaiter()) {
 		writeUserMessage(EJ("The opponent is not waiting with own game rule. You can invite him if you wait with your own game rule.", "相手は対局待をしていません。自分が対局待にすることで招待メッセージを送ることが可能です。"), 1, "#008800")
 	} else if (user.idle) {
@@ -1038,16 +1017,6 @@ function _playerChallengeClick(user){
 		client.privateChat(user.name, "[##INVITE]" + RegExp.$3 + "," + RegExp.$4 + "," + RegExp.$1)
 		writeUserMessage(EJ("The opponent is not waiting with own game rule. Instead, an invitation to your game has been sent to him.", "相手は対局待をしていません。代わりに自分の対局への招待メッセージを" + user.name + "さんに送信しました。(拒否された場合は連続送信しないで下さい)"), 1, "#008800")
 	}
-      /*
-		  if (_isGuest && _guestGamesExpired()) {
-			  Alert.show(LanguageSelector.lan.msg_guest_expire, LanguageSelector.lan.error, 4);
-			  return;
-		  if (!(_challengeUser.statusMark.match(/[待W]/))) {
-			  if (_isGuest || _users[name].isMobile) {
-			if (_isGuest && (match[1] == "r" || match[2].match(/\-\-..$/))) {
-				Alert.show(LanguageSelector.EJ("Guests cannot play rated games.", "ゲストはレーティング対局に参加できません"), LanguageSelector.lan.error, 4);
-		  }
-      */
 }
 
 function _playerDetailClick(user){
@@ -1085,7 +1054,7 @@ function _handleGeneralResponse(tokens){
 function _handleLoggedIn(str){
   sp.stopOpening()
   $('#loginAlert').text(i18next.t("login.successfull"))
-  if (!isGuest) {
+  if ($('input[name=loginType]:checked').val() == 0) {
     localStorage.login = $('#usernameInput').val()
     localStorage.dat = caesar(caesar($('#passwordInput').val(), 3), 81)
     localStorage.save = $('#loginSave').prop('checked')
@@ -1498,6 +1467,7 @@ function _handleGameEnd(lines, atReconnection = false){
       if (tournament) {
         writeUserMessage(EJ('Tournament status: ', 'イベント対局結果の確認: ') + tournament.url(), 2, "#FF3388")
       }
+      if (me.isGuest) _countGuestGame()
     }
   }
   board.playerNameClassChange(0, 'name-mouse-out', false)
@@ -1505,18 +1475,6 @@ function _handleGameEnd(lines, atReconnection = false){
   setBoardConditions()
   board.updateTurnHighlight()
   if (_greetState <= 2) _greetState = atReconnection ? 4 : 3
-  /*
-  _shareKifuEnabled = true;
-  _status_disconnected = false;
-  if (_isGuest) {
-	  var date:Date = new Date();
-	  if (_so.data.guest_game_period && _so.data.guest_game_period == date.toDateString()) _so.data.guest_game_num += 1;
-	  else {
-		  _so.data.guest_game_period = date.toDateString();
-		  _so.data.guest_game_num = 1;
-	  }
-  }
-  */
 }
 
 function _handleResult(str){
@@ -1913,7 +1871,7 @@ function _handlePrivateChat(sender, message){
 		return
 	}
 //	if (_ignore_list.indexOf(name.toLowerCase()) >= 0) return;
-//	if (_isGuest) return;
+  if (me.isGuest) return
   let playerWindow = $("div#player-info-window-" + sender)
   if (!playerWindow[0] && users[sender]) playerWindow = _openPlayerInfo(users[sender], false)
   let area = playerWindow.find("#privateMessageArea")
@@ -1961,6 +1919,7 @@ function _clearAllParams(){
   board.close()
   _checkLobbyButtonClick(true) //Cancel see lobby button if activated
   $('#lobbyMessageArea').empty()
+  _loadDefaultOptions()
 }
 
 /* ====================================
@@ -2098,8 +2057,8 @@ function _handleServers(data){
   serverGrid.rows.add(data)
   serverGrid.draw()
   serverGrid.row(0).select()
-  //$('input[name=loginType], input#usernameInput, input#passwordInput, input#loginSave').prop('disabled', false)
-  $('input#usernameInput, input#passwordInput, input#loginSave, input#loginButton').prop('disabled', false)
+  $('input[name=loginType], input#usernameInput, input#passwordInput, input#loginSave, input#loginButton').prop('disabled', false)
+  _loginTypeChange()
   if (testMode) _testFunction(1)
 }
 
@@ -2302,4 +2261,50 @@ function _generateKIF(){
     }
   })
   return lines.join("\r\n")
+}
+
+function _countGuestGame(){
+  let date = new Date()
+  if (localStorage.period && localStorage.period == date.getDay()) localStorage.status = parseInt(localStorage.status) + 1
+  else {
+	  localStorage.period = date.getDay()
+    localStorage.status = 1
+  }
+}
+
+function _checkGuestGamesExpired(){
+	//if (serverName == "MOON") return false;
+  if (!me.isGuest) return false
+	let date = new Date()
+	if (localStorage.period && localStorage.period == date.getDay() && localStorage.status >= 3) {
+    showAlertDialog("guest_expire")
+    return true
+  } else {
+    return false
+  }
+}
+
+function _loadDefaultOptions(){
+  options = {
+    timer_sound_type: 2,
+    piece_type: 0,
+    piece_type_34: 1,
+    button_sound_play: 1,
+    lobbychat_sound_play: 1,
+    gamechat_sound_play: 1,
+    end_sound_play: 1,
+    hold_piece: 1,
+    highlight_movable: 0,
+    notation_style: 1,
+    pm_auto_open: 0,
+    accept_arrow: 1,
+    arrow_color: 52224,
+    history_length: 50,
+    postgame_study_level: 0,
+    english_level: 0,
+    receive_kifu_comment: 0,
+    board_size: 0
+  }
+  _enforceOptions()
+  _loadOptionsToDialog()
 }

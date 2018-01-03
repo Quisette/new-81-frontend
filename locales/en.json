@@ -261,7 +261,9 @@
   "status": "Status",
   "alert": {
     "disconnect": "Your network has disonnected from the server.",
-    "disconnect_title": "Disconnection"
+    "disconnect_title": "Disconnection",
+    "guest_expire": "The number of games played has reached the limit. Please register an account (free of charge) to continue playing.",
+    "guest_expire_title": "Please register"
   },
   "msg": {
     "html5_initial": "Welcome to HTML5 beta version. A part of the functions from Flash version are still not available. If you find any bug, please report to info@81dojo.com.",
@@ -294,7 +296,6 @@
     "auto_reject": "Further challenges from this user will be automatically rejected. This setting will be canceled on your next login.",
     "before_upgrade": "You have a chance of rank promotion now. Win against someone who has a fixed rating higher than (yours - 200), and you will be promoted.",
     "before_downgrade": "Your rating is at the bottom of the rank now. You may be demoted if you lose the next game.",
-    "guest_expire": "The number of games played per day has reached the limit. Please register an account (free of charge) to continue playing.",
     "reconnect_only": "You can only recconect to the game you disconnected from.\nIf your game had already ended, re-login to clear your 'D' status.",
     "suggest_invitation": "Opponent is not waiting for a game. Invite to your game?",
     "mobile": "This function is invalid for this user testing the mobile app."

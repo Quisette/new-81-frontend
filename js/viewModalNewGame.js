@@ -16,6 +16,16 @@ $('#modalNewGame').find('[name="newGameType"]').change(function(){
   }
 })
 
+function _disableNewGameOptions(isGuest){
+  if (isGuest) {
+    $('#modalNewGame').find('[name=newGameType]:lt(4), [name=newGameType]:lt(7):gt(4)').prop({'disabled': true})
+    $('#modalNewGame').find('[name=newGameType]:eq(4)').prop('checked', true)
+  } else {
+    $('#modalNewGame').find('[name=newGameType]').prop({'disabled': false})
+  }
+  $('#modalNewGame').find('[name=newGameType]').change()
+}
+
 $('#modalNewGame').dialog({
   modal: true,
   dialogClass: 'no-close',

@@ -280,7 +280,7 @@ function playingStyleName(i) {
   }
 }
 
-function showAlertDialog(i18nextCode, handler){
+function showAlertDialog(i18nextCode, handler = function(){}){
   //string, string, function
   let alertWindow = $('<div></div>', {class: 'alert-dialog'}).html('<div style="padding:10px">'+ i18next.t("alert." + i18nextCode) + '</div>').appendTo($('body'))
   alertWindow.dialog({

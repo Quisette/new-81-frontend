@@ -3,13 +3,13 @@
 class User{
   constructor(name){
     this.name = name
-    this.isGuest = name.match(/^GUEST_[0-9a-z]{6}$/)
+    this.isGuest = /^GUEST_[0-9a-z]{6}$/.test(name)
     this.rate = 0
     this._countryCode = 0
     this.status = 0
     // 0:connected, 1:game_waiting, 2:agree_wating, 3:start_waiting, 4:game, 5:post_game, 6:finished
     this.idle = false
-    this._isMobile = false
+    this.isMobile = false
     this._monitorGame = "*"
     this.provisional = true
     this._waitingGameName = ""
@@ -19,7 +19,7 @@ class User{
   }
 
   setFromWho(tokens){
-    if (tokens.shift() == "x2|81AR") this._isMobile = true
+    if (tokens.shift() == "x2|81AR") this.isMobile = true
     this.status = parseInt(tokens.shift())
     this.rate = parseInt(tokens.shift())
     this.provisional = tokens.shift() == "1"
