@@ -20,23 +20,23 @@ div.modal#modalOption data-i18n-title="lobby.options"
       div#pieceDesignSelector
       p
         input type="checkbox" id="hold_piece" disabled="true"
-        span data-i18n="option.piece_grab"
+        span data-i18n="option.piece_grab" style="text-decoration: line-through"
       p
         input type="checkbox" id="highlight_movable" disabled="true"
-        span data-i18n="option.piece_highlight"
+        span data-i18n="option.piece_highlight" style="text-decoration: line-through"
         
     div#tabs-2
       p
-        input type="checkbox" id="button_sound_play" disabled="true" checked="true"
-        span data-i18n="option.sound_button"
+        input type="checkbox" id="button_sound_play" checked="true"
+        span data-i18n="option.sound_button" style="text-decoration: line-through"
       p
-        input type="checkbox" id="end_sound_play" disabled="true" checked="true"
+        input type="checkbox" id="end_sound_play" checked="true"
         span data-i18n="option.sound_end"
       p
-        input type="checkbox" id="lobbychat_sound_play" disabled="true" checked="true"
+        input type="checkbox" id="lobbychat_sound_play" checked="true"
         span data-i18n="option.sound_lobbychat"
       p
-        input type="checkbox" id="gamechat_sound_play" disabled="true" checked="true"
+        input type="checkbox" id="gamechat_sound_play" checked="true"
         span data-i18n="option.sound_gamechat"
       h3 data-i18n="option.sound_byoyomi"
       p
@@ -55,17 +55,36 @@ div.modal#modalOption data-i18n-title="lobby.options"
       h3 data-i18n="option.study_fitness"
       p
         span data-i18n="option.study_level"
+        select#postgame_study_level style="width:150px"
+          option value="0" data-i18n="option.not_defined"
+          option value="1" data-i18n="option.study_level_0"
+          option value="2" data-i18n="option.study_level_1"
+          option value="3" data-i18n="option.study_level_2"
       p
         span data-i18n="option.english_level"
-      h3 data-i18n="option.notation"
+        select#english_level style="width:150px"
+          option value="0" data-i18n="option.not_defined"
+          option value="1" data-i18n="option.english_level_0"
+          option value="2" data-i18n="option.english_level_1"
+          option value="3" data-i18n="option.english_level_2"
+      h3 data-i18n="option.notation" style="text-decoration: line-through"
       h3 data-i18n="option.arrow"
       p
-        input type="checkbox" id="accept_arrow" disabled="true" checked="true"
+        input type="checkbox" id="accept_arrow" checked="true"
         span data-i18n="option.arrow_accept"
       p
         span data-i18n="option.arrow_color"
         input type="text" id="arrow_color"
       h3 data-i18n="option.others"
+      p
+        input type="checkbox" id="pm_auto_open"
+        span data-i18n="option.pm_auto" style="text-decoration: line-through"
+      p
+        input type="checkbox" id="receive_kifu_comment"
+        span data-i18n="option.comment_notification"
+      p
+        input type="checkbox" id="reject_game_invitation"
+        span data-i18n="option.reject_invitation" style="text-decoration: line-through"
         
 javascript:
   _jsInclude("js/viewModalOption.js")

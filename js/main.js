@@ -1,4 +1,5 @@
 "use strict";
+var testMode = false
 const IMAGE_DIRECTORY = "http://81dojo.com/dojo/images/"
 var args = new Object()
 var client = null;
@@ -29,7 +30,6 @@ var hidden_prm = 0
 var _hourMileCount
 var mouseX
 var mouseY
-var testMode = false
 var config = null
 var options = new Object()
 var _studyBase = null
@@ -57,12 +57,10 @@ function _testFunction(phase){
       //{id:1, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.47.133', port: 4081}
     ])
   } else if (phase == 1) { // After servers are loaded
-    //return
-    serverGrid.row(0).select()
     _loginButtonClick()
   } else if (phase == 2) { // After logged in
     //client.send("%%GAME hc2pd_test2-900-30 -")
-    //_optionButtonClick()
+    _optionButtonClick()
   }
 }
 
@@ -1346,7 +1344,7 @@ function _writeGameStartMessage(){
 	  if (isBeforeUpgrade(me.rate) && !opponent.provisional && opponent.rate > me.rate - 200) _sendAutoChat("#G020")
 	  else if (isBeforeDowngrade(me.rate) & !opponent.provisional && opponent.rate < me.rate + 200) _sendAutoChat("#G021")
   }
-  //_client.privateChat(oppo.name, "[##FITNESS]" + _levelStudy + "," + _levelEnglish);
+  client.privateChat(board.getOpponent().name, "[##FITNESS]" + options.postgame_study_level + "," + options.english_level)
 }
 
 function _handleMove(csa, time){
@@ -1863,9 +1861,9 @@ function _handlePrivateChat(sender, message){
     // TODO If the user has been forced to become Host after entering room, he should be demoted to subHost as soon as receiving this private message
 		return
 	} else if (message.match(/^\[\#\#FITNESS\](\d),(\d)$/)) {
-//		let str = EJ("Opponent's ", "対局相手の") + LanguageSelector.lan.study_level + ": " + (match[1] == 0 ? ("<" + LanguageSelector.lan.not_defined + ">") : (LanguageSelector.EJ("Level ", "レベル") + (parseInt(match[1]) - 1)));
-//		if (board.playerInfos[0].country_code != 392 || board.playerInfos[1].country_code != 392) str += LanguageSelector.EJ(" \ ", "、　") + LanguageSelector.lan.english_level + ": " + (match[2] == 0 ? ("<" + LanguageSelector.lan.not_defined + ">") : (LanguageSelector.EJ("Level ", "レベル") + (parseInt(match[2]) - 1)));
-//		_writeUserMessage(str + "\n", 2, "#0000AA");
+		let str = EJ("Opponent's ", "対局相手の") + i18next.t("option.study_level") + ": " + _fitnessLevelText(RegExp.$1)
+		if (!board.game.black.isFromJapan() || !board.game.white.isFromJapan()) str += " / " + i18next.t("option.english_level") + ": " + _fitnessLevelText(RegExp.$2)
+		writeUserMessage(str, 2, "#0000AA")
 		return
 	} else if (message.match(/^\[\#\#INVITE\](\d+),(\d+),(.+)$/)) {
 //		_handleInvitation(name, parseInt(match[1]), parseInt(match[2]), match[3]);
@@ -1877,7 +1875,7 @@ function _handlePrivateChat(sender, message){
     */
 		return
 	} else if (message.match(/^\[auto\-PM\]/)) {
-//		if (message.match(/^\[auto\-PM\]\s#([A-Z]\d{3})/)) _interpretCommunicationCode(name, match[1], 2, false, true);
+		if (message.match(/^\[auto\-PM\]\s#([A-Z]\d{3})/)) _interpretCommunicationCode(sender, RegExp.$1, 2, false, true)
 		return
 	}
 //	if (_ignore_list.indexOf(name.toLowerCase()) >= 0) return;
@@ -2145,6 +2143,10 @@ function clearGeneralTimeout(key){
 
 function _enforceOptions(){
   sp.setByoyomiType(options.timer_sound_type)
+  sp.gameStartEndEnabled = options.gamechat_sound_play == 1
+  sp.chatLobbyEnabled = options.lobbychat_sound_play == 1
+  sp.chatBoardEnabled = options.gamechat_sound_play == 1
+  sp.buttonEnabled = options.button_sound_play == 1
   board.setPieceDesignType(options.piece_type)
   let scale = [1, 1.5, 2][options.board_size]
   if (board.setScale(scale)) {
@@ -2336,4 +2338,10 @@ function _refreshWorldClocks(){
     clock.draw(now)
   })
   setGeneralTimeout("WORLD_CLOCK", 10000)
+}
+
+function _fitnessLevelText(level){
+  let i = parseInt(level)
+  if (i == 0) return i18next.t("option.not_defined")
+  else return i18next.t("option.level") + (i - 1).toString()
 }

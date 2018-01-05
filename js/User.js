@@ -161,6 +161,10 @@ class User{
     }
   }
 
+  isFromJapan(){
+    return this._countryCode == 392
+  }
+
   static rateStrToRate(v){ // Restore rate as integer back from rateStr
     let str = v.toString()
     if (str == "????") return 0

@@ -55,12 +55,12 @@ class WebSystemApiClient {
 
   postEvaluation(name, like){
     if (me.isGuest) return
-    $.post(this._path + "players/evaluate.xml", {like: like, name: me.name.toLowerCase(), opponent: name.toLowerCase()}, function(){})
+    $.post(this._path + "players/evaluate.xml", {like: like, name: me.name.toLowerCase(), opponent: name.toLowerCase()}, function(){console.log('Evaluation posted')})
   }
 
   postOption(key, val){
     if (me.isGuest) return
-    $.post(this._path + "options", {name: me.name.toLowerCase(), key: key, value: val}, function(){})
+    $.post(this._path + "options", {name: me.name.toLowerCase(), key: key, value: val}, function(){console.log('Option posted')})
   }
 
 }
