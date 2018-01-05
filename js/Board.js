@@ -400,6 +400,7 @@ class Board{
         }
         this._position.getMovableGridsFromSquare(sq).forEach(function(e){
           $("#sq" + e[0] + "_" + e[1]).addClass("square-movable")
+          if (options.highlight_movable == 1) $("#sq" + e[0] + "_" + e[1]).addClass("square-movable-highlight")
         })
       }
     } else {
@@ -535,12 +536,12 @@ class Board{
   _cancelSelect(){
     if (this._selectedSquare != null){
       $(".square").removeClass("square-movable")
+      $(".square").removeClass("square-movable-highlight")
       this._selectedSquare.removeClass("square-selected")
       this._selectedSquare = null
     }
     if (this.isPlaying()) sendGrab(0,0)
 		//_endGrab();
-		//if (highlight_movable) _hideMovableSquares();
 		//_pieceGrab = false;
   }
 

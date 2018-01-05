@@ -43,7 +43,6 @@
     "websystem": "WEBシステムへ",
     "search": "検索",
     "mute": "ミュート",
-    "leave": "離席",
     "logout": "ログアウト",
     "back_to_game": "対局室へ戻る",
     "status_short": "状態",
@@ -74,7 +73,6 @@
     "monitor": "観戦",
     "opening_short": "戦型",
     "watch": "観戦",
-    "view_as": "手番選択",
     "chat": "チャット"
   },
   "board": {
@@ -94,7 +92,6 @@
     "give_subhost": "サブ・ホスト権限を付与",
     "watchers": "観戦者",
     "allow_chat": "観戦者のチャットを受信",
-    "load_disabled": "この機能は検討室のホストユーザ専用です。",
     "replay": "ローカル再生・検討",
     "listen": "現在の局面を受信",
     "replay_tip": "自分のPC上でのみ局面を動かします。感想戦ホストである場合を除き、他者との情報共有は行いません。",

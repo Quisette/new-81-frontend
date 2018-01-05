@@ -24,41 +24,42 @@ div.layer#layerBoard
           ul.subMenu
             li
               a.submenu-button-disabled href="#" onclick=""
+                i.fa.fa-calculator.fa-lg.fa-fw
                 span data-i18n="submenu.material_balance"
             li
               a href="#" onclick="_KyokumenpediaClick()"
-                img src="img/icon_kyokumenpedia.png"
+                img style="margin: 0 2px" src="img/icon_kyokumenpedia.png"
                 span data-i18n="submenu.kyokumenpedia"
             li
-              a.submenu-button-disabled href="#" onclick=""
-                img src="img/icon_twitter.png"
+              a href="#" onclick="_sharePositionButtonClick('TW')"
+                i.fa.fa-twitter.fa-lg.fa-fw
                 span data-i18n="submenu.twitter"
             li
-              a.submenu-button-disabled href="#" onclick=""
-                img src="img/icon_facebook.png"
+              a href="#" onclick="_sharePositionButtonClick('FB')"
+                i.fa.fa-facebook-official.fa-lg.fa-fw
                 span data-i18n="submenu.facebook"
         li
           a.button#kifuMenuButton href="#" data-i18n="board.kifu" onclick=""
           ul.subMenu
             li
               a#kifuCopyButton href="#" onclick="_kifuCopyButtonClick()"
-                img src="img/icon_copy.png"
+                i.fa.fa-clipboard.fa-lg.fa-fw
                 span data-i18n="submenu.kifu_copy"
             li
               a.submenu-button-disabled href="#" onclick=""
-                img src="img/icon_save.png"
+                i.fa.fa-save.fa-lg.fa-fw
                 span data-i18n="submenu.kifu_save"
             li
               a#shareKifuTwitterButton href="#" onclick="_shareKifuButtonClick('TW')"
-                img src="img/icon_twitter.png"
+                i.fa.fa-twitter.fa-lg.fa-fw
                 span data-i18n="submenu.twitter"
             li
               a#shareKifuFacebookButton href="#" onclick="_shareKifuButtonClick('FB')"
-                img src="img/icon_facebook.png"
+                i.fa.fa-facebook-official.fa-lg.fa-fw
                 span data-i18n="submenu.facebook"
             li
               a.submenu-button-disabled href="#" onclick=""
-                img src="img/icon_load.png"
+                i.fa.fa-folder-open.fa-lg.fa-fw
                 span data-i18n="submenu.kifu_load"
         li
           a.button href="#" onclick="_optionButtonClick()" data-i18n-title="lobby.options"

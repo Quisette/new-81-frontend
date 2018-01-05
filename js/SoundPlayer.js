@@ -49,12 +49,10 @@ class SoundPlayer{
     }
   }
 
-  piece(isDouble = false){
-    if (isDouble) {
-      this.play("PIECE_DOUBLE")
-    } else {
-      this.play("PIECE_NORMAL")
-    }
+  piece(isDouble = false, volume = 1){
+    let key = isDouble ? "PIECE_DOUBLE" : "PIECE_NORMAL"
+    this._setVolume(key, volume)
+    this.play(key)
   }
 
   sayByoyomi(){
@@ -102,7 +100,7 @@ class SoundPlayer{
   }
 
   startOpening(){
-    this._channels["OPENING"].volume = 0
+    this._setVolume("OPENING", 0)
     this.play("OPENING")
     $(this._channels["OPENING"]).animate({volume: 0.8}, 3000)
   }
@@ -117,6 +115,10 @@ class SoundPlayer{
 
   muteOpening(toggle){
     this._channels["OPENING"].muted = toggle
+  }
+
+  _setVolume(key, volume){
+    this._channels[key].volume = volume
   }
 
   play(key){

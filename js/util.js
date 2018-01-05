@@ -316,6 +316,8 @@ function shareKifu(mode){
 	let white = board.game.white
   /*
     //TODO Load opening name from the game list when isPlayer()
+    //Must automatically refresh lobby from time to time
+    //gameGrid.rows().data().forEach
 		for each (var game:Object in _game_list) {
 			if (game.id == _game_name) {
 				opening = game.openingTip;
@@ -342,5 +344,31 @@ function shareKifu(mode){
 		url = "http://twitter.com/share?text=" + encodeURIComponent(str) + "&url=" + encodeURIComponent(board.toKifuURL(true))
 	}
   window.open(url, "_blank")
+	//TODO _handleSNSClick(mode)
+}
+
+function sharePosition(mode) {
+  let row = kifuGrid.row({selected: true})
+  let black = board.game.black.name
+  let white = board.game.white.name
+	let url = "http://sfenreader.appspot.com/twiimg?sfen=" + board.position.toSFEN(true) + "%20" + row.index()
+	url += "&lm=" + (row.data().toX == null ?  "" : (row.data().toX.toString() + row.data().toY.toString()))
+	url += "&sname=" + black + "&gname=" + white
+	url += EJ("&title=from_81Dojo", "&title=81道場・局面図")
+
+  let str
+	if (mode == "FB") {
+		str = "http://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url)
+	} else if (mode == "TW") {
+		if (i18next.language == "ja") {
+			str = "81道場 局面図: ▲" + black + " 対 △" + white
+			str += " #81dojo #shogi (powered by @shibacho2)"
+		} else {
+			str = "81Dojo Diagram: [" + black + " vs " + white + "]"
+			str += " %2381dojo (powered by @shibacho2)";
+		}
+		str = "http://twitter.com/share?text=" + encodeURIComponent(str) + "&url=" + encodeURIComponent(url)
+	}
+  window.open(str, "_blank")
 	//TODO _handleSNSClick(mode)
 }

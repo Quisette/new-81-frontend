@@ -43,7 +43,6 @@
     "websystem": "To WebSystem",
     "search": "Search",
     "mute": "Mute",
-    "leave": "Leave PC",
     "logout": "Log Out",
     "back_to_game": "Back to Game",
     "status_short": "Stat",
@@ -73,7 +72,6 @@
     "monitor": "Mon",
     "opening_short": "Opng",
     "watch": "Watch Game",
-    "view_as": "View as:",
     "chat": "Chat"
   },
   "board": {
@@ -86,7 +84,6 @@
     "close_game": "Exit Game",
     "rematch": "Rematch",
     "check_lobby": "See Lobby Temporarily\n(while NOT leaving this game)",
-    "position_query": "Look up the position",
     "clear": "Clear",
     "greet": "Greet",
     "allow": "Give Study-mode rights",
@@ -94,7 +91,6 @@
     "give_subhost": "Allow Sub-host status",
     "watchers": "Watchers",
     "allow_chat": "Receive watcher's chat",
-    "load_disabled": "This button is only for the host player in STUDY Room.",
     "replay": "Replay/analyze locally",
     "listen": "Follow latest position",
     "replay_tip": "Replay/analyze only on own PC. The board is not shared unless you are the host of post-game discussion.",
@@ -118,8 +114,8 @@
     "kifu_load": "Load KIF/BOD file",
     "twitter": "Share on Twitter",
     "facebook": "Share on Facebook",
-    "kyokumenpedia": "Jump to Kyokumenpedia",
-    "material_balance": "Material balance calculation",
+    "kyokumenpedia": "To Kyokumenpedia",
+    "material_balance": "Calculate material",
     "query_precedent": "Precedent games search",
     "query_eval": "Analyze with engine",
     "query_mate": "Search for mate"

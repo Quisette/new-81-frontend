@@ -15,17 +15,29 @@ div.layer#layerLobby
             img src="img/icon_web2.png"
           ul.subMenu
             li
-              a href="#" data-i18n="submenu.ranking" onclick="_navigateToWebSystem('ranking')"
+              a href="#" onclick="_navigateToWebSystem('ranking')"
+                i.fa.fa-lg.fa-fw.fa-list-ol
+                span data-i18n="submenu.ranking"
             li
-              a href="#" data-i18n="submenu.kifu_search" onclick="_navigateToWebSystem('kifus/search/form')"
+              a href="#" onclick="_navigateToWebSystem('kifus/search/form')"
+                i.fa.fa-lg.fa-fw.fa-search
+                span data-i18n="submenu.kifu_search"
             li
-              a href="#" data-i18n="submenu.bbs" onclick="_navigateToWebSystem('forums')"
+              a href="#" onclick="_navigateToWebSystem('forums')"
+                i.fa.fa-lg.fa-fw.fa-comments
+                span data-i18n="submenu.bbs" 
             li
-              a href="#" data-i18n="submenu.tournament" onclick="_navigateToWebSystem('tournaments')"
+              a href="#" onclick="_navigateToWebSystem('tournaments')"
+                i.fa.fa-lg.fa-fw.fa-sitemap
+                span  data-i18n="submenu.tournament"
             li
-              a href="#" data-i18n="submenu.club" onclick="_navigateToWebSystem('circles')"
+              a href="#" onclick="_navigateToWebSystem('circles')"
+                i.fa.fa-lg.fa-fw.fa-users
+                span data-i18n="submenu.club"
             li
-              a href="#" data-i18n="submenu.player_search" onclick="_navigateToWebSystem('players/search/form')"
+              a href="#" onclick="_navigateToWebSystem('players/search/form')"
+                i.fa.fa-lg.fa-fw.fa-user-o
+                span data-i18n="submenu.player_search"
         li
           a.button href="#" onclick="_logoutButtonClick()" data-i18n-title="lobby.logout"
             i.fa.fa-window-close.fa-2x

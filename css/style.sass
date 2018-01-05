@@ -286,7 +286,16 @@ div.square-selected
   background-color: $SelectedSquareColor
 div.square-last
   background-color: $LastSquareColor
-div.square-movable
+div.square-movable-highlight
+  &::after
+    content: ""
+    position: absolute
+    top: 12px
+    left: 10px
+    width: 24px
+    height: 24px
+    border-radius: 12px
+    background-color: rgba(0,180,0,0.3)
 div.komadai
   background-size: contain
 div.player-info

@@ -36,6 +36,7 @@ var _studyBase = null
 var _studyBranchMoves = null
 var _studySender = null
 var _sendStudyBuffer = null
+var _opponentDisconnectCount = 0
 var _dialogOnBoardClose = false
 var _worldClocks = []
 
@@ -46,7 +47,7 @@ var _worldClocks = []
 function _testFunction(phase){
   //phase:integer
   if (phase == 0) { // After creation
-    if (false) {
+    if (true) {
       board.loadNewPosition()
       _switchLayer(2)
       return
@@ -60,7 +61,7 @@ function _testFunction(phase){
     _loginButtonClick()
   } else if (phase == 2) { // After logged in
     //client.send("%%GAME hc2pd_test2-900-30 -")
-    _optionButtonClick()
+    //_optionButtonClick()
   }
 }
 
@@ -521,6 +522,11 @@ function _enterGame(game){
   }
 }
 
+function _enterGameById(gameId){
+  let row = gameGrid.row('#' + gameId)
+  if (row != null) _enterGame(row.data())
+}
+
 function writeUserMessage(str, layer, clr = null, bold = false, lineChange = true){
   let area
   let p
@@ -542,7 +548,7 @@ function writeUserMessage(str, layer, clr = null, bold = false, lineChange = tru
   }).html(str).appendTo(area)
   if (lineChange) area.append('<br>')
   if (p && p.length) p.appendTo(area)
-  area.animate({scrollTop: area[0].scrollHeight}, 'fast')
+  if (area.scrollTop() + area.height() > area[0].scrollHeight - 80) area.animate({scrollTop: area[0].scrollHeight}, 'fast')
 }
 
 function _interpretCommunicationCode(name, code, n, bold, sound) {
@@ -675,6 +681,11 @@ function _KyokumenpediaClick(){
   window.open("http://kyokumen.jp/positions/" + board.position.toSFEN(), "_blank")
 }
 
+function _sharePositionButtonClick(mode){
+  if (!board.game.gameType.match(/^va/)) sharePosition(mode)
+  else writeUserMessage(EJ('This board cannot be shared.', 'この盤面はシェアできません'), 2, "#FF0000")
+}
+
 function _kifuCopyButtonClick(){
   let textArea = $('<textarea></textarea>', {id: 'clip-board-area'}).text(_generateKIF()).appendTo($('body'))
   $("#clip-board-area").select()
@@ -724,6 +735,7 @@ function _closeBoard(){
   _greetState = 0
   _studyBase = null
   _studyBranchMoves = null
+  _opponentDisconnectCount = 0
   forceKifuMode(1)
   _kifuModeRadioChange()
 }
@@ -1068,7 +1080,7 @@ function _handleGeneralResponse(tokens){
 function _handleLoggedIn(str){
   sp.stopOpening()
   $('#loginAlert').text(i18next.t("login.successfull"))
-  if ($('input[name=loginType]:checked').val() == 0) {
+  if ($('input[name=loginType]:checked').val() == 0 && $('#loginSave').prop('checked')) {
     localStorage.login = $('#usernameInput').val()
     localStorage.dat = caesar(caesar($('#passwordInput').val(), 3), 81)
     localStorage.save = $('#loginSave').prop('checked')
@@ -1372,7 +1384,6 @@ function _handleGameEnd(lines, atReconnection = false){
   _checkLobbyButtonClick(true) //Cancel see lobby button if activated
   let gameEndType = lines.split("\n")[0]
   let result = lines.split("\n")[1]
-  //var adviseIllegal:Boolean = false;
   clearInterval(_disconnectTimer)
   $("p#disconnectTimer").remove()
   board.isPostGame = true
@@ -1410,7 +1421,7 @@ function _handleGameEnd(lines, atReconnection = false){
     	if (board.gameType == "r") _wins_session += 1;
     	history = "  ◯";
       */
-    	// if (board.game.isRated() && board.moves.length >= 6 && (me.wins + 1) % 100 == 0)) client.chat("[##WINS]" + (me.wins + 1))
+    	// if (board.game.isRated() && (me.wins + 1) % 100 == 0)) client.chat("[##WINS]" + (me.wins + 1))
       break
     case "DRAW":
     	if (board.myRoleType == 1) board.studyHostType = 2
@@ -1654,15 +1665,17 @@ function _handleDisconnect(name) {
 }
 
 function _startDisconnectTimer(){
+  _opponentDisconnectCount += 1
   $("p#disconnectTimer").remove()
   let p = $('<p></p>', {id: 'disconnectTimer'})
   $("#boardMessageArea").append(p)
   p.html(i18next.t("since_disconnect") + '<span id="disconnectCount">0</span>&nbsp' + i18next.t("sec"))
   let count = 0
+  let minimumWaitSeconds = _opponentDisconnectCount > 1 ? 1 : 60
   _disconnectTimer = setInterval(function(){
     count++
     $("span#disconnectCount").text(count)
-    if (count == 60) { //TODO count has to be 1 if disconnected twice
+    if (count == minimumWaitSeconds) { //TODO count has to be 1 if disconnected twice
       $('<input id="disconnectDeclareButton" type="button" value="' + i18next.t("declare") + '" style="height:20px;margin-left:5px">').appendTo(p)
       $("#disconnectDeclareButton").click(function(){
         _handleDisconnectDeclare()
@@ -1683,8 +1696,12 @@ function _handleStart(game_id){
 	let tokens = game_id.split("+")
 	let game_info = tokens[1].match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/)
   let game
+  let str
 	if (tokens[0] == "STUDY") {
-		writeUserMessage(game_info[2].split(".")[0] + EJ(" CREATED STUDY ROOM.", " さんが検討室を作成しました。"), 1, "#008800")
+		let str = game_info[2].split(".")[0] + EJ(" CREATED [", "さんが[")
+    str += _game2link(EJ("STUDY ROOM", "検討室"), game_id)
+		str += EJ("].", "]を作成しました。")
+		writeUserMessage(str, 1, "#008800")
     sp.chatLobby()
 		let black = new User(tokens[2])
 		black.setFromStudy(true)
@@ -1696,11 +1713,9 @@ function _handleStart(game_id){
       _enterGame(game)
     }
 	} else {
-    /*
-		var gameKind:String;
-		else gameKind = LanguageSelector.EJ(InfoFetcher.gameTypeEn(game_info[1]), InfoFetcher.gameType(game_info[1]));
-    */
-		writeUserMessage(EJ("GAME STARTED: ▲", "新規対局: ☗") + tokens[2] + EJ(" vs △", " 対 ☖") + tokens[3] + " / " + EJ(HANDICAPS_EN[game_info[1]], HANDICAPS_JA[game_info[1]]), 1, "#008800")
+		str = "[" + _game2link(EJ("GAME STARTED", "新規対局"), game_id) + "] "
+    str += "☗" + tokens[2] + EJ(" vs ", " 対 ") + "☖" + tokens[3] + " / " + EJ(HANDICAPS_EN[game_info[1]], HANDICAPS_JA[game_info[1]])
+		writeUserMessage(str, 1, "#008800")
 		if (users[tokens[2]]) {
       users[tokens[2]].setFromStart(tokens[1], "+")
       playerGrid.row("#" + tokens[2]).remove()
@@ -1731,7 +1746,7 @@ function _handleChat(sender, message){
 	} else if (message.match(/^\[##WINS\](\d+)$/)) {
 		writeUserMessage(_name2link(sender) + EJ(" has won ", "さんが通算") + parseInt(RegExp.$1) + EJ(" games!", "勝を達成しました!"), 1, "#008800", true);
 	} else if (message.match(/^\[##EXP\](.+),(\d+)$/)) {
-//		writeUserMessage(_name2link(sender) + EJ(" is promoted to " + makeRank34FromExp(parseInt(RegExp.$2)) + " class in " + (RegExp.$1 == "nr" ? "10-sec Shogi" : gameTypeShort(RegExp.$1)) + "!", "さん、" + (RegExp.$1 == "nr" ? "10秒将棋" : gameTypeShort(RegExp.$1)) + "で " + makeRank34FromExp(parseInt(RegExp.$2)) + " に昇格!!"), 1, "#008800", true);
+//TODO		writeUserMessage(_name2link(sender) + EJ(" is promoted to " + makeRank34FromExp(parseInt(RegExp.$2)) + " class in " + (RegExp.$1 == "nr" ? "10-sec Shogi" : gameTypeShort(RegExp.$1)) + "!", "さん、" + (RegExp.$1 == "nr" ? "10秒将棋" : gameTypeShort(RegExp.$1)) + "で " + makeRank34FromExp(parseInt(RegExp.$2)) + " に昇格!!"), 1, "#008800", true);
 	} else if (message.match(/^\[##.+\]/)) {
     return
   } else if (_isFavorite(sender)) {
@@ -1990,7 +2005,6 @@ function _handleStudy(singleMove = false) {
     kifuGrid.draw()
     kifuGrid.row(':last').select()
     scrollGridToSelected(kifuGrid)
-		// if (name != login_name && board.study_list.length >= old_length) board.showLastSquareLabel(name);
 	}
 }
 
@@ -2208,6 +2222,10 @@ function _name2link(name){
   return '<sPAn onclick="_openPlayerInfo(users[\'' + name + '\'])" class="name-link">' + name + '</SpaN>'
 }
 
+function _game2link(text, gameId){
+  return '<sPAn onclick="_enterGameById(\'' + gameId + '\')" class="name-link">' + text + '</SpaN>'
+}
+
 function _isFavorite(name){
   return false
 }
@@ -2288,7 +2306,7 @@ function _countGuestGame(){
 }
 
 function _checkGuestGamesExpired(){
-	//if (serverName == "MOON") return false;
+	if (client.serverName == "MOON") return false
   if (!me.isGuest) return false
 	let date = new Date()
 	if (localStorage.period && localStorage.period == date.getDay() && localStorage.status >= 3) {

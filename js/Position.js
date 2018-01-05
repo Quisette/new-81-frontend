@@ -230,7 +230,17 @@ class Position{
     }
     this.turn = !this.turn
     this.lastMove = move
-    if (withSound) sp.piece()
+    if (withSound) {
+      let soundDouble = false
+      let koma3 = null
+      if (move.owner && move.toY <= 8) {
+        koma3 = this._squares[move.toX - 1][move.toY]
+      } else if (!move.owner && move.toY >= 2) {
+        koma3 = this._squares[move.toX - 1][move.toY - 2]
+      }
+      if (koma3 && koma3.owner == move.owner) soundDouble = true
+      sp.piece(soundDouble, koma1.soundVolume())
+    }
     return move
   }
 
@@ -329,8 +339,7 @@ class Position{
     }
 		if (hand == "") hand = "-"
 		str += " " + hand
-    return str
-//		return url ? encodeURIComponent(str) : str;
+		return url ? encodeURIComponent(str) : str
 	}
 
 }

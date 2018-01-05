@@ -66,6 +66,10 @@ class Piece{
     let str = (this.isPromotable() && this.isPromoted() ? "+" : "") + this._sfen
     return this.owner ? str : str.toLowerCase()
   }
+
+  soundVolume(){
+    return 1
+  }
 //  kyotoConvert(){
 //  		 kyoto_conversion:Array = new Array(0, 7, 4, 5, 2, 3, 15, 1, 8, 9, 10, 11, 12, 13, 14, 6);
 //  }
@@ -114,6 +118,9 @@ class PieceHI extends Piece{
   farMoves(){
     return [[0, +1], [+1, 0], [0, -1], [-1, 0]]
   }
+  soundVolume(){
+    return this._promoted ? 1 : 0.9
+  }
 }
 
 class PieceKA extends Piece{
@@ -133,6 +140,9 @@ class PieceKA extends Piece{
   farMoves(){
     return [[+1, +1], [+1, -1], [-1, -1], [-1, +1]]
   }
+  soundVolume(){
+    return this._promoted ? 1 : 0.9
+  }
 }
 
 class PieceKI extends Piece{
@@ -149,6 +159,9 @@ class PieceKI extends Piece{
   }
   isPromotable(){
     return false
+  }
+  soundVolume(){
+    return 0.65
   }
 }
 
@@ -169,6 +182,9 @@ class PieceGI extends Piece{
   promotedMoves(){
     return [[0, +1], [+1, +1], [-1, +1], [+1, +0], [-1, +0], [0, -1]]
   }
+  soundVolume(){
+    return 0.65
+  }
 }
 
 class PieceKE extends Piece{
@@ -187,6 +203,9 @@ class PieceKE extends Piece{
   }
   promotedMoves(){
     return [[0, +1], [+1, +1], [-1, +1], [+1, +0], [-1, +0], [0, -1]]
+  }
+  soundVolume(){
+    return 0.5
   }
 }
 
@@ -207,6 +226,9 @@ class PieceKY extends Piece{
   farMoves(){
     return this._promoted ? [] : [[0, +1]]
   }
+  soundVolume(){
+    return 0.5
+  }
 }
 
 class PieceFU extends Piece{
@@ -225,5 +247,8 @@ class PieceFU extends Piece{
   }
   promotedMoves(){
     return [[0, +1], [+1, +1], [-1, +1], [+1, +0], [-1, +0], [0, -1]]
+  }
+  soundVolume(){
+    return this._promoted ? 0.4 : 0.35
   }
 }
