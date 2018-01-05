@@ -37,6 +37,7 @@ var _studyBranchMoves = null
 var _studySender = null
 var _sendStudyBuffer = null
 var _dialogOnBoardClose = false
+var _worldClocks = []
 
 /* ====================================
     On document.ready
@@ -257,6 +258,9 @@ $(function(){
   $('.subMenu').find('a').click(function(){
     $(this).closest('ul').slideUp('fast')
   })
+
+  // World clocks
+  _generateWorldClocks()
 
   // Hide all layers other than login
   _switchLayer(0)
@@ -1082,6 +1086,7 @@ function _handleLoggedIn(str){
   _writeWelcomeMessage()
   _hourMileCount = 0
   setGeneralTimeout("HOUR_MILE", 3600000)
+  _refreshWorldClocks()
 }
 
 function _writeWelcomeMessage(){
@@ -2180,6 +2185,9 @@ function _handleGeneralTimeout(key){
     case "TYPE_1":
       _stopTypingIndicator(1, true)
       break
+    case "WORLD_CLOCK":
+      _refreshWorldClocks()
+      break
   }
 }
 
@@ -2307,4 +2315,20 @@ function _loadDefaultOptions(){
   }
   _enforceOptions()
   _loadOptionsToDialog()
+}
+
+function _generateWorldClocks(){
+  WorldClock.CONST.SEEDS.forEach(function(data){
+    let clock = new WorldClock(data.key, data.timezone)
+    $('#worldClocks').append(clock.div)
+    _worldClocks.push(clock)
+  })
+}
+
+function _refreshWorldClocks(){
+  let now = moment()
+  _worldClocks.forEach(function(clock){
+    clock.draw(now)
+  })
+  setGeneralTimeout("WORLD_CLOCK", 10000)
 }

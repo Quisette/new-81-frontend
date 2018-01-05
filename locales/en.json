@@ -376,5 +376,23 @@
     "V003": "Requesting to connect to public voice-chat...",
     "V004": "Sent request to players to access their post-game voice-chat.",
     "E007": "You cannot start another game until you exit the current game room."
+  },
+  "clock": {
+    "utc": "UTC",
+    "frankfurt": "Frankfurt",
+    "moscow": "Moscow",
+    "mumbai": "Mumbai",
+    "bangkok": "Bangkok",
+    "tokyo": "Tokyo",
+    "los_angeles": "Los Angeles",
+    "new_york": "New York",
+    "sao_paulo": "Sao Paulo",
+    "sun": "Sun.",
+    "mon": "Mon.",
+    "tue": "Tue.",
+    "wed": "Wed.",
+    "thu": "Thu.",
+    "fri": "Fri.",
+    "sat": "Sat."
   }
 }
