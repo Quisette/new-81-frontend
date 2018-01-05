@@ -79,6 +79,22 @@ function makeColorFromRating(v){
 	}
 }
 
+function isBeforeUpgrade(rate) {
+	for (let i = 1; i <= 21; i++) {
+		if (rate == RANK_THRESHOLDS[i] - 1) return true
+		else if (rate >= RANK_THRESHOLDS[i]) return false
+	}
+	return false
+}
+
+function isBeforeDowngrade(rate) {
+	for (let i = 1; i <= 21; i++) {
+		if (rate > RANK_THRESHOLDS[i]) return false
+		else if (rate == RANK_THRESHOLDS[i]) return true
+	}
+	return false
+}
+
 const HANDICAPS_JA = {
 	r: "平手(レート)",
 	nr: "平手(非レート)",

@@ -713,16 +713,12 @@ function _closeBoard(){
   if (board.isHost()) _giveHostButtonClick()
   if (board.isPlayer()) {
     client.closeGame()
-    if (_dialogOnBoardClose) {
-		  writeUserMessage(EJ("Kifu URL of your last game: ", "先ほどの対局の棋譜URL: ") + board.toKifuURL(), 1, "#008800")
-		  _askEvaluation(board.getOpponent().name)
-    }
-    _dialogOnBoardClose = false
+    _writeAfterCloseBoardMessage()
   }
   else if (board.isWatcher()) client.monitor(board.game.gameId, false)
   _checkLobbyButtonClick(true) //Cancel see lobby button if activated
   _refreshLobby()
-  board.close()
+  board.close() //board.game is null after this line!
   _switchLayer(1)
   $('#boardMessageArea').empty()
   watcherGrid.clear().draw()
@@ -732,6 +728,22 @@ function _closeBoard(){
   _studyBranchMoves = null
   forceKifuMode(1)
   _kifuModeRadioChange()
+}
+
+function _writeAfterCloseBoardMessage(){
+  if (_dialogOnBoardClose) {
+    _dialogOnBoardClose = false
+	  writeUserMessage(EJ("Kifu URL of your last game: ", "先ほどの対局の棋譜URL: ") + board.toKifuURL(), 1, "#008800")
+	  _askEvaluation(board.getOpponent().name)
+	  if (board.game.gameType == "r") {
+      console.log(isBeforeUpgrade(me.rate))
+      console.log(me.provisional)
+		  //_writeUserMessage(LanguageSelector.EJ("Rated game results so far in this session: ", "本セッションでのこれまでの成績(レート対局のみ): ") + _wins_session + LanguageSelector.EJ(" win ", "勝 ") + _losses_session + LanguageSelector.EJ(" loss\n", "敗\n"), 1, "#008800", true);
+		  //for each (var history:String in _games_session) _writeUserMessage(history + "\n", 1, "#000000");
+		  if (!me.provisional && isBeforeUpgrade(me.rate)) writeUserMessage(i18next.t("msg.before_upgrade"), 1, "#FF3388")
+		  else if (!me.provisional && isBeforeDowngrade(me.rate)) writeUserMessage(i18next.t("msg.before_downgrade"), 1, "#FF3388")
+	  }
+  }
 }
 
 function sendMoveAsPlayer(move){
@@ -1309,39 +1321,32 @@ function _handleGameSummary(str){
   _challengeUser = null
 //	  _waiting = false;
 //	  _rematching = false;
-    if (board.game) _closeBoard()
-	  board.setGame(new Game(0, gameId, black, white))
-    board.startGame(initialPosition, myTurn ? 0 : 1)
-    board.setKifuId(kid)
-    _dialogOnBoardClose = false
-    $("#kifuGridWrapper").find(".dataTables_scrollBody").removeClass("local-kifu")
-    setBoardConditions()
-    _switchLayer(2)
-    sp.gameStart()
-    _greetState = 1
+  if (board.game) _closeBoard()
+  board.setGame(new Game(0, gameId, black, white))
+  board.startGame(initialPosition, myTurn ? 0 : 1)
+  board.setKifuId(kid)
+  _dialogOnBoardClose = false
+  $("#kifuGridWrapper").find(".dataTables_scrollBody").removeClass("local-kifu")
+  setBoardConditions()
+  _switchLayer(2)
+  sp.gameStart()
+  _greetState = 1
+  _writeGameStartMessage()
+  //_nOpponentDisconnect = 0;
+  //_study_notified = false;
+}
 
-    writeUserMessage(i18next.t("msg.game_start") + "\n", 2, "#444444")
-    if (myTurn) writeUserMessage(EJ("You are Black " + (board.game.isHandicap() ? "(Handicap taker)." : "(Sente)."), "あなた" + (board.game.isHandicap() ? "は下手(したて)" : "が先手") + "です。"), 2, "#008800", true)
-    else writeUserMessage(EJ("You are White " + (board.game.isHandicap() ? "(Handicap giver)." : "(Gote).\n"), "あなた" + (board.game.isHandicap() ? "が上手(うわて)" : "は後手") + "です。"), 2, "#008800", true)
-	  if (board.game.gameType != "r") writeUserMessage(i18next.t("msg.mute_chat"), 2, "#008800")
-    /*
-	  greetButton.state = GreetButton.STATE_BEFORE_GAME;
-	  board.onListen = true;
-	  _switchListenColor(true);
-    */
-	  //_nOpponentDisconnect = 0;
-	  //_study_notified = false;
-    /*
-	  var oppo:Object = login_name == game.black.name ? game.white : game.black;
-	  if (board.gameType == "r" && !_users[login_name].isProvisional) {
-		  if (InfoFetcher.beforeUpgrade(_myRate)) {
-			  if (!oppo.isProvisional && oppo.rating > _myRate - 200) _sendAutoChat("#G020");
-		  } else if (InfoFetcher.beforeDowngrade(_myRate)) {
-			  if (!oppo.isProvisional && oppo.rating < _myRate + 200) _sendAutoChat("#G021");
-		  }
-	  }*/
-//	  _client.privateChat(oppo.name, "[##FITNESS]" + _levelStudy + "," + _levelEnglish);
-//	  if (parseInt(match[4]) == 0) greetButton.autoGreet(GreetButton.STATE_BEFORE_GAME);
+function _writeGameStartMessage(){
+  writeUserMessage(i18next.t("msg.game_start") + "\n", 2, "#444444")
+  if (board.myRoleType == 0) writeUserMessage(EJ("You are Black " + (board.game.isHandicap() ? "(Handicap taker)." : "(Sente)."), "あなた" + (board.game.isHandicap() ? "は下手(したて)" : "が先手") + "です。"), 2, "#008800", true)
+  else writeUserMessage(EJ("You are White " + (board.game.isHandicap() ? "(Handicap giver)." : "(Gote).\n"), "あなた" + (board.game.isHandicap() ? "が上手(うわて)" : "は後手") + "です。"), 2, "#008800", true)
+  if (board.game.gameType != "r") writeUserMessage(i18next.t("msg.mute_chat"), 2, "#008800")
+  let opponent = board.getOpponent()
+  if (board.game.gameType == "r" && !me.provisional) {
+	  if (isBeforeUpgrade(me.rate) && !opponent.provisional && opponent.rate > me.rate - 200) _sendAutoChat("#G020")
+	  else if (isBeforeDowngrade(me.rate) & !opponent.provisional && opponent.rate < me.rate + 200) _sendAutoChat("#G021")
+  }
+  //_client.privateChat(oppo.name, "[##FITNESS]" + _levelStudy + "," + _levelEnglish);
 }
 
 function _handleMove(csa, time){

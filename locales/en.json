@@ -2,6 +2,20 @@
   "min": "min",
   "sec": "sec",
   "cancel": "Cancel",
+  "since_disconnect": "Time past since disconnection: ",
+  "declare": "Declare Win",
+  "error": "Error",
+  "status": "Status",
+  "status_tip_mobile": "Using mobile app",
+  "status_tip_self": "Myself",
+  "status_tip_direct": "Using DIRECT post-game voice-chat",
+  "status_tip_shared": "Using PUBLIC post-game voice-chat",
+  "status_tip_broadcast": "Broadcasting",
+  "status_tip_listen": "Listening to your public voice-chat",
+  "status_tip_host": "Host of the study-mode",
+  "close": "Close",
+  "player_search": "Player Search",
+  "pass_invalid": "Wrong password. Cannot enter the room.",
   "login": {
     "loginname": "Login Name",
     "password": "Password",
@@ -61,8 +75,7 @@
     "opening_short": "Opng",
     "watch": "Watch Game",
     "view_as": "View as:",
-    "chat": "Chat",
-    "auto_scroll": "Auto-scroll"
+    "chat": "Chat"
   },
   "board": {
     "resign": "Resign",
@@ -112,34 +125,6 @@
     "query_eval": "Analyze with engine",
     "query_mate": "Search for mate"
   },
-  "status_tip_mobile": "Using mobile app",
-  "status_tip_self": "Myself",
-  "status_tip_direct": "Using DIRECT post-game voice-chat",
-  "status_tip_shared": "Using PUBLIC post-game voice-chat",
-  "status_tip_broadcast": "Broadcasting",
-  "status_tip_listen": "Listening to your public voice-chat",
-  "status_tip_host": "Host of the study-mode",
-  "search_panel": "Search Panel",
-  "kifu_search": "Kifu Search",
-  "share": "Share Kifu",
-  "close": "Close",
-  "result": "Result",
-  "opening": "Opening",
-  "moves": "Moves",
-  "game_date": "Date",
-  "player_search": "Player Search",
-  "win": "Win",
-  "loss": "Loss",
-  "draw": "Draw",
-  "total": "Total",
-  "percentage_short": "%-win",
-  "streak_short": "Streak",
-  "signed_up": "Joined",
-  "last_updated": "Updated",
-  "view_rankings": "View Rankings",
-  "percentage": "Winning %",
-  "wins": "Wins",
-  "total_games": "Total Games",
   "challenger": {
     "title": "Here comes a new challenger!!",
     "accept": "Accept",
@@ -162,9 +147,6 @@
     "favorite": "Favorite",
     "ignore": "Block"
   },
-  "hours": "hours",
-  "minutes": "minutes",
-  "message": "message",
   "option": {
     "pieces": "Piece",
     "piece_design": {
@@ -244,21 +226,12 @@
   "chat_template": {
     "title": "Auto-translated templates"
   },
-  "pass_invalid": "Wrong password. Cannot enter the room.",
   "impasse": {
     "title": "Impasse Status",
     "entered": "Entered",
     "pieces": "Pieces",
     "points": "Points"
   },
-  "since_disconnect": "Time past since disconnection: ",
-  "declare": "Declare Win",
-  "error": "Error",
-  "tendency": "Tendencies",
-  "rate_history": "Rate History",
-  "data_table": "Data Table",
-  "apply_dan": "JSA Certificate",
-  "status": "Status",
   "alert": {
     "disconnect": "Your network has disonnected from the server.",
     "disconnect_title": "Disconnection",
@@ -279,7 +252,6 @@
     "rated": "This game is Rated.\nPlayers CANNOT see watcher's chat until the game ends.\nWatcher can PM to players, but it will be notified to others.",
     "nonrated": "This game is Non-rated.\nPlayers CAN see watcher's chat by default. (Player can switch it off.)",
     "opponent_disconnect": "Opponent disconnected. You can declare win after 60 seconds, or keep waiting. However, you will be forced to win automatically after 300 seconds.",
-    "disconnect_self": "You are disconnected from the server. The applet is no longer active. Please reload the applet to login again and continue.　Do you want to reload immidately?",
     "game_end": {
       "time_up": "Time up.",
       "disconnect": "Game end by player's disconnection.",
@@ -290,15 +262,13 @@
       "jishogi": "Game end by 27-point rule."
     },
     "lag": "Your timer is lagging by more than 5 sec due to CPU load. Time-up loss can occur earlier than your timer hits zero.",
-    "addlist": "Added to the list temporarily. Go to Option Window to set it permanent or cancel.",
-    "addlist_favorite": "Added to the favorite list temporarily. Go to Option Window to set it permanent or cancel.",
-    "addlist_block": "Blocked all communication from the user. This setting will be canceled on your next login.",
+    "add_block": "Blocked all communication from the user. This setting will be canceled on your next login.",
     "auto_reject": "Further challenges from this user will be automatically rejected. This setting will be canceled on your next login.",
     "before_upgrade": "You have a chance of rank promotion now. Win against someone who has a fixed rating higher than (yours - 200), and you will be promoted.",
     "before_downgrade": "Your rating is at the bottom of the rank now. You may be demoted if you lose the next game.",
     "reconnect_only": "You can only recconect to the game you disconnected from.\nIf your game had already ended, re-login to clear your 'D' status.",
     "suggest_invitation": "Opponent is not waiting for a game. Invite to your game?",
-    "mobile": "This function is invalid for this user testing the mobile app."
+    "mobile": "This function is invalid for this user using the mobile app."
   },
   "code": {
     "E010": "The user is not logged in. The message was saved for his/her next login.",
