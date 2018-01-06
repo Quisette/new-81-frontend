@@ -161,6 +161,10 @@ class User{
     }
   }
 
+  isWatchingGame(game){
+    return this._monitorGame == game.shortId
+  }
+
   isFromJapan(){
     return this._countryCode == 392
   }

@@ -47,7 +47,7 @@ var _worldClocks = []
 function _testFunction(phase){
   //phase:integer
   if (phase == 0) { // After creation
-    if (true) {
+    if (false) {
       board.loadNewPosition()
       _switchLayer(2)
       return
@@ -163,6 +163,13 @@ $(function(){
   $('#playerGrid tbody').on('dblclick', 'tr', function () {
     _openPlayerInfo(users[playerGrid.row(this).id()])
   })
+  playerGrid.on('user-select', function(e, dt, type, cell, originalEvent){
+    if ($(cell.node()).parent().hasClass('selected')) {
+      e.preventDefault()
+    } else {
+      _playerSelected(playerGrid, cell.index().row)
+    }
+  })
 
   waiterGrid = $('#waiterGrid').DataTable({
     data: [],
@@ -182,6 +189,13 @@ $(function(){
   waiterGrid.clear()
   $('#waiterGrid tbody').on('dblclick', 'tr', function () {
     _openPlayerInfo(users[waiterGrid.row(this).id()])
+  })
+  waiterGrid.on('user-select', function(e, dt, type, cell, originalEvent){
+    if ($(cell.node()).parent().hasClass('selected')) {
+      e.preventDefault()
+    } else {
+      _playerSelected(waiterGrid, cell.index().row)
+    }
   })
 
   gameGrid = $('#gameGrid').DataTable({
@@ -275,6 +289,23 @@ $(function(){
     sp.muteOpening(!(localStorage.openingMusic == 'true'))
   }
 
+  // User finder
+  $('#findUser').autocomplete({
+    autoFocus: true,
+    minLength: 2,
+    delay: 0,
+    select: function(e, ui){
+      let name = ui.item.value
+      if (users[name]) {
+        playerGrid.row('#' + name).select()
+        scrollGridToSelected(playerGrid)
+        _playerSelected(playerGrid, playerGrid.row({selected: true}).index())
+      } else {
+        writeUserMessage(i18next.t("lobby.player_not_found"), 1, "#FF0000")
+      }
+    }
+  })
+
   // Event listeners
   window.onblur = function(){
     if (board.isPlaying() && !testMode && board.game.isRated()) client.gameChat("[##M_OUT]0,0")
@@ -312,6 +343,8 @@ $(function(){
       mouseX = event.clientX
       mouseY = event.clientY
   }
+  $("#findUser").on('focus', function(){$(this).val('')})
+
   _resize()
 
   // Define default options
@@ -342,7 +375,7 @@ window.onresize = function () {
 }
 
 function _resize(){
-  $("#layerLobby").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 8.5)
+  $("#layerLobby").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 9.5)
   $("#layerBoard").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 12.5)
 	if (window.innerWidth > 1550) {
     $("#lobbyChatBox").insertAfter($("#playerListBox")).css('flex', 'initial')
@@ -491,6 +524,21 @@ function _waitButtonClick(){
 
 function _navigateToWebSystem(path){
   window.open('http://system.81dojo.com/' + EJ('en', 'ja') + '/' + path, '_blank')
+}
+
+function _playerSelected(grid, index){
+  let other_grid = grid == playerGrid ? waiterGrid : playerGrid
+  let name = grid.row(index).data().name
+  other_grid.rows().deselect()
+  other_grid.row('#' + name).select()
+  scrollGridToSelected(other_grid)
+  gameGrid.rows().deselect()
+  let game = _findGameByUser(users[name])
+  if (game) {
+    gameGrid.row('#' + game.gameId).select()
+    scrollGridToSelected(gameGrid)
+  }
+  $('#findUser').val('')
 }
 
 function _enterGame(game){
@@ -746,8 +794,6 @@ function _writeAfterCloseBoardMessage(){
 	  writeUserMessage(EJ("Kifu URL of your last game: ", "先ほどの対局の棋譜URL: ") + board.toKifuURL(), 1, "#008800")
 	  _askEvaluation(board.getOpponent().name)
 	  if (board.game.gameType == "r") {
-      console.log(isBeforeUpgrade(me.rate))
-      console.log(me.provisional)
 		  //_writeUserMessage(LanguageSelector.EJ("Rated game results so far in this session: ", "本セッションでのこれまでの成績(レート対局のみ): ") + _wins_session + LanguageSelector.EJ(" win ", "勝 ") + _losses_session + LanguageSelector.EJ(" loss\n", "敗\n"), 1, "#008800", true);
 		  //for each (var history:String in _games_session) _writeUserMessage(history + "\n", 1, "#000000");
 		  if (!me.provisional && isBeforeUpgrade(me.rate)) writeUserMessage(i18next.t("msg.before_upgrade"), 1, "#FF3388")
@@ -1109,6 +1155,7 @@ function _handleLoggedIn(str){
   _hourMileCount = 0
   setGeneralTimeout("HOUR_MILE", 3600000)
   _refreshWorldClocks()
+  $('#classSurveyButton').css('display', i18next.language == "ja" ? 'block' : 'none')
 }
 
 function _writeWelcomeMessage(){
@@ -1146,6 +1193,8 @@ function _handleWho(str){
   playerGrid.row('#' + me.name).select()
   scrollGridToSelected(playerGrid)
   drawGridMaintainScroll(waiterGrid)
+  _playerSelected(playerGrid, playerGrid.row({selected: true}).index())
+  $('#findUser').autocomplete('option', 'source', Object.keys(users))
 }
 
 function _handleList(str){
@@ -2362,4 +2411,15 @@ function _fitnessLevelText(level){
   let i = parseInt(level)
   if (i == 0) return i18next.t("option.not_defined")
   else return i18next.t("option.level") + (i - 1).toString()
+}
+
+function _findGameByUser(user){
+  let foundGame = null
+  gameGrid.rows().data().toArray().some(function(game){
+    if (game.isUserIn(user)) {
+      foundGame = game
+      return true
+    }
+  })
+  return foundGame
 }

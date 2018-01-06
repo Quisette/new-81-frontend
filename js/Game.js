@@ -21,6 +21,7 @@ class Game{
     this.password = ""
     this.status = ""
 		if (game_info[2].match(/\.([0-9a-z]{6})/)) this.password = RegExp.$1
+    this.shortId = (this.isStudy() ? "SG" : (black.name.substr(0,1) + white.name.substr(0,1))) + id.substr(id.length - 7, 7)
   }
 
 	setFromList(moves, status, isBlackIn, isWhiteIn, watchers, opening){
@@ -146,6 +147,17 @@ class Game{
     } else {
       return false
     }
+  }
+
+  isUserIn(user){
+    if (this.isBlackIn && this.black.name == user.name) {
+      return true
+    } else if (this.isWhiteIn && this.white.name == user.name) {
+      return true
+    } else if (user.isWatchingGame(this)) {
+      return true
+    }
+    return false
   }
 
 }

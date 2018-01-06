@@ -8,6 +8,12 @@ div.layer#layerLobby
         li
           a.button href="#" data-i18n="lobby.wait" onclick="_waitButtonClick()"
         li
+          a.button href="#" data-i18n-title="lobby.find_player"
+            span.fa-stack
+              i.fa.fa-search.fa-stack-2x style="top:-2px"
+              i.fa.fa-user.fa-stack-1x style="font-size:0.8em;top:-3px; left:-2px" 
+            input#findUser type="text" style="margin-left:4px;width:60px"
+        li
           a.button href="#" onclick="_optionButtonClick()" data-i18n-title="lobby.options"
             img src="img/icon_gear.png"
         li
@@ -36,8 +42,24 @@ div.layer#layerLobby
                 span data-i18n="submenu.club"
             li
               a href="#" onclick="_navigateToWebSystem('players/search/form')"
-                i.fa.fa-lg.fa-fw.fa-user-o
+                i.fa.fa-lg.fa-fw.fa-address-book
                 span data-i18n="submenu.player_search"
+            li
+              a href="#" onclick="_navigateToWebSystem('players/favorites')"
+                i.fa.fa-lg.fa-fw.fa-star
+                span data-i18n="submenu.favorites"
+            li
+              a href="#" onclick="_navigateToWebSystem('certificate')"
+                i.fa.fa-lg.fa-fw.fa-graduation-cap
+                span data-i18n="submenu.diploma"
+            li#classSurveyButton
+              a href="#" onclick="window.open('http://system.81dojo.com/class_survey')"
+                i.fa.fa-lg.fa-fw.fa-bar-chart
+                span 棋力対応調査
+            li
+              a href="#" onclick="_navigateToWebSystem('inquiries/new')"
+                i.fa.fa-lg.fa-fw.fa-question-circle
+                span data-i18n="submenu.inquiry"
         li
           a.button href="#" onclick="_logoutButtonClick()" data-i18n-title="lobby.logout"
             i.fa.fa-window-close.fa-2x
