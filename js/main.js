@@ -138,7 +138,7 @@ $(function(){
     searching: false, paging: false, info: false,
     order: false,
     select: "single",
-    oLanguage: {sEmptyTable: "Loading..."}
+    oLanguage: {sEmptyTable: i18next.t("loading")}
   })
   serverGrid.clear()
 
@@ -156,8 +156,7 @@ $(function(){
     searching: false, paging: false, info: false,
     select: "single",
     order: [[5, 'desc']],
-    scrollY: true,
-    oLanguage: {sEmptyTable: EJ("Loading...", "読込中...")}
+    scrollY: true
   })
   playerGrid.clear()
   $('#playerGrid tbody').on('dblclick', 'tr', function () {
@@ -183,8 +182,7 @@ $(function(){
     searching: false, paging: false, info: false,
     select: "single",
     order: [[1, 'desc']],
-    scrollY: true,
-    oLanguage: {sEmptyTable: EJ("No waiting player", "対局待プレーヤがいません")}
+    scrollY: true
   })
   waiterGrid.clear()
   $('#waiterGrid tbody').on('dblclick', 'tr', function () {
@@ -212,8 +210,7 @@ $(function(){
     searching: false, paging: false, info: false,
     select: "single",
     order: false,
-    scrollY: true,
-    oLanguage: {sEmptyTable: EJ("Waiting for games...", "待機中...")}
+    scrollY: true
   })
   gameGrid.clear()
   $('#gameGrid tbody').on('dblclick', 'tr', function () {
@@ -231,8 +228,7 @@ $(function(){
     searching: false, paging: false, info: false,
     select: "single",
     order: [[2, 'desc']],
-    scrollY: true,
-    oLanguage: {sEmptyTable: EJ("No watcher", "観戦者なし")}
+    scrollY: true
   })
   watcherGrid.clear()
   $('#watcherGrid tbody').on('dblclick', 'tr', function () {
@@ -417,6 +413,10 @@ function _languageSelected(){
 
 function _updateLanguage(){
   serverGrid.rows().invalidate()
+  playerGrid.settings()[0].oLanguage.sEmptyTable = i18next.t("loading")
+  waiterGrid.settings()[0].oLanguage.sEmptyTable = i18next.t("loading")
+  gameGrid.settings()[0].oLanguage.sEmptyTable = i18next.t("loading")
+  watcherGrid.settings()[0].oLanguage.sEmptyTable = i18next.t("no_watchers")
   $('span#languageFlag').html(countries[$('#languageSelector option:selected').data('code')].flagImgTag16())
   $('p#loginAlert').text('')
   $("[data-i18n]").each(function(){
@@ -429,12 +429,11 @@ function _updateLanguage(){
     $(this).attr('title', i18next.t($(this).attr('data-i18n-title')))
   })
   $('#newGameRuleSelect, #newGameStudyRuleSelect').empty()
-  if (i18next.language == "ja") {
-    Object.keys(HANDICAPS_JA).forEach(function(key){
-      if (key == "r" || key.match(/^va/)) return true
-      $('#newGameRuleSelect, #newGameStudyRuleSelect').append($("<option />").val(key).text(HANDICAPS_JA[key]))
-    })
-  }
+  let handicaps = i18next.language == "ja" ? HANDICAPS_JA : HANDICAPS_EN
+  Object.keys(handicaps).forEach(function(key){
+    if (key == "r" || key.match(/^va/)) return true
+    $('#newGameRuleSelect, #newGameStudyRuleSelect').append($("<option />").val(key).text(handicaps[key]))
+  })
   $('#modalNewGame, #modalChallenger, #modalImpasse, #modalOption, #modalChatTemplate').each(function(){
     $(this).dialog('option', 'title', i18next.t($(this).attr('data-i18n-title')))
   })
@@ -557,7 +556,7 @@ function _enterGame(game){
   //TODO watching or reconnecting ?
 	if (!game.gameId.match(/^STUDY/) && board.getPlayerRoleFromName(me.name) != null) { // Reconnect
 		if (me.status == 1) {
-      writeUserMessage(EJ("Stop waiting for game before you reconnect.", "対局に再接続するには、対局待状態を解除して下さい。"), 1, "#008800", true)
+      writeUserMessage(i18next.t("msg.reconnect_while_game"), 1, "#008800", true)
       board.close()
     } else {
       client.watchers(game.gameId)
@@ -662,7 +661,7 @@ function _rematchButtonClick(){
       client.watchers(board.game.gameId)
       client.monitor(board.game.gameId, true)
     } else {
-			writeUserMessage(EJ("The rematch game is already finished.", "再戦の対局が既に終了しています"), 2, "#008800")
+			writeUserMessage(i18next.t("msg.rematch_ended"), 2, "#008800")
 		}
   }
 }
@@ -791,7 +790,7 @@ function _closeBoard(){
 function _writeAfterCloseBoardMessage(){
   if (_dialogOnBoardClose) {
     _dialogOnBoardClose = false
-	  writeUserMessage(EJ("Kifu URL of your last game: ", "先ほどの対局の棋譜URL: ") + board.toKifuURL(), 1, "#008800")
+	  writeUserMessage(i18next.t("msg.last_kifu_url") + board.toKifuURL(), 1, "#008800")
 	  _askEvaluation(board.getOpponent().name)
 	  if (board.game.gameType == "r") {
 		  //_writeUserMessage(LanguageSelector.EJ("Rated game results so far in this session: ", "本セッションでのこれまでの成績(レート対局のみ): ") + _wins_session + LanguageSelector.EJ(" win ", "勝 ") + _losses_session + LanguageSelector.EJ(" loss\n", "敗\n"), 1, "#008800", true);
@@ -1015,6 +1014,7 @@ function _openPlayerInfo(user, doOpen = true){
         <div class="check-game" id="check-game-' + user.name + '"></div>'
     }).dialog({
       autoOpen: false,
+      width: 'auto',
       position: {at:'left+'+mouseX+' top+'+mouseY},
       close: function(e){
         if (element.find("#privateMessageArea").html() == "") element.dialog('destroy').remove()
@@ -1054,21 +1054,21 @@ function _openPlayerInfo(user, doOpen = true){
 function _playerChallengeClick(user){
   if (user == me) return
   if (board.isPlayer()) {
-	  writeUserMessage(EJ("You are still in a game.", "現在対局者であるため別の対局を開始できません"), 1, "#008800")
+	  writeUserMessage(i18next("msg.still_in_game"), 1, "#008800")
   } else if (_challengeUser) {
-	  writeUserMessage(EJ("You can only challenge one player at a time.", "挑戦は一度に一人に対してしか行えません。"), 1, "#008800")
+	  writeUserMessage(i18next("msg.challenge_only_one"), 1, "#008800")
   } else if (user.listAsWaiter()) {
     if (user.waitingTournamentId && !user.waitingChallengeableTournament()) {
   	  writeUserMessage(EJ("You are not registered to this tournament.", "この大会には参加していません。"), 1, "#ff0000")
     } else if (user.rate >= RANK_THRESHOLDS[2] && me.provisional && user.waitingGameName.match(/^r_/)) {
-  	  writeUserMessage(EJ("New player with a provisional rating cannot challenge 6-Dan or higher for rated games.", "レート未確定の新鋭棋士は六段以上とのレーティング対局には挑戦出来ません。"), 1, "#008800")
+  	  writeUserMessage(i18next.t("msg.no_challenge_6dan"), 1, "#008800")
     } else if (_checkGuestGamesExpired()) {
     } else if (user.waitingGameName.match(/_automatch\-/)) {
 		  client.seek(user)
     } else if (user.waitingGameName.match(/^va/)) {
   	  writeUserMessage(EJ("This game rule is not supported yet.", "HTML版は特殊ルールには未対応です。"), 1, "#ff0000")
     } else if (me.isGuest && user.waitingGameName.match(/^r_/)) {
-			writeUserMessage(EJ("Guests cannot play rated games.", "ゲストはレーティング対局に参加できません"), 1, "#ff0000")
+			writeUserMessage(i18next.t("msg.no_guest_rating"), 1, "#ff0000")
 	  } else {
 		  _challengeUser = user
 		  writeUserMessage(EJ("Challenging " + _challengeUser.name + "..... (Must wait for 20 seconds max)", _challengeUser.name + "さんに挑戦中..... (待ち時間 最大で20秒)"), 1, "#008800", true)
@@ -1873,7 +1873,7 @@ function _handleGameChat(sender, message){
     board.rematch(board.getPlayerRoleFromName(sender))
     _interpretCommunicationCode(sender, "G050", 2, true, true)
     if (board.rematchAgreed()) {
-			writeUserMessage(EJ("Rematch agreed!", "再戦成立!"), 2, "#008800", true)
+			writeUserMessage(i18next.t("msg.rematch_agreed"), 2, "#008800", true)
 			if (board.isPlayer()) {
         client.closeGame()
 				client.rematch(board.game, board.myRoleType)
@@ -2102,7 +2102,7 @@ function _runTypingIndicator(name){
     elem = $('<p></p>', {id: elem_id, class: 'typingIndicator'})
     let area = $("#boardMessageArea")
     area.append(elem)
-    elem.text('[' + name + '] ' + EJ('is typing...', '(タイピング中...)'))
+    elem.text('[' + name + '] ' + i18next.t("msg.typing"))
     area.animate({scrollTop: area[0].scrollHeight}, 'fast')
   }
   setGeneralTimeout("TYPE_" + turn, 5000, true)
@@ -2154,9 +2154,9 @@ function _handleCheckOpponent(data, opponent){
   if (data.to_play == null) return
   let elem = $('[id=check-game-' + opponent + ']').css('display', 'block')
   if (data.to_play) {
-    elem.text(EJ("You haven't played with this opponent", "未対局の大会参加者です"))
+    elem.text(i18next.t("challenger.tournament_not_yet"))
   } else {
-    elem.text(EJ("You have already played with this opponent", "この大会参加者とは対局済です"))
+    elem.text(i18next.t("challenger.tournament_played"))
   }
 }
 
@@ -2224,7 +2224,7 @@ function _handleGeneralTimeout(key){
     case "CHALLENGE":
   		if (_challengeUser) {
   			_challengeUser = null
-  			writeUserMessage(EJ("Communication could not be established with this opponent. The challenge is canceled.", "相手との通信が確認できないため挑戦をキャンセルします。"), 1, "#008800", true)
+  			writeUserMessage(i18next.t("msg.no_answer"), 1, "#008800", true)
   			client.decline("C031")
   		}
       break

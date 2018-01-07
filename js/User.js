@@ -111,13 +111,14 @@ class User{
   }
 
   gridObject(){
-		let statStr =  (this._monitorGame != "*") ? EJ("M ", "観") : ""
-		if (this.listAsWaiter()) {
-		  statStr += EJ("W", "待")
+		let statStr = ""
+    if (this.listAsWaiter()) statStr = coloredSpan(i18next.t("lobby.stat_w"), 'green', 13, i18next.t("lobby.stat_w_tip"))
+		if (this._monitorGame != "*") {
+		  statStr += coloredSpan(i18next.t("lobby.stat_m"), null, 13, i18next.t("lobby.stat_m_tip"))
 		} else if (this.status == 5) {
-			statStr = EJ("P ", "感想 ")
+		  statStr = coloredSpan(i18next.t("lobby.stat_p"), null, null, i18next.t("lobby.stat_p_tip"))
 		} else if (this.status == 4) {
-			statStr = EJ("G ", "対")
+		  statStr = coloredSpan(i18next.t("lobby.stat_g"), 'darkgoldenrod', null, i18next.t("lobby.stat_g_tip"))
 		}
 
     let ruleStr = ""

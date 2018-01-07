@@ -34,7 +34,7 @@ class Game{
   }
 
   senteStr(){
-    let str = coloredSpan(makeRankFromRating(this.black.rate), makeColorFromRating(this.black.rate), 25)
+    let str = coloredSpan(makeRankFromRating(this.black.rate), makeColorFromRating(this.black.rate), 34)
     str += this.black.country.flagImgTag27()
     let nameHTML = this.status == "win" ? ('<span style="text-decoration:underline">' + this.black.name + '</span>') : this.black.name
     nameHTML = (this.isBlackIn || this.isStudy()) ? nameHTML : coloredSpan(nameHTML, '#999')
@@ -47,7 +47,7 @@ class Game{
     nameHTML = (this.isWhiteIn || this.isStudy()) ? nameHTML : coloredSpan(nameHTML, '#999')
     let str = nameHTML + '&nbsp;'
     str += this.white.country.flagImgTag27()
-    str += coloredSpan(makeRankFromRating(this.white.rate), makeColorFromRating(this.white.rate), 25)
+    str += coloredSpan(makeRankFromRating(this.white.rate), makeColorFromRating(this.white.rate), 34)
     return str
   }
 
@@ -88,7 +88,7 @@ class Game{
   openingStr(){
     let object
     if (this.password != "") {
-      object = {short: EJ("PRIVATE", "[ロック]"), tip: i18next.t("new_game.private_room")}
+      object = {short: '<i class="fa fa-lock fa-lg"></i>', tip: i18next.t("new_game.private_room")}
     } else {
       object = openingTypeObject(this.hasNoOpeningTypes() ? this.gameType : this.opening)
     }

@@ -175,10 +175,14 @@ function getHandicapShort(key){
   return EJ(HANDICAPS_EN[key], HANDICAPS_JA[key])
 }
 
-function coloredSpan(text, color, width = 0){
-  let str = '<span style="color:' + color
-  if (width > 0) str += ';display:inline-block;text-align:center;width:' + width + 'px'
-  str += '">' + text + '</span>'
+function coloredSpan(text, color = null, width = null, title = null){
+  //string(css color), integer, string
+  let str = '<span style="'
+  if (color) str += 'color:' + color + ';'
+  if (width) str += 'display:inline-block;text-align:center;width:' + width + 'px;'
+  str += '"'
+  if (title) str += ' title="' + title + '"'
+  str += '>' + text + '</span>'
   return str
 }
 

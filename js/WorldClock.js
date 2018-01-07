@@ -12,13 +12,13 @@ class WorldClock{
     return {
       SEEDS: [
         {key: 'utc', timezone: 'UTC'},
-        {key: 'frankfurt', timezone: 'Europe/Berlin'},
+        {key: 'cet', timezone: 'Europe/Berlin'},
         {key: 'moscow', timezone: 'Europe/Moscow'},
-        {key: 'mumbai', timezone: 'Asia/Calcutta'},
-        {key: 'bangkok', timezone: 'Asia/Bangkok'},
+        {key: 'shanghai', timezone: 'Asia/Shanghai'},
         {key: 'tokyo', timezone: 'Asia/Tokyo'},
-        {key: 'los_angeles', timezone: 'America/Los_Angeles'},
-        {key: 'new_york', timezone: 'America/New_York'},
+        {key: 'sydney', timezone: 'Australia/Sydney'},
+        {key: 'pst', timezone: 'America/Los_Angeles'},
+        {key: 'est', timezone: 'America/New_York'},
         {key: 'sao_paulo', timezone: 'America/Sao_Paulo'}
       ],
       WEEK_DAY_KEYS: ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']

@@ -1,7 +1,8 @@
 $DefaultBackColor: #f2f2f2
 $KeyColor: #7c3
 $DarkKeyColor: rgb(83, 134, 0)
-$AccentColor: rgb(212, 152, 0)
+$AccentColor: #fbbb44
+$DarkAccentColor: rgb(212, 152, 0)
 $GreyCanvasColor: #fafafa
 $LobbyGap: 7px
 $boardGap: 7px
@@ -32,7 +33,9 @@ a
   color: $DarkKeyColor
   text-decoration: none
   &:hover
-    color: $AccentColor
+    color: $DarkAccentColor
+  &:focus
+    outline: none
 p
   margin: 3px 0
 img.inline
@@ -127,6 +130,8 @@ ul.subMenu
       pointer-events: none
       background-color: $DarkKeyColor
       opacity: 0.7
+select option[selected]
+  background: $AccentColor
 img.avatar
   width: 128px
   height: 128px
@@ -134,13 +139,44 @@ input[type=text], input[type=password], select
   &:focus
     outline-color: orange
 
+//--------------------------------
+// jQuery-UI override
+// -------------------------------
+
+.ui-dialog
+  border: none!important
+  box-shadow: 0px 2px 8px 0px rgba(0,0,0,0.3)
+.ui-dialog-titlebar
+  border-radius: 0!important
+  background: $KeyColor!important
+  color: white!important
+.ui-state-active
+  background: $AccentColor!important
+  border: 1px solid $AccentColor!important
+.ui-state-focus
+  outline: none
+.ui-button:active
+  background: $AccentColor!important
+  border-color: $DarkAccentColor
+.ui-widget
+  &:active
+    outline: none
+  &:focus
+    outline: none
+.ui-tabs
+  border: 0!important
+.ui-tabs-nav
+  border: 0
+  background: none
+.ui-tabs-panel
+  border: 1px solid #ddd!important
+
 // -------------------------------
 // Login View
 // -------------------------------
 
 select#languageSelector
   width: 100px
-  height: 20px
 
 div#layerLogin
   z-index: 3
@@ -308,7 +344,6 @@ div.square-movable-highlight
 div.komadai
   background-size: contain
 div.player-info
-  width: 160px
   height: 186px
   background-image: url(../img/paper.jpg)
   border: solid 2px #ddd
