@@ -138,7 +138,7 @@ $(function(){
     searching: false, paging: false, info: false,
     order: false,
     select: "single",
-    oLanguage: {sEmptyTable: i18next.t("loading")}
+    oLanguage: {sEmptyTable: EJ('Loading...', '読込中')}
   })
   serverGrid.clear()
 
@@ -414,9 +414,13 @@ function _languageSelected(){
 function _updateLanguage(){
   serverGrid.rows().invalidate()
   playerGrid.settings()[0].oLanguage.sEmptyTable = i18next.t("loading")
+  playerGrid.draw()
   waiterGrid.settings()[0].oLanguage.sEmptyTable = i18next.t("loading")
+  waiterGrid.draw()
   gameGrid.settings()[0].oLanguage.sEmptyTable = i18next.t("loading")
-  watcherGrid.settings()[0].oLanguage.sEmptyTable = i18next.t("no_watchers")
+  gameGrid.draw()
+  watcherGrid.settings()[0].oLanguage.sEmptyTable = i18next.t("board.no_watchers")
+  watcherGrid.draw()
   $('span#languageFlag').html(countries[$('#languageSelector option:selected').data('code')].flagImgTag16())
   $('p#loginAlert').text('')
   $("[data-i18n]").each(function(){
@@ -587,7 +591,7 @@ function writeUserMessage(str, layer, clr = null, bold = false, lineChange = tru
 	str = str.replace(/</g, "&lt;")
 	str = str.replace(/&lt;sPAn/g, "<span");
 	str = str.replace(/&lt;\/SpaN>/g, "</span>");
-	str = str.replace(/(https?\:\/\/[^\"^\s^\\]+)/g, '<a href="$1" target="_blank">$1</a>')
+	str = str.replace(/(https?\:\/\/[^\"^\s^\\^\)^\(]+)/g, '<a href="$1" target="_blank">$1</a>')
 	str = str.replace(/\n/g, "<br>&emsp;")
   $('<span></span>',{}).css({
     'color': (clr ? clr : ''),
@@ -2216,6 +2220,7 @@ function _enforceOptions(){
     $('#boardLeftBottomHBox').width(scale * board.div.width())
     _resize()
   }
+  kifuGrid.rows().invalidate()
 }
 
 function _handleGeneralTimeout(key){

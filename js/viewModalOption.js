@@ -8,6 +8,7 @@ function _loadOptionsToDialog(){
   $('input[name=timer_sound_type]').val([options.timer_sound_type])
   $('input[name=piece_type]').val([options.piece_type])
   $('input[name=board_size]').val([options.board_size])
+  $('input[name=notation_style]').val([options.notation_style])
   //Selectboxes
   $('div#optionTabs').find('select').each(function(){
     $(this).val(options[$(this).prop('id')])
@@ -24,6 +25,7 @@ function _setOptionsFromDialog(){
   options.timer_sound_type = parseInt($('input[name=timer_sound_type]:checked').val())
   options.piece_type = parseInt($('input[name=piece_type]:checked').val())
   options.board_size = parseInt($('input[name=board_size]:checked').val())
+  options.notation_style= parseInt($('input[name=notation_style]:checked').val())
   //Selectboxes
   $('div#optionTabs').find('select').each(function(){
     options[$(this).prop('id')] = $(this).val()

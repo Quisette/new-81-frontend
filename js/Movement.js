@@ -32,14 +32,14 @@ class Movement{
   		CATCH: 8,
   		TRY: 9,
       SUSPEND: 10,
-  		LIST_UNIVERSAL: 0,
+  		LIST_UNIVERSAL: 0, // Chess-style
   		LIST_JAPANESE: 1, // Default in WebSystem options database
-  		LIST_WESTERN: 2,
   		LIST_1TO1: 4, // Default for English app
   		koma_japanese_names: ['玉', '飛', '角', '金', '銀', '桂', '香', '歩', '玉', '龍', '馬', '', '成銀', '成桂', '成香', 'と'],
   		rank_japanese_names: ['', '一','二','三','四','五','六','七','八','九'],
   		file_japanese_names: ['', '１', '２', '３', '４', '５', '６', '７', '８', '９'],
-  		koma_universal_names: ['Ｋ', 'Ｒ', 'Ｂ', 'Ｇ', 'Ｓ', 'Ｎ', 'Ｌ', 'Ｐ', '', 'Ｄ', 'Ｈ', '', '+S', '+N', '+L', 'Ｔ'],
+  		koma_universal_names: ['Ｋ', 'Ｒ', 'Ｂ', 'Ｇ', 'Ｓ', 'Ｎ', 'Ｌ', 'Ｐ', 'Ｋ', 'Ｄ', 'Ｈ', '', '+S', '+N', '+L', 'Ｔ'],
+  		koma_universal_names_condensed: ['K', 'R', 'B', 'G', 'S', 'N', 'L', 'P', 'K', 'D', 'H', '', '+S', '+N', '+L', 'T'],
       special_notations_ja: {
         TIME_UP: '時間切れ',
         DISCONNECT: '接続切れ',
@@ -50,6 +50,17 @@ class Movement{
         JISHOGI: '27点宣言',
         CATCH: 'キャッチ!',
         TRY: 'トライ!'
+      },
+      special_notations_en: {
+        TIME_UP: 'Time-up',
+        DISCONNECT: 'Disconnection',
+        ILLEGAL_MOVE: 'Illegal',
+        RESIGN: 'Resign',
+        OUTE_SENNICHITE: 'Illegal',
+        SENNICHITE: 'Repetition',
+        JISHOGI: '27-point Rule',
+        CATCH: 'CATCH!',
+        TRY: 'TRY!'
       }
     }
   }
@@ -116,7 +127,7 @@ class Movement{
       case "TRY":
         return EJ("REACH!", "トライ!")
       case "SUSPEND":
-        return EJ("Game suspended.", "対局は中断されました")
+        return i18next.t("msg.game_end.suspend")
     }
   }
 
@@ -134,7 +145,7 @@ class Movement{
 			if (this.additionalIdentifier || forFile) str += alphabet ? "*" : "打"
 		} else {
 			if (this.additionalIdentifier && !forFile) {
-				str += "(" + Movement.CONST.file_rank_numbers[this.fromX] + Movement.CONST.file_rank_numbers[this.fromY] + ")"
+				str += "(" + this.fromX.toString() + this.fromY.toString() + ")"
 			}
 			if (this.promote) {
 				str += alphabet ? "+" : "成"
@@ -148,6 +159,25 @@ class Movement{
     if (!forFile) str = (this.owner == Position.CONST.SENTE ? "☗" : "☖") + str
     return str
   }
+
+	toChessNotation() {
+		let str = Movement.CONST.koma_universal_names_condensed[this.pieceType]
+		if (this.fromX == 0 && this.fromY == 0) {
+			str += "*"
+		} else {
+  		if (this.additionalIdentifier) {
+				str += "(" + this.fromX.toString() + this.fromY.toString() + ")"
+  		}
+  		str += this.capture ? "x" : "-"
+    }
+    str += this.toX.toString() + this.toY.toString()
+		if (this.promote) {
+			str += "+"
+		} else if (this.promotable) {
+      str += "="
+		}
+    return (this.owner == Position.CONST.SENTE ? "☗" : "☖") + str
+	}
 
   toKIF(){
     let str = ""
@@ -173,11 +203,11 @@ class Movement{
 
   get moveStr(){
     if (this.num == 0) {
-      return EJ('Start', '開始')
+      return options.notation_style == Movement.CONST.LIST_JAPANESE ? '開始' : 'Start'
     } else if (this.endTypeKey) {
-      return Movement.CONST.special_notations_ja[this.endTypeKey]
+      return options.notation_style == Movement.CONST.LIST_JAPANESE ? Movement.CONST.special_notations_ja[this.endTypeKey] : Movement.CONST.special_notations_en[this.endTypeKey]
     } else {
-      return this.toJapaneseNotation()
+      return options.notation_style == Movement.CONST.LIST_UNIVERSAL ? this.toChessNotation() : this.toJapaneseNotation()
     }
   }
 
