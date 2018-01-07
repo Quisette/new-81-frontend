@@ -70,7 +70,6 @@
     "game_status": "Status",
     "monitor": "Mon",
     "opening_short": "Opng",
-    "watch": "Watch Game",
     "chat": "Chat"
   },
   "board": {
@@ -176,7 +175,6 @@
     "byoyomi_yamato": "Ladies Professional Byoyomi (Yamato Takahashi)",
     "byoyomi_noto": "yetAnother 萌えるチェスクロ voice sample",
     "byoyomi_chime": "Chime",
-    "byoyomi_jp": "Japanese",
     "pm": "Private Message",
     "communication": "Communication",
     "notation": "Notation Style",

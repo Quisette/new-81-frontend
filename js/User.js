@@ -118,7 +118,7 @@ class User{
 		} else if (this.status == 5) {
 		  statStr = coloredSpan(i18next.t("lobby.stat_p"), null, null, i18next.t("lobby.stat_p_tip"))
 		} else if (this.status == 4) {
-		  statStr = coloredSpan(i18next.t("lobby.stat_g"), 'darkgoldenrod', null, i18next.t("lobby.stat_g_tip"))
+		  statStr = coloredSpan(i18next.t("lobby.stat_g"), 'goldenrod', null, i18next.t("lobby.stat_g_tip"))
 		}
 
     let ruleStr = ""
