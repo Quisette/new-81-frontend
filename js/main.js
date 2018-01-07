@@ -309,6 +309,15 @@ $(function(){
   window.onfocus = function(){
     if (board.isPlaying() && !testMode && board.game.isRated()) client.gameChat("[##M_IN]0,0")
   }
+  $(window).on("beforeunload",function(e){
+    if (board.isPlaying()) {
+      writeUserMessage("You are player.", 2, "#FF0000")
+      return "You are player. Exit the room before closing the browser."
+    }
+  })
+  $(window).unload(function(){
+    if (board.isHost()) _giveHostButtonClick()
+  })
   document.getElementById('layerBoard').ondragstart = function(){return false}
   $("#lobbyChatInput").on('keyup', function(e){
     if (e.keyCode == 13){
@@ -728,6 +737,11 @@ function _giveHostButtonClick(){
   }
 }
 
+function _giveSubhostButtonClick(user){
+  if (user.name == me.name) return
+  client.gameChat("[##SUBHOST_ON]" + user.name)
+}
+
 function _KyokumenpediaClick(){
   window.open("http://kyokumen.jp/positions/" + board.position.toSFEN(), "_blank")
 }
@@ -945,8 +959,13 @@ function setBoardConditions(){
   else $("#logoutButton").addClass("button-disabled")
   if (board.onListen) $("input[name=kifuModeRadio]:eq(1)").prop("checked", true)
   else $("input[name=kifuModeRadio]:eq(0)").prop("checked", true)
-  if (!board.isHost()) $("#giveHostButton").addClass("button-disabled")
-  else $("#giveHostButton").removeClass("button-disabled")
+  if (board.isHost()) {
+    $("#giveHostButton").removeClass("button-disabled")
+    $(".give-subhost-button").css('display', 'initial')
+  } else {
+    $("#giveHostButton").addClass("button-disabled")
+    $(".give-subhost-button").css('display', 'none')
+  }
   if (board.isPostGame) $("#shareKifuTwitterButton, #shareKifuFacebookButton").removeClass("submenu-button-disabled")
   else $("#shareKifuTwitterButton, #shareKifuFacebookButton").addClass("submenu-button-disabled")
   _allowWatcherChat = $("#receiveWatcherChatCheckBox").is(":checked")
@@ -1024,11 +1043,13 @@ function _openPlayerInfo(user, doOpen = true){
         if (element.find("#privateMessageArea").html() == "") element.dialog('destroy').remove()
       },
       buttons: [
+        {text: "", class: "fa fa-user-plus font-fa give-subhost-button", title: i18next.t("board.give_subhost"), click: function(){_giveSubhostButtonClick(user)}},
         {text: i18next.t("player_info.challenge"), click: function(){_playerChallengeClick(user); $(this).dialog('close')}},
         {text: i18next.t("player_info.detail"), click: function(){_playerDetailClick(user)}},
         {text: "PM", click: function(){_playerPMClick(this)}}
       ]
     })
+    if (!board.isHost()) element.siblings('.ui-dialog-buttonpane').find('.give-subhost-button').css('display', 'none')
     if (user.isGuest) element.find("#privateChatInput").prop('disabled', true)
     element.find("#privateChatInput").on('keyup', function(e){
       if (e.keyCode == 13){
