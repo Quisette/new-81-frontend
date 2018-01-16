@@ -369,7 +369,7 @@ function sharePosition(mode) {
 			str += " #81dojo #shogi (powered by @shibacho2)"
 		} else {
 			str = "81Dojo Diagram: [" + black + " vs " + white + "]"
-			str += " %2381dojo (powered by @shibacho2)";
+			str += " #81dojo (powered by @shibacho2)";
 		}
 		str = "http://twitter.com/share?text=" + encodeURIComponent(str) + "&url=" + encodeURIComponent(url)
 	}

@@ -466,6 +466,7 @@ function _loginTypeChange(){
 }
 
 function _loginButtonClick(){
+  $("#passwordInput").tooltip('close')
   let server = serverGrid.row({selected: true}).data()
   if (server == null){
     alert('Please select a server.')
