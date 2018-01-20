@@ -376,3 +376,28 @@ function sharePosition(mode) {
   window.open(str, "_blank")
 	//TODO _handleSNSClick(mode)
 }
+
+function downloadToFile(content, filename){
+  var blob = new Blob([content], {type: "text/plain"})
+  if(window.navigator.msSaveBlob){ // InternetExplorer
+    window.navigator.msSaveBlob(blob, filename)
+  } else { // For other browser, create a tag and fire an event
+    var a = document.createElement("a")
+    a.href = URL.createObjectURL(blob)
+    a.target = '_blank'
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(a.href)
+  }
+}
+
+function formatDateToText(date){
+  let str = ""
+  str += date.getFullYear() % 100
+  str += (date.getMonth() + 101).toString().slice(1)
+  str += (date.getDate() + 100).toString().slice(1)
+  str += (date.getHours() + 100).toString().slice(1)
+  str += (date.getMinutes() + 100).toString().slice(1)
+  str += (date.getSeconds() + 100).toString().slice(1)
+  return str
+}

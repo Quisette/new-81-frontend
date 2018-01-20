@@ -765,6 +765,11 @@ function _kifuCopyButtonClick(){
   $("#clip-board-area").remove()
 }
 
+function _kifuDownloadButtonClick(){
+  let date = Date.now()
+  downloadToFile(_generateKIF(), "81Dojo-" + formatDateToText(new Date()) + "-" + board.game.black.name + "-" + board.game.white.name + ".kif")
+}
+
 function _shareKifuButtonClick(mode){
   if (board.toKifuURL() != "") shareKifu(mode)
   else writeUserMessage(EJ('This board does not have a kifu URL.', 'この盤面には棋譜URLの設定がありません'), 2, "#FF0000")

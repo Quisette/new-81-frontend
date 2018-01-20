@@ -47,9 +47,9 @@ div.layer#layerBoard
                 i.fa.fa-clipboard.fa-lg.fa-fw
                 span data-i18n="submenu.kifu_copy"
             li
-              a.submenu-button-disabled href="#" onclick=""
-                i.fa.fa-save.fa-lg.fa-fw
-                span data-i18n="submenu.kifu_save"
+              a#kifuDownloadButton href="#" onclick="_kifuDownloadButtonClick()"
+                i.fa.fa-download.fa-lg.fa-fw
+                span data-i18n="submenu.kifu_download"
             li
               a#shareKifuTwitterButton href="#" onclick="_shareKifuButtonClick('TW')"
                 i.fa.fa-twitter.fa-lg.fa-fw
