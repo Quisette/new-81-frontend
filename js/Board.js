@@ -733,6 +733,10 @@ class Board{
     }
   }
 
+  getMaterialBalance(joban){
+    return this._position.materialBalance(this._direction, joban)
+  }
+
   get runningTimer(){
     return this._timers[this._publicPosition.turn ? 0 : 1]
   }

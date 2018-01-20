@@ -743,6 +743,12 @@ function _giveSubhostButtonClick(user){
   client.gameChat("[##SUBHOST_ON]" + user.name)
 }
 
+function _materialBalanceButtonClick(){
+  let num = kifuGrid.row({selected: true}).index()
+  if (board.game.canCalculateMaterialBalance()) writeUserMessage(EJ("Material balance (move #", "駒割計算結果(") + num + EJ("):　", "手まで):　") + board.getMaterialBalance(num <= 40), 2, "#008800")
+	else writeUserMessage(EJ("This function is only for even games.", "平手以外では使えません"), 2, "#008800")
+}
+
 function _KyokumenpediaClick(){
   window.open("http://kyokumen.jp/positions/" + board.position.toSFEN(), "_blank")
 }

@@ -33,6 +33,8 @@ class Position{
     return {
       SENTE: true,
       GOTE: false,
+      NEUTRAL_NUMS: [1, 1, 1, 2, 2, 2, 2, 9],
+      MATERIAL_POINTS: [0, 8, 8, 5, 5, 3, 3, 1],
       INITIAL_POSITION: "P0+\n" +
         "P1-KY-KE-GI-KI-OU-KI-GI-KE-KY\n" +
         "P2 * -HI *  *  *  *  * -KA * \n" +
@@ -347,28 +349,60 @@ class Position{
 		return url ? encodeURIComponent(str) : str
 	}
 
+	materialBalance(turn, joban) {
+    // boolean (true if seen from sente), boolean
+    let str = ""
+		let senteGot = ""
+		let goteGot = ""
+		let sentePieceNums = new Array(8).fill(0)
+		let senteGain = 0
+		for (let y = 0; y < 9; y++) {
+			for (let x = 0; x < 9; x++) {
+				if (this._squares[x][y] && this._squares[x][y].owner) sentePieceNums[this._squares[x][y].type] += 1
+			}
+		}
+    this.komadais[0].forEach(function(piece){
+      sentePieceNums[piece.type] += 1
+    })
+		for (let i = 1; i <= 6; i++) {
+			if (sentePieceNums[i] > Position.CONST.NEUTRAL_NUMS[i]) {
+				for (let n = 1; n <= sentePieceNums[i] - Position.CONST.NEUTRAL_NUMS[i]; n++) {
+					senteGot += Movement.CONST.koma_japanese_names[i]
+					senteGain += Position.CONST.MATERIAL_POINTS[i]
+				}
+			} else if (sentePieceNums[i] < Position.CONST.NEUTRAL_NUMS[i]) {
+				for (let n = 1; n <= Position.CONST.NEUTRAL_NUMS[i] - sentePieceNums[i]; n++) {
+					goteGot += Movement.CONST.koma_japanese_names[i]
+					senteGain -= Position.CONST.MATERIAL_POINTS[i]
+				}
+			}
+		}
+    let sentePawns = sentePieceNums[7]
+    let evenPawns = Position.CONST.NEUTRAL_NUMS[7]
+		if (goteGot.length > 0 && senteGot.length == 0) {
+			if (joban && senteGain >= -3 && sentePawns >= evenPawns + 3) senteGot += EJ("歩x", "歩") + (sentePawns - evenPawns) + EJ("", "枚")
+			return turn ? EJ("Black is down by " + goteGot, "先手 " + goteGot + "損") : EJ("White is up by " + goteGot, "後手 " + goteGot + "得")
+		} else if (goteGot.length == 0 && senteGot.length > 0) {
+			if (joban && senteGain <= 3 && sentePawns <= evenPawns - 3) goteGot += EJ("歩x", "歩") + (evenPawns - sentePawns) + EJ("", "枚")
+			return turn ? EJ("Black is up by " + senteGot, "先手 " + senteGot + "得") : EJ("White is up by " + senteGot, "後手 " + senteGot + "損")
+		}
+		if (senteGot.length > 0 && goteGot.length > 0) {
+			str = EJ("Exchange of ", "") + (turn ? ("☗" + senteGot) : ("☖" + goteGot)) + EJ(" and ", "と") + (turn ? ("☖" + goteGot) : ("☗" + senteGot)) + EJ("", "の交換") + "　/　"
+			let gain_threshold = (senteGot.length == goteGot.length && senteGot.length <= 2) ? 2 : 3
+			if (senteGain >= gain_threshold) return str + (turn ? EJ("Black is up.", "先手の駒得") : EJ("White is down.", "後手の駒損"))
+			else if (senteGain <= -gain_threshold) return str + (turn ? EJ("Black is down.", "先手の駒損") : EJ("White is up.", "後手の駒得"))
+		}
+		if (senteGain == 0 && senteGot.length == goteGot.length && senteGot.length <= 2) {
+			if (joban && sentePawns > evenPawns) str += turn ? EJ("", "先手 ") + (sentePawns - evenPawns) + EJ("-pawn up for black.", "歩得") : EJ("", "後手 ") + (sentePawns - evenPawns) + EJ("-pawn down for white.", "歩損")
+			else if (joban && sentePawns < evenPawns) str += turn ? EJ("", "先手 ") + (evenPawns - sentePawns) + EJ("-pawn down for black.", "歩損") : EJ("", "後手 ") + (evenPawns - sentePawns) + EJ("-pawn up for white.", "歩得")
+			else str += EJ("Equal.", "互角")
+		}
+		return str
+	}
+
 }
 
-//	private static const koma_neutral_nums:Array = new Array(1, 1, 1, 2, 2, 2, 2, 9);
-//	private static const koma_material_points:Array = new Array(0, 8, 8, 5, 5, 3, 3, 1);
-
 /*
-
-		public function mustPromote(from:Point, to:Point):Boolean {
-			if (koma_names == koma_names_zoo) return false;
-			from = translateHumanCoordinates(from);
-			to = translateHumanCoordinates(to);
-			var koma:Koma = getKomaAt(from);
-			if (koma.type == Koma.FU || koma.type == Koma.KY) {
-				if (koma.ownerPlayer == SENTE && to.y == 0) return true;
-				if (koma.ownerPlayer == GOTE && to.y == 8) return true;
-			} else if (koma.type == Koma.KE) {
-				if (koma.ownerPlayer == SENTE && to.y <= 1) return true;
-				if (koma.ownerPlayer == GOTE && to.y >= 7) return true;
-			}
-			return false;
-		}
-
 		public function isNifu(from:Point, to:Point):Boolean {
 			if (from.x == HAND_FU) {
 				to = translateHumanCoordinates(to);
@@ -382,79 +416,6 @@ class Position{
 				}
 			}
 			return false;
-		}
-
-		public function isSoundDouble(to:Point):Boolean {
-			var koma:Koma;
-			if (getKomaAt(to).ownerPlayer == SENTE && to.y <= 7) {
-				if ((koma = getKomaAt(new Point(to.x, to.y + 1)))) {
-					if (koma.ownerPlayer == SENTE) return true;
-				}
-			} else if (getKomaAt(to).ownerPlayer == GOTE && to.y >= 1) {
-				if ((koma = getKomaAt(new Point(to.x, to.y - 1)))) {
-					if (koma.ownerPlayer == GOTE) return true;
-				}
-			}
-			return false;
-		}
-
-		public function calcMaterial(turn:int, joban:Boolean):String {
-			var piece_nums:Array = new Array(0, 0, 0, 0, 0, 0, 0, 0);
-			var sente_got:String = "";
-			var gote_got:String = "";
-			var sente_gain:int = 0;
-			var str:String = "";
-			for (var y:int = 0; y < 9; y++) {
-				for (var x:int = 0; x < 9; x++) {
-					if (_ban[x][y] && _ban[x][y].ownerPlayer == SENTE) piece_nums[_ban[x][y].type <= 7 ? _ban[x][y].type : (_ban[x][y].type - Koma.PROMOTE)] += 1;
-				}
-			}
-			for (var i:int = 0; i < 8; i++) {
-				piece_nums[i] += _komadai[SENTE].getNumOfKoma(i);
-			}
-			for (i = 1; i <= 6; i++) {
-				if (piece_nums[i] > koma_neutral_nums[i]) {
-					for (var n:int = 1; n <= piece_nums[i] - koma_neutral_nums[i]; n++) {
-						sente_got += koma_japanese_names[i];
-						sente_gain += koma_material_points[i];
-					}
-				} else if (piece_nums[i] < koma_neutral_nums[i]) {
-					for (n = 1; n <= koma_neutral_nums[i] - piece_nums[i]; n++) {
-						gote_got += koma_japanese_names[i];
-						sente_gain -= koma_material_points[i];
-					}
-				}
-			}
-			if (gote_got.length > 0 && sente_got.length == 0) {
-				if (joban && sente_gain >= -3 && piece_nums[7] >= koma_neutral_nums[7] + 3) sente_got += LanguageSelector.EJ("歩x", "歩") + (piece_nums[7] - koma_neutral_nums[7]) + LanguageSelector.EJ("", "枚");
-			} else if (gote_got.length == 0 && sente_got.length > 0) {
-				if (joban && sente_gain <= 3 && piece_nums[7] <= koma_neutral_nums[7] - 3) gote_got += LanguageSelector.EJ("歩x", "歩") + (koma_neutral_nums[7] - piece_nums[7]) + LanguageSelector.EJ("", "枚");
-			}
-			if (gote_got.length > 0 && sente_got.length == 0) {
-				return turn == SENTE ? LanguageSelector.EJ("Black is down by " + gote_got, "先手 " + gote_got + "損") : LanguageSelector.EJ("White is up by " + gote_got, "後手 " + gote_got + "得");
-			} else if (gote_got.length == 0 && sente_got.length > 0) {
-				return turn == SENTE ? LanguageSelector.EJ("Black is up by " + sente_got, "先手 " + sente_got + "得") : LanguageSelector.EJ("White is up by " + sente_got, "後手 " + sente_got + "損");
-			} else {
-				if (sente_got.length > 0 && gote_got.length > 0) {
-					str = LanguageSelector.EJ("Exchange of " + (turn == SENTE ? ("▲" + sente_got + " and △" + gote_got) : ("△" + gote_got + " and ▲" + sente_got)) + " / ", (turn == SENTE ? ("☗" + sente_got + "と☖" + gote_got) : ("☖" + gote_got + "と☗" + sente_got)) + "の交換　　");
-					var gain_threshold:int = (sente_got.length == gote_got.length && sente_got.length <= 2) ? 2 : 3;
-					if (sente_gain >= gain_threshold) return str + (turn == SENTE ? LanguageSelector.EJ("Black is up.","先手の駒得") : LanguageSelector.EJ("White is down.", "後手の駒損"));
-					else if (sente_gain <= -gain_threshold) return str + (turn == SENTE ? LanguageSelector.EJ("Black is down.","先手の駒損") : LanguageSelector.EJ("White is up.", "後手の駒得"));
-				}
-				if (sente_gain == 0 && sente_got.length == gote_got.length && sente_got.length <= 2) {
-					if (joban && piece_nums[7] > koma_neutral_nums[7]) str += turn == SENTE ? LanguageSelector.EJ("", "先手 ") + (piece_nums[7] - koma_neutral_nums[7]) + LanguageSelector.EJ("-pawn up for black.", "歩得") : LanguageSelector.EJ("", "後手 ") + (piece_nums[7] - koma_neutral_nums[7]) + LanguageSelector.EJ("-pawn down for white.", "歩損");
-					else if (joban && piece_nums[7] < koma_neutral_nums[7]) str += turn == SENTE ? LanguageSelector.EJ("", "先手 ") + (koma_neutral_nums[7] - piece_nums[7]) + LanguageSelector.EJ("-pawn down for black.", "歩損") : LanguageSelector.EJ("", "後手 ") + (koma_neutral_nums[7] - piece_nums[7]) + LanguageSelector.EJ("-pawn up for white.", "歩得");
-					else str += LanguageSelector.EJ("Equal.", "互角");
-				}
-				return str;
-			}
-		}
-
-		public static function komaJapaneseToCSA(v:String):String {
-			if (koma_japanese_names.indexOf(v) >= 0) return koma_names[koma_japanese_names.indexOf(v)];
-			else if (v == "王") return "OU";
-			else if (v == "竜") return "RY";
-			else return "";
 		}
 
 		public static function numJapaneseToInt(v:String):int {

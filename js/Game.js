@@ -136,6 +136,10 @@ class Game{
     return this.gameId.match(/^STUDY/)
   }
 
+  canCalculateMaterialBalance(){
+    return this.gameType == "r" || this.gameType == "nr" || this.gameType == "hcfixed"
+  }
+
   isMyRoom(){
     return this._ownerName == me.name
   }
