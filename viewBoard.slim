@@ -100,11 +100,13 @@ div.layer#layerBoard
           div#kifuBox.vbox
             div style="text-align:left"
               p
-                input type="radio" name="kifuModeRadio" value="0" onchange="_kifuModeRadioChange()"
-                span.local-kifu data-i18n="board.replay"
+                label
+                  input type="radio" name="kifuModeRadio" value="0" onchange="_kifuModeRadioChange()"
+                  span.local-kifu data-i18n="board.replay"
               p
-                input type="radio" name="kifuModeRadio" value="1" onchange="_kifuModeRadioChange()"
-                span data-i18n="board.listen"
+                label
+                  input type="radio" name="kifuModeRadio" value="1" onchange="_kifuModeRadioChange()"
+                  span data-i18n="board.listen"
               div#replayButtons
                 button id="replayButtonFirst" data-i18n-title="board.replay_first" type="button" onclick="_replayButtonClick(-2)"
                   i.fa.fa-step-backward

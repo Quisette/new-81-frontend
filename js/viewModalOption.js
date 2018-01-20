@@ -38,13 +38,15 @@ function _DisableOptionsByPremium(){
   $('input[name=timer_sound_type]:gt(0), input[name=piece_type]:lt(9):gt(3)').prop({'disabled': getPremium() == 0, 'title': getPremium() == 0 ? i18next.t("option.for_premium") : ''})
 }
 function _loadPieceDesignToDialog(key, val, checked = false){
-  let elm = $('<p></p>').css('margin-bottom', '5px')
+  let p = $('<p></p>').css('margin-bottom', '5px')
+  let elm = $('<label></label>')
   $('<input/>').attr({type: "radio", name: "piece_type", value: val}).prop('checked', checked).appendTo(elm)
   $('<span></span>').attr("data-i18n", "option.piece_design." + key).css('margin-right', '10px').appendTo(elm)
   $('<img/>', {class: "piece-preview", src: "img/themes/" + key + "/Sou.png"}).appendTo(elm)
   $('<img/>', {class: "piece-preview", src: "img/themes/" + key + "/Suma.png"}).appendTo(elm)
   $('<img/>', {class: "piece-preview", src: "img/themes/" + key + "/Gfu.png"}).appendTo(elm)
-  $("#pieceDesignSelector").append(elm)
+  p.append(elm)
+  $("#pieceDesignSelector").append(p)
 }
 
 _loadPieceDesignToDialog("ichiji", 0, true)

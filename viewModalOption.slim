@@ -11,12 +11,15 @@ div#modalOption data-i18n-title="lobby.options"
     div#tabs-1
       p data-i18n-title="option.board_size_tip"
         span data-i18n="option.board_size"
-        input type="radio" name="board_size" value="0" checked="true"
-        span data-i18n="option.board_standard"
-        input type="radio" name="board_size" value="1"
-        span data-i18n="option.board_large"
-        input type="radio" name="board_size" value="2"
-        span data-i18n="option.board_huge"
+        label
+          input type="radio" name="board_size" value="0" checked="true"
+          span data-i18n="option.board_standard"
+        label
+          input type="radio" name="board_size" value="1"
+          span data-i18n="option.board_large"
+        label
+          input type="radio" name="board_size" value="2"
+          span data-i18n="option.board_huge"
       div#pieceDesignSelector
       p
         input type="checkbox" id="hold_piece" disabled="true"
@@ -69,12 +72,15 @@ div#modalOption data-i18n-title="lobby.options"
           option value="3" data-i18n="option.english_level_2"
       h3 data-i18n="option.notation"
       p
-        input type="radio" name="notation_style" value="1"
-        span data-i18n="option.notation_jp"
-        input type="radio" name="notation_style" value="4"
-        span data-i18n="option.notation_west"
-        input type="radio" name="notation_style" value="0"
-        span data-i18n="option.notation_chess"
+        label
+          input type="radio" name="notation_style" value="1"
+          span data-i18n="option.notation_jp"
+        label
+          input type="radio" name="notation_style" value="4"
+          span data-i18n="option.notation_west"
+        label
+          input type="radio" name="notation_style" value="0"
+          span data-i18n="option.notation_chess"
       h3 data-i18n="option.arrow"
       p
         input type="checkbox" id="accept_arrow" checked="true"
