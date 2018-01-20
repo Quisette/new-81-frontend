@@ -33,20 +33,26 @@ class BoardArrow{
     fromY = fromY / scale
     toX = toX / scale
     toY = toY / scale
-		let theta = Math.atan2(fromY - toY, fromX - toX)
-		fromX -= BoardArrow.CONST.OFFSET * Math.cos(theta)
-    fromY -= BoardArrow.CONST.OFFSET * Math.sin(theta)
-		toX += BoardArrow.CONST.OFFSET * Math.cos(theta)
-    toY += BoardArrow.CONST.OFFSET * Math.sin(theta)
     let ctx = this._parentCanvas.get(0).getContext('2d');
     ctx.beginPath()
-    ctx.moveTo(fromX, fromY)
-		ctx.lineTo(toX + BoardArrow.CONST.HEAD_LENGTH / 2 * Math.cos(theta + BoardArrow.CONST.HEAD_ANGLE * 0.4), toY + BoardArrow.CONST.HEAD_LENGTH / 2 * Math.sin(theta + BoardArrow.CONST.HEAD_ANGLE * 0.4))
-		ctx.lineTo(toX + BoardArrow.CONST.HEAD_LENGTH * Math.cos(theta + BoardArrow.CONST.HEAD_ANGLE), toY + BoardArrow.CONST.HEAD_LENGTH * Math.sin(theta + BoardArrow.CONST.HEAD_ANGLE))
-		ctx.lineTo(toX, toY)
-		ctx.lineTo(toX + BoardArrow.CONST.HEAD_LENGTH * Math.cos(theta - BoardArrow.CONST.HEAD_ANGLE), toY + BoardArrow.CONST.HEAD_LENGTH * Math.sin(theta - BoardArrow.CONST.HEAD_ANGLE))
-		ctx.lineTo(toX + BoardArrow.CONST.HEAD_LENGTH / 2 * Math.cos(theta - BoardArrow.CONST.HEAD_ANGLE * 0.4), toY + BoardArrow.CONST.HEAD_LENGTH / 2 * Math.sin(theta - BoardArrow.CONST.HEAD_ANGLE * 0.4))
-		ctx.lineTo(fromX, fromY)
+    if (fromX == toX && fromY == toY) {
+      ctx.lineWidth = 2
+      ctx.arc(fromX, fromY, 18, 0, Math.PI*2, false)
+    } else {
+      ctx.lineWidth = 1
+  		let theta = Math.atan2(fromY - toY, fromX - toX)
+      fromX -= BoardArrow.CONST.OFFSET * Math.cos(theta)
+      fromY -= BoardArrow.CONST.OFFSET * Math.sin(theta)
+      toX += BoardArrow.CONST.OFFSET * Math.cos(theta)
+      toY += BoardArrow.CONST.OFFSET * Math.sin(theta)
+      ctx.moveTo(fromX, fromY)
+      ctx.lineTo(toX + BoardArrow.CONST.HEAD_LENGTH / 2 * Math.cos(theta + BoardArrow.CONST.HEAD_ANGLE * 0.4), toY + BoardArrow.CONST.HEAD_LENGTH / 2 * Math.sin(theta + BoardArrow.CONST.HEAD_ANGLE * 0.4))
+      ctx.lineTo(toX + BoardArrow.CONST.HEAD_LENGTH * Math.cos(theta + BoardArrow.CONST.HEAD_ANGLE), toY + BoardArrow.CONST.HEAD_LENGTH * Math.sin(theta + BoardArrow.CONST.HEAD_ANGLE))
+      ctx.lineTo(toX, toY)
+      ctx.lineTo(toX + BoardArrow.CONST.HEAD_LENGTH * Math.cos(theta - BoardArrow.CONST.HEAD_ANGLE), toY + BoardArrow.CONST.HEAD_LENGTH * Math.sin(theta - BoardArrow.CONST.HEAD_ANGLE))
+      ctx.lineTo(toX + BoardArrow.CONST.HEAD_LENGTH / 2 * Math.cos(theta - BoardArrow.CONST.HEAD_ANGLE * 0.4), toY + BoardArrow.CONST.HEAD_LENGTH / 2 * Math.sin(theta - BoardArrow.CONST.HEAD_ANGLE * 0.4))
+      ctx.lineTo(fromX, fromY)
+    }
     ctx.strokeStyle = intToColorStyle(this._color)
     ctx.stroke()
   }

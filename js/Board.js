@@ -133,14 +133,15 @@ class Board{
       }
     }
     let thisInstance = this
-    $('.square').on("click", function(){
+    $('.square').on("click", function(e){
+      if (e.ctrlKey) return
       thisInstance._handleSquareClick($(this))
     })
     $('.square').on("mousedown", function(){
       thisInstance._handleSquareMouseDown($(this))
     })
-    $('.square').on("mouseup", function(){
-      thisInstance._handleSquareMouseUp($(this))
+    $('.square').on("mouseup", function(e){
+      thisInstance._handleSquareMouseUp($(this), e.ctrlKey && getPremium() >= 1)
     })
   }
 
@@ -346,9 +347,9 @@ class Board{
     this._mouseDownSquare = sq
   }
 
-  _handleSquareMouseUp(sq){
+  _handleSquareMouseUp(sq, circleEnabled){
     if (this._mouseDownSquare == null) return
-    if (!this._mouseDownSquare.is(sq)) {
+    if (circleEnabled && this._mouseDownSquare.is(sq) || !this._mouseDownSquare.is(sq)) {
       if (this.onListen){
         if (!board.isPlaying()) {
           if (_studyBase != null || !this.isPostGame) this._addMyArrow(sq, true)
