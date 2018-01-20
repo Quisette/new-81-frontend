@@ -39,6 +39,7 @@ class Board{
 
   _generateParts(){
     this._ban = $('<div></div>', {id: 'banField'}).appendTo(this._div)
+    this._coord = $('<div></div>', {id: 'coord'}).appendTo(this._div)
     this._komadais[0] = $('<div></div>', {id: 'senteKomadai', class: 'komadai'}).appendTo(this._div)
     this._komadais[1] = $('<div></div>', {id: 'goteKomadai', class: 'komadai'}).appendTo(this._div)
     this.playerInfos[0] = $('<div></div>', {id: 'senteInfo', class: 'player-info'}).appendTo(this._div)
@@ -89,12 +90,14 @@ class Board{
 
   _partSize(){
     this._ban.css({width: this._banW + 'px', height: this._banH + 'px'})
+    this._coord.css({width: this._banW + 'px', height: this._banH + 'px'})
     $(this._komadais.map(e => e[0])).css({width: this._komadaiW + 'px', height: this._komadaiH + 'px'})
   }
 
   _imagePath(){
     let dir = ['dobutsu', 'blind_extreme'].includes(this._theme) ? this._theme : 'default'
     this._ban.css('background-image', 'url(img/themes/' + dir + '/ban.jpg)')
+    this._coord.css('background-image', 'url(img/themes/' + dir + (this._direction ? '/Scoord_e.png)' : '/Gcoord_e.png)'))
     this._komadais[0].css('background-image', 'url(img/themes/' + dir + '/Shand.jpg)')
     this._komadais[1].css('background-image', 'url(img/themes/' + dir + '/Ghand.jpg)')
   }
@@ -103,6 +106,7 @@ class Board{
     let myTurnIndex = this._direction ? 0 : 1
     let hisTurnIndex = this._direction ? 1 : 0
     this._ban.css({left: this._banX + 'px', top: this._banY + 'px'})
+    this._coord.css({left: this._banX + 'px', top: this._banY + 'px'})
     this._komadais[myTurnIndex].css({left: this._myKomadaiX + 'px', top: this._myKomadaiY + 'px'})
     this._komadais[hisTurnIndex].css({left: this._hisKomadaiX + 'px', top: this._hisKomadaiY + 'px'})
     this.playerInfos[myTurnIndex].css({left: this._myInfoX + 'px', top: this._myInfoY + 'px'})
@@ -226,6 +230,7 @@ class Board{
   setDirection(direction){
     this._direction = direction
     this._partLayout()
+    this._imagePath()
   }
 
   displayPlayerInfos(){
@@ -526,9 +531,11 @@ class Board{
     if (this.isPlaying()) {
       this._canMoveMyPiece = true
       this._canMoveHisPiece = false
+      this._coord.css('opacity', 0)
     } else {
       this._canMoveMyPiece = !this.onListen || this.studyHostType >= 1
       this._canMoveHisPiece = !this.onListen || this.studyHostType >= 1
+      this._coord.css('opacity', 1)
     }
   }
 
