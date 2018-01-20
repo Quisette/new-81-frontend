@@ -74,6 +74,10 @@ class Piece{
 //  		 kyoto_conversion:Array = new Array(0, 7, 4, 5, 2, 3, 15, 1, 8, 9, 10, 11, 12, 13, 14, 6);
 //  }
 
+  mustPromote(rowsAhead){
+    // integer (how many rows are ahead of the piece until the end of the opponent side)
+    return false
+  }
 }
 
 class PieceOU extends Piece{
@@ -207,6 +211,9 @@ class PieceKE extends Piece{
   soundVolume(){
     return 0.5
   }
+  mustPromote(rowsAhead){
+    return !this._promoted && rowsAhead < 2
+  }
 }
 
 class PieceKY extends Piece{
@@ -229,6 +236,9 @@ class PieceKY extends Piece{
   soundVolume(){
     return 0.5
   }
+  mustPromote(rowsAhead){
+    return !this._promoted && rowsAhead < 1
+  }
 }
 
 class PieceFU extends Piece{
@@ -250,5 +260,8 @@ class PieceFU extends Piece{
   }
   soundVolume(){
     return this._promoted ? 0.4 : 0.35
+  }
+  mustPromote(rowsAhead){
+    return !this._promoted && rowsAhead < 1
   }
 }

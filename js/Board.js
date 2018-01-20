@@ -406,7 +406,9 @@ class Board{
       }
     } else {
       if (sq.hasClass("square-movable")) {
-        if (this._position.canPromote(this._selectedSquare, sq)) this._openPromotionDialog(sq)
+        let res = this._position.canPromote(this._selectedSquare, sq)
+        if (res == 2) this._manualMoveCommandComplete(sq, true)
+        else if (res == 1) this._openPromotionDialog(sq)
         else this._manualMoveCommandComplete(sq, false)
       } else {
         this._cancelSelect()

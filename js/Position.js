@@ -245,13 +245,18 @@ class Position{
   }
 
   canPromote(sqFrom, sqTo){
-    if (sqFrom.data('x') <= 0) return false
+    // returns 0: Not promotable, 1: Can promote, 2: Must promote
+    if (sqFrom.data('x') <= 0) return 0
     let koma = this.getPieceFromSquare(sqFrom)
-    if (!koma || !koma.isPromotable() || koma.isPromoted()) return false
+    if (!koma || !koma.isPromotable() || koma.isPromoted()) return 0
     if (koma.owner) {
-      return sqFrom.data('y') <= this._promoteY0 || sqTo.data('y') <= this._promoteY0
+      if (sqFrom.data('y') <= this._promoteY0 || sqTo.data('y') <= this._promoteY0) {
+        return koma.mustPromote(sqTo.data('y') - this.ymin) ? 2 : 1
+      } else return 0
     } else {
-      return sqFrom.data('y') >= this._promoteY1 || sqTo.data('y') >= this._promoteY1
+      if (sqFrom.data('y') >= this._promoteY1 || sqTo.data('y') >= this._promoteY1) {
+        return koma.mustPromote(this.ymax - sqTo.data('y')) ? 2 : 1
+      } else return 0
     }
   }
 
