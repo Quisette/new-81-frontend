@@ -35,6 +35,7 @@ class Movement{
   		LIST_UNIVERSAL: 0, // Chess-style
   		LIST_JAPANESE: 1, // Default in WebSystem options database
   		LIST_1TO1: 4, // Default for English app
+      PIECE_NAMES_CSA: ['OU', 'HI', 'KA', 'KI', 'GI', 'KE', 'KY', 'FU', 'OU', 'RY', 'UM', '', 'NG', 'NK', 'NY', 'TO'],
   		koma_japanese_names: ['玉', '飛', '角', '金', '銀', '桂', '香', '歩', '玉', '龍', '馬', '', '成銀', '成桂', '成香', 'と'],
   		rank_japanese_names: ['', '一','二','三','四','五','六','七','八','九'],
   		file_japanese_names: ['', '１', '２', '３', '４', '５', '６', '７', '８', '９'],
@@ -65,10 +66,6 @@ class Movement{
     }
   }
 
-  static get PIECE_NAMES_CSA(){
-    return ['OU', 'HI', 'KA', 'KI', 'GI', 'KE', 'KY', 'FU', 'OU', 'RY', 'UM', '', 'NG', 'NK', 'NY', 'TO']
-  }
-
   setFromManualMove(owner, sq1, sq2, promote = false){
     this.owner = owner
     this.fromX = sq1.data('x') > 0 ? sq1.data('x') : 0
@@ -89,7 +86,7 @@ class Movement{
       this.toX = parseInt(csa.substr(3, 1))
       this.toY = parseInt(csa.substr(4, 1))
       // Set pieceType temporarily even if the piece is already promoted (pieceType >= 8)
-      this.pieceType = Movement.PIECE_NAMES_CSA.indexOf(csa.substr(5,2))
+      this.pieceType = Movement.CONST.PIECE_NAMES_CSA.indexOf(csa.substr(5,2))
       // Set promoted to true temporarily even if the piece is already promoted
       if (this.pieceType >= 8) this.promote = true
     }
@@ -102,7 +99,7 @@ class Movement{
   toCSA(){
     let str = this.owner ? "+" : "-"
     str += this.fromX.toString() + this.fromY.toString() + this.toX.toString() + this.toY.toString()
-    str += Movement.PIECE_NAMES_CSA[this.pieceType + (this.promote && this.pieceType < 8 ? 8 : 0)]
+    str += Movement.CONST.PIECE_NAMES_CSA[this.pieceType + (this.promote && this.pieceType < 8 ? 8 : 0)]
     return str
   }
 

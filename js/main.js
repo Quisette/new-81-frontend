@@ -775,6 +775,25 @@ function _shareKifuButtonClick(mode){
   else writeUserMessage(EJ('This board does not have a kifu URL.', 'この盤面には棋譜URLの設定がありません'), 2, "#FF0000")
 }
 
+function _uploadKifuButtonClick(){
+  if (board.game.isStudy() && board.isHost()){
+    let fileInput = document.createElement("input")
+    fileInput.type = 'file'
+    fileInput.addEventListener('change', function(e){
+      let file = e.target.files[0]
+      let reader = new FileReader()
+      reader.onload = function(evt){
+        let csa_lines = []
+        if (file.name.match(/\.bod$/)) csa_lines = CSALinesFromBOD(evt.target.result)
+        else if (file.name.match(/\.kif$/)) csa_lines = CSALinesFromKIF(evt.target.result)
+        if (csa_lines.length > 0) client.resetStudyPosition(csa_lines.join("/"))
+      }
+      reader.readAsText(file)
+    }, false)
+    fileInput.click()
+  }
+}
+
 function _optionButtonClick(){
   $('#modalOption').dialog('open')
 }
@@ -978,6 +997,8 @@ function setBoardConditions(){
     $("#giveHostButton").addClass("button-disabled")
     $(".give-subhost-button").css('display', 'none')
   }
+  if (board.game.isStudy() && board.isHost()) $("#uploadKifuButton").removeClass("submenu-button-disabled")
+  else $("#uploadKifuButton").addClass("submenu-button-disabled")
   if (board.isPostGame) $("#shareKifuTwitterButton, #shareKifuFacebookButton").removeClass("submenu-button-disabled")
   else $("#shareKifuTwitterButton, #shareKifuFacebookButton").addClass("submenu-button-disabled")
   _allowWatcherChat = $("#receiveWatcherChatCheckBox").is(":checked")

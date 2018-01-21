@@ -1,19 +1,24 @@
 div#modalNewGame data-i18n-title="new_game.title"
   p
-    input type="radio" name="newGameType" value="1"
-    |15<span data-i18n="min"></span> - 60<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.21)
+    label
+      input type="radio" name="newGameType" value="1"
+      |15<span data-i18n="min"></span> - 60<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.21)
   p
-    input type="radio" name="newGameType" value="2" checked="true"
-    |10<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.11)
+    label
+      input type="radio" name="newGameType" value="2" checked="true"
+      |10<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.11)
   p
-    input type="radio" name="newGameType" value="3"
-    |&ensp;5<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.00)
+    label
+      input type="radio" name="newGameType" value="3"
+      |&ensp;5<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.00)
   p
-    input type="radio" name="newGameType" value="4"
-    |&ensp;0<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x0.85)
+    label
+      input type="radio" name="newGameType" value="4"
+      |&ensp;0<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x0.85)
   p
-    input type="radio" name="newGameType" value="5"
-    span data-i18n="new_game.nonrated"
+    label
+      input type="radio" name="newGameType" value="5"
+      span data-i18n="new_game.nonrated"
   p style="margin-left:25px"
     select#newGameRuleSelect disabled="true"
   p style="margin-left:25px"
@@ -34,13 +39,15 @@ div#modalNewGame data-i18n-title="new_game.title"
       option 60
     span data-i18n="sec"
   p
-    input type="radio" name="newGameType" value="6"
-    span data-i18n="new_game.tournament"
+    label
+      input type="radio" name="newGameType" value="6"
+      span data-i18n="new_game.tournament"
   p style="margin-left:25px"
     select#newGameTournamentSelect style="max-width: 250px" disabled="true"
   p
-    input type="radio" name="newGameType" value="7"
-    span data-i18n="new_game.study_room"
+    label
+      input type="radio" name="newGameType" value="7"
+      span data-i18n="new_game.study_room"
   p style="margin-left:25px"
     select#newGameStudyRuleSelect disabled="true"
   p style="margin-left:25px"
@@ -49,8 +56,9 @@ div#modalNewGame data-i18n-title="new_game.title"
     |&nbsp;☖
     input type="text" size="7" id="newGameStudyWhite" value="White" disabled="true"  
   p
-    input type="radio" name="newGameType" value="8"
-    span data-i18n="new_game.stop"
+    label
+      input type="radio" name="newGameType" value="8"
+      span data-i18n="new_game.stop"
 
 javascript:
   _jsInclude("js/viewModalNewGame.js")

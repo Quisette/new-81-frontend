@@ -401,3 +401,128 @@ function formatDateToText(date){
   str += (date.getSeconds() + 100).toString().slice(1)
   return str
 }
+
+function CSALinesFromBOD(text){
+  let csa_lines = []
+  text.split("\n").forEach(function(line){
+    line = line.trim()
+    let csa = ""
+  	if (line.match(/^(.)手の持駒：(.*)$/)) {
+      let pieces = RegExp.$2
+  		csa = (RegExp.$1 == "後" || RegExp.$1 == "上") ? "P-" : "P+"
+  		if (!pieces.match(/なし/)) {
+  			pieces.split("　").forEach(function(str){
+  				if (str.length == 1) csa += "00" + pieceNameToCSA(str)
+  				else {
+  					for (let i = 0; i < numJapaneseToInt(str.slice(1)); i++) csa += "00" + pieceNameToCSA(str.substr(0,1))
+  				}
+  			})
+  		}
+  	} else if (line.match(/^\|(.+)\|(.)$/)) {
+  		csa = "P" + numJapaneseToInt(RegExp.$2)
+  		for (let i = 0; i < 9; i++) {
+  			if (RegExp.$1.substr(2 * i + 1, 1) == "・") csa += "_*_"
+  			else csa += (RegExp.$1.substr(2 * i, 1) == "v" ? "-" : "+") + pieceNameToCSA(RegExp.$1.substr(2 * i + 1, 1))
+  		}
+  	} else return
+  	csa_lines.push(csa)
+  })
+  csa_lines.push("+")
+  return csa_lines
+}
+
+function CSALinesFromKIF(text){
+  let csa_lines = []
+  let hirate = false
+  let prev = ""
+  let lines = text.split("\n")
+  for (let i = 0; i < lines.length; i++){
+    let line = lines[i].trim()
+  	if (line.match(/^手合割：平手/)) {
+  		hirate = true
+  		continue
+  	} else if (line.match(/^\s*\d+\s+投了\s/)) {
+  		csa_lines.push("%TORYO")
+  		break
+  	} else if (line.match(/^\s*\d+\s+切れ負け\s/)) {
+  		csa_lines.push("%%%TIMEOUT")
+  		break
+  	} else if (line.match(/^変化：\d+手$/)) break
+
+  	if (line.match( /^\s*(\d+)\s+(同|[１２３４５６７８９][一二三四五六七八九])[\s　]*(成?)([歩と香桂銀金角馬飛龍竜玉王])(不?成?)(\(\d+\)|打)/)) {
+    	let csa = ""
+    	if (parseInt(RegExp.$1) % 2 == (hirate ? 0 : 1)) {
+    		csa += "-"
+    	} else {
+    		csa += "+"
+    	}
+    	if (RegExp.$6 == "打") {
+    		csa += "00"
+    	} else {
+    		csa += RegExp.$6.substr(1, 2)
+    	}
+    	if (RegExp.$2 == "同") {
+    		csa += prev
+    	} else {
+    		prev = numJapaneseToInt(RegExp.$2.substr(0, 1)).toString()
+    		prev += numJapaneseToInt(RegExp.$2.substr(1, 1)).toString()
+    		csa += prev
+    	}
+    	if (RegExp.$3 == "成" || RegExp.$5 == "成") {
+        csa += pieceNameToCSA(RegExp.$4, true) // returns CSA piece name after promoting the piece
+    	} else {
+    		csa += pieceNameToCSA(RegExp.$4)
+    	}
+    	csa_lines.push(csa)
+    }
+  }
+  return csa_lines
+}
+
+function pieceNameToCSA(str, forcePromotion = false) {
+  if (str == "王") str = "玉"
+  else if (str == "竜") str = "龍"
+  else if (str == "全") str = "成銀"
+  else if (str == "圭") str = "成桂"
+  else if (str == "杏") str = "成香"
+	if (Movement.CONST.koma_japanese_names.indexOf(str) >= 0) return Movement.CONST.PIECE_NAMES_CSA[Movement.CONST.koma_japanese_names.indexOf(str) + (forcePromotion ? 8 : 0)]
+	else return ""
+}
+
+function numJapaneseToInt(str) {
+	let i = 0
+	str.split("").forEach(function(jp){
+		switch (jp) {
+			case "１":
+			case "一":
+				i += 1; break;
+			case "２":
+			case "二":
+				i += 2; break;
+			case "３":
+			case "三":
+				i += 3; break;
+			case "４":
+			case "四":
+				i += 4; break;
+			case "５":
+			case "五":
+				i += 5; break;
+			case "６":
+			case "六":
+				i += 6; break;
+			case "７":
+			case "七":
+				i += 7; break;
+			case "８":
+			case "八":
+				i += 8; break;
+			case "９":
+			case "九":
+				i += 9; break;
+			case "十":
+				i += 10; break;
+		}
+	})
+	return i;
+}

@@ -218,6 +218,10 @@ class WebSocketClient {
     this.send("%%%STUDY " + rule + " " + black + " " + white + " * " + password)
   }
 
+	resetStudyPosition(str) {
+		this.send("%%%POSITION " + str)
+	}
+
   challenge(user){
     this.send("%%CHALLENGE " + user.name)
   }
