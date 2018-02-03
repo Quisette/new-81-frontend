@@ -36,6 +36,7 @@ class Board{
     this._generateParts()
     this._setTheme()
     this._scale = 1
+    this._promotionDialog = null
   }
 
   _generateParts(){
@@ -403,7 +404,7 @@ class Board{
           let x = sq.data().x
           let y = sq.data().y
           if (x <= 0) {
-            x = 100 + koma.pieceType
+            x = 100 + koma.type
             y = 0
           }
           sendGrab(x, y)
@@ -436,7 +437,10 @@ class Board{
       thisInstance._positionPickedPiece(e.pageX, e.pageY)
   	})
     $(this._div).mouseleave(function(e){
-      thisInstance._cancelSelect()
+      if (e.pageX <= thisInstance._div.offset().left ||
+          e.pageX >= thisInstance._div.offset().left + thisInstance.actualWidth() ||
+          e.pageY <= thisInstance._div.offset().top ||
+          e.pageY >= thisInstance._div.offset().top + thisInstance.actualHeight()) thisInstance._cancelSelect()
     })
   }
 
@@ -449,7 +453,8 @@ class Board{
 
   _openPromotionDialog(sq){
     //square
-    let element = $("<div></div>",{
+    let thisInstance = this
+    this._promotionDialog = $("<div></div>",{
       title: 'Promote?',
       html: '<div id="promotion-window">\
         <button type=button id="promote-yes" class="promotion-button"><img class="promotion-image" id="promote-yes-image"></button>\
@@ -463,22 +468,22 @@ class Board{
       minHeight: 0,
       position: {at:'left+'+mouseX+' top+'+mouseY},
       close: function(e){
-        element.dialog('destroy').remove()
+        thisInstance._promotionDialog.dialog('destroy').remove()
+        thisInstance._promotionDialog = null
       }
     })
     let koma = this._position.getPieceFromSquare(this._selectedSquare)
-    element.find('#promote-yes-image').attr('src', 'img/themes/' + this._theme + '/' + koma.toImagePath(!this._direction, true))
-    element.find('#promote-no-image').attr('src', 'img/themes/' + this._theme + '/' + koma.toImagePath(!this._direction))
-    let thisInstance = this
+    this._promotionDialog.find('#promote-yes-image').attr('src', 'img/themes/' + this._theme + '/' + koma.toImagePath(!this._direction, true))
+    this._promotionDialog.find('#promote-no-image').attr('src', 'img/themes/' + this._theme + '/' + koma.toImagePath(!this._direction))
     $('#promote-yes').click(function(){
       thisInstance._manualMoveCommandComplete(sq, true)
-      element.dialog('close')
+      thisInstance._promotionDialog.dialog('close')
     })
     $('#promote-no').click(function(){
       thisInstance._manualMoveCommandComplete(sq, false)
-      element.dialog('close')
+      thisInstance._promotionDialog.dialog('close')
     })
-    element.dialog('open')
+    this._promotionDialog.dialog('open')
   }
 
   _manualMoveCommandComplete(destinationSquare, promote){
@@ -570,6 +575,7 @@ class Board{
   }
 
   _cancelSelect(){
+    if (this._promotionDialog) this._promotionDialog.dialog('close')
     if (this._selectedSquare != null){
     	$(this._div).unbind("mousemove mouseleave")
       $(".square").removeClass("square-movable square-movable-highlight")
