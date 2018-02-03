@@ -22,6 +22,7 @@ class Board{
     this._selectedSquare = null
     this._lastSquare = null
     this._mouseDownSquare = null
+    this._pickedPiece = null
     this._canMoveMyPiece = true
     this._canMoveHisPiece = true
     this.onListen = true
@@ -53,6 +54,7 @@ class Board{
     }
     $('[id=player-info-name]').dblclick(function(){_playerNameDblClick($(this).text())})
     this._arrowCanvas = $('<canvas></canvas>', {id: 'boardCanvas'}).attr({width: this._originalWidth, height: this._originalHeight}).appendTo(this._div)
+    this._pickedPiece = $('<div></div>', {class: 'picked-piece'})
   }
 
   _setTheme(){
@@ -92,6 +94,7 @@ class Board{
     this._ban.css({width: this._banW + 'px', height: this._banH + 'px'})
     this._coord.css({width: this._banW + 'px', height: this._banH + 'px'})
     $(this._komadais.map(e => e[0])).css({width: this._komadaiW + 'px', height: this._komadaiH + 'px'})
+    this._pickedPiece.css({width: this._komaW + 'px', height: this._komaH + 'px'})
   }
 
   _imagePath(){
@@ -395,6 +398,7 @@ class Board{
       if (this._canMovePieceNow() && koma && koma.owner == this._position.turn) {
         this._selectedSquare = sq
         sq.addClass("square-selected")
+        if (options.hold_piece) this._pickUpPiece(sq)
         if (this.isPlaying()) { //Send ##GRAB message
           let x = sq.data().x
           let y = sq.data().y
@@ -411,6 +415,7 @@ class Board{
       }
     } else {
       if (sq.hasClass("square-movable")) {
+      	$(this._div).unbind("mouseleave")
         let res = this._position.canPromote(this._selectedSquare, sq)
         if (res == 2) this._manualMoveCommandComplete(sq, true)
         else if (res == 1) this._openPromotionDialog(sq)
@@ -419,6 +424,27 @@ class Board{
         this._cancelSelect()
       }
     }
+  }
+
+  _pickUpPiece(sq){
+    this._pickedPiece.css('background-image', sq.css('background-image'))
+    this._positionPickedPiece(mouseX, mouseY)
+    this._pickedPiece.appendTo(this._div)
+    sq.addClass("square-picked-up")
+    let thisInstance = this
+  	$(this._div).mousemove(function(e){
+      thisInstance._positionPickedPiece(e.pageX, e.pageY)
+  	})
+    $(this._div).mouseleave(function(e){
+      thisInstance._cancelSelect()
+    })
+  }
+
+  _positionPickedPiece(mouse_X, mouse_Y){
+    this._pickedPiece.css({
+			top: (mouse_Y - this._div.offset().top) / this._scale - this._komaW/2 - 4 + 'px',
+			left: (mouse_X - this._div.offset().left) / this._scale - this._komaH/2 + 2 + 'px'
+		})
   }
 
   _openPromotionDialog(sq){
@@ -545,9 +571,10 @@ class Board{
 
   _cancelSelect(){
     if (this._selectedSquare != null){
-      $(".square").removeClass("square-movable")
-      $(".square").removeClass("square-movable-highlight")
-      this._selectedSquare.removeClass("square-selected")
+    	$(this._div).unbind("mousemove mouseleave")
+      $(".square").removeClass("square-movable square-movable-highlight")
+      this._pickedPiece.remove()
+      this._selectedSquare.removeClass("square-selected square-picked-up")
       this._selectedSquare = null
     }
     if (this.isPlaying()) sendGrab(0,0)
