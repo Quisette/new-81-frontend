@@ -198,7 +198,7 @@ class WebSocketClient {
 
   wait(rule, total, byoyomi, side=0, tournament="", comment="", password="") {
     //string, int, int
-    //if (password != "") password = "." + generateMD5Hex(Config.PRIVATE_ROOM_SALT + password).substr(0,6);
+    if (password != "") password = "." + CybozuLabs.MD5.calc(config.privateRoomSalt + password).substr(0,6)
   	let wait_gamename = rule + "_" + this.username + password + tournament + "-" + total.toString() + "-" + byoyomi.toString() + (comment == "" ? "" : ("," + comment))
     let side_code = "*"
     if (side > 0) {
@@ -213,8 +213,10 @@ class WebSocketClient {
     this.send("%%GAME " + wait_gamename + ' ' + side_code)
   }
 
-  study(rule, black, white, password = "*"){
+  study(rule, black, white, password = ""){
     //string, string, string, string
+    if (password != "") password = CybozuLabs.MD5.calc(config.privateRoomSalt + password).substr(0,6)
+    else password = "*"
     this.send("%%%STUDY " + rule + " " + black + " " + white + " * " + password)
   }
 

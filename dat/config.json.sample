@@ -1,5 +1,6 @@
 {
   "clientPass": "client login password",
   "mileagePass": "mile command password",
+  "privateRoomSalt": "salt for private room password",
   "allowConsole": "true/false"
 }

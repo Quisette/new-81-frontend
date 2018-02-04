@@ -19,6 +19,7 @@ class Game{
 		this.isWhiteIn = true
     this.opening = "*"
     this.password = ""
+    this._enteredPassword = ""
     this.status = ""
 		if (game_info[2].match(/\.([0-9a-z]{6})/)) this.password = RegExp.$1
     this.shortId = (this.isStudy() ? "SG" : (black.name.substr(0,1) + white.name.substr(0,1))) + id.substr(id.length - 7, 7)
@@ -162,6 +163,23 @@ class Game{
       return true
     }
     return false
+  }
+
+  enterPass(pass){
+    this._enteredPassword = pass
+  }
+
+  lockedOut(){
+    if (this.isStudy()) {
+      if (this.isMyRoom()) return false
+    } else {
+      if (this.black.name == me.name || this.white.name == me.name) return false
+    }
+    if (this.password == "") {
+      return false
+    } else {
+      return this.password != CybozuLabs.MD5.calc(config.privateRoomSalt + this._enteredPassword).substr(0,6)
+    }
   }
 
 }

@@ -477,11 +477,9 @@ class Board{
     this._promotionDialog.find('#promote-no-image').attr('src', 'img/themes/' + this._theme + '/' + koma.toImagePath(!this._direction))
     $('#promote-yes').click(function(){
       thisInstance._manualMoveCommandComplete(sq, true)
-      thisInstance._promotionDialog.dialog('close')
     })
     $('#promote-no').click(function(){
       thisInstance._manualMoveCommandComplete(sq, false)
-      thisInstance._promotionDialog.dialog('close')
     })
     this._promotionDialog.dialog('open')
   }

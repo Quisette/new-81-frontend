@@ -555,15 +555,20 @@ function _playerSelected(grid, index){
 }
 
 function _enterGame(game){
+  if (game.lockedOut()) {
+    let ret = prompt(i18next.t("lobby.require_pass"))
+    if (ret != null && ret != "") {
+      game.enterPass(ret)
+      _enterGame(game)
+    }
+    return
+  }
   if (board.game) {
     if (board.myRoleType == null) board.close()
     else return
   }
   if (game.isVariant()) {
     writeUserMessage(EJ("This game rule is not supported by HTML client yet.", "この対局ルールはHTML版アプリでは未対応です。"), 1, "#ff0000")
-    return
-  } else if (game.password != "") {
-    writeUserMessage(EJ("Entering private room is not supported by HTML client yet.", "プライベート対局室への入室はHTML版アプリでは未対応です。"), 1, "#ff0000")
     return
   }
   board.setGame(game)
@@ -1011,6 +1016,8 @@ function setBoardConditions(){
 
 function _handleNewGame(){
   let val = $('input[name="newGameType"]:checked').val()
+  let comment = ""
+  let password = $('#privateRoomPass').css('display') == 'block' ? $('#newGamePasswordInput').val() : ""
   if (val == 1) {
     client.wait("r", 900, 60)
   } else if (val == 2) {
@@ -1021,7 +1028,7 @@ function _handleNewGame(){
     client.wait("r", 0, 30)
   } else if (val == 5) {
     let ruleType = $("#newGameRuleSelect option:selected").val()
-    client.wait(ruleType, 60 * $("#newGameTotalSelect option:selected").val(), $("#newGameByoyomiSelect option:selected").val(), ruleType.match(/^hc/) ? -1 : 0)
+    client.wait(ruleType, 60 * $("#newGameTotalSelect option:selected").val(), $("#newGameByoyomiSelect option:selected").val(), ruleType.match(/^hc/) ? -1 : 0, "", comment, password)
   } else if (val == 6) {
     let tournamentId = $("#newGameTournamentSelect option:selected").val()
     if (tournaments[tournamentId]) tournaments[tournamentId].wait()
@@ -1030,7 +1037,7 @@ function _handleNewGame(){
     let ruleType = $("#newGameStudyRuleSelect option:selected").val()
     let blackName = $("#newGameStudyBlack").val()
     let whiteName = $("#newGameStudyWhite").val()
-    client.study(ruleType, blackName, whiteName)
+    client.study(ruleType, blackName, whiteName, password)
   } else if (val == 8) {
     client.stopWaiting()
   }
