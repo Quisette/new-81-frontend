@@ -501,6 +501,8 @@ function _loginButtonClick(){
   client.setCallbackFunctions("MONITOR", _handleMonitor)
   client.setCallbackFunctions("RECONNECT", _handleReconnect)
   client.setCallbackFunctions("MILE", _handleMile)
+  client.setCallbackFunctions("EXP", _handleExp)
+  client.setCallbackFunctions("WINS", _handleWins)
   client.setCallbackFunctions("ENTER", _handleEnter)
   client.setCallbackFunctions("LEAVE", _handleLeave)
   client.setCallbackFunctions("DISCONNECT", _handleDisconnect)
@@ -1531,7 +1533,6 @@ function _handleGameEnd(lines, atReconnection = false){
     	if (board.gameType == "r") _wins_session += 1;
     	history = "  ◯";
       */
-    	// if (board.game.isRated() && (me.wins + 1) % 100 == 0)) client.chat("[##WINS]" + (me.wins + 1))
       break
     case "DRAW":
     	if (board.myRoleType == 1) board.studyHostType = 2
@@ -1859,7 +1860,8 @@ function _handleChat(sender, message){
 	} else if (message.match(/^\[##WINS\](\d+)$/)) {
 		writeUserMessage(_name2link(sender) + EJ(" has won ", "さんが通算") + parseInt(RegExp.$1) + EJ(" games!", "勝を達成しました!"), 1, "#008800", true);
 	} else if (message.match(/^\[##EXP\](.+),(\d+)$/)) {
-//TODO		writeUserMessage(_name2link(sender) + EJ(" is promoted to " + makeRank34FromExp(parseInt(RegExp.$2)) + " class in " + (RegExp.$1 == "nr" ? "10-sec Shogi" : gameTypeShort(RegExp.$1)) + "!", "さん、" + (RegExp.$1 == "nr" ? "10秒将棋" : gameTypeShort(RegExp.$1)) + "で " + makeRank34FromExp(parseInt(RegExp.$2)) + " に昇格!!"), 1, "#008800", true);
+    let expModeName = RegExp.$1 == "nr" ? EJ("10-sec Shogi", "10秒将棋") : getHandicapShort(RegExp.$1)
+    writeUserMessage(_name2link(sender) + EJ(" is promoted to " + makeRank34FromExp(parseInt(RegExp.$2)) + " class in " + expModeName + "!", "さん、" + expModeName + "で " + makeRank34FromExp(parseInt(RegExp.$2)) + " に昇格!!"), 1, "#008800", true)
 	} else if (message.match(/^\[##.+\]/)) {
     return
   } else if (_isFavorite(sender)) {
@@ -2030,6 +2032,21 @@ function _handleMile(result) {
 	else if (diff < 0) writeUserMessage(EJ("You've used " + (- diff) + " D-Mile" + (diff == -1 ? "" : "s"), (- diff) + " Dマイルを消費しました。(通算マイル・期間マイルは減少しません)"), 1, "#FF3388")
   mileage = result
   _updateLobbyHeader()
+}
+
+function _handleWins(wins) {
+	client.chat("[##WINS]" + wins)
+}
+
+function _handleExp(str) {
+  let diff = parseInt(str.split(",")[0])
+  let result = parseInt(str.split(",")[1])
+	let rank = makeRank34FromExp(result)
+	if (rank != makeRank34FromExp(result - diff)) {
+		client.chat("[##EXP]" + board.game.gameType + "," + result)
+		writeUserMessage(EJ("You're promoted to a new rank!!", "クラス昇格!!"), 2, "#DD0088", true)
+	}
+	writeUserMessage(EJ("You've gained " + diff + " EXP!! (Total: " + result + " EXP) You're in \"" + rank + "\" level.", diff + "EXPを獲得!! (トータル " + result + "EXP) 現在「" + rank + "」レベルです"), 2, "#DD0088")
 }
 
 function _handleClosed(){

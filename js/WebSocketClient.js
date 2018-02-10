@@ -102,6 +102,8 @@ class WebSocketClient {
             thisInstance._callbackFunctions["MILE"](RegExp.$1)
           } else if (line.match(/^##\[EXP\](.+)$/)) {
             thisInstance._callbackFunctions["EXP"](RegExp.$1)
+          } else if (line.match(/^##\[WINS\](.+)$/)) {
+            thisInstance._callbackFunctions["WINS"](RegExp.$1)
           } else if (line.match(/^##\[LOBBY_IN\](.+)$/)) {
             thisInstance._callbackFunctions["LOBBY_IN"](RegExp.$1)
           } else if (line.match(/^##\[LOBBY_OUT\]\[(.+)\]$/)) {
