@@ -31,6 +31,7 @@ var _hourMileCount
 var mouseX
 var mouseY
 var config = null
+var infoFetcher = new Object()
 var options = new Object()
 var _studyBase = null
 var _studyBranchMoves = null
@@ -39,6 +40,7 @@ var _sendStudyBuffer = null
 var _opponentDisconnectCount = 0
 var _dialogOnBoardClose = false
 var _worldClocks = []
+var _loginHistory = []
 
 /* ====================================
     On document.ready
@@ -74,7 +76,7 @@ $(function(){
     })
   }
 
-  // Load version InfoFetcher
+  // Load version
   $('p#versionText').text('ver. ' + version)
 
   // Generate board
@@ -90,6 +92,37 @@ $(function(){
   })
   xhr.open("get", "dat/countries.txt")
   xhr.send()
+
+  infoFetcher = {
+    titleNames: new Object(),
+    titleNameTips: new Object(),
+    titleAvatars: new Object(),
+    banned: []
+  }
+  let xhr2 = new XMLHttpRequest()
+  xhr2.addEventListener("load", function(){
+    let header = ""
+    xhr2.responseText.split("\n").forEach(function(line){
+      if (line.match(/^###(.+)$/)) {
+        header = RegExp.$1
+      } else {
+        switch (header) {
+          case "TITLE_HOLDERS":
+            let tokens = line.split("\t")
+            infoFetcher.titleNames[tokens[0]] = tokens[1]
+            infoFetcher.titleNameTips[tokens[0]] = tokens[2]
+            infoFetcher.titleAvatars[tokens[0]] = tokens[3]
+            break
+          case "BANNED":
+            infoFetcher.banned.push(line.trim())
+        }
+      }
+    })
+  })
+  xhr2.open("get", "http://81dojo.com/dojo/infoData.html?" + version)
+  xhr2.send()
+  // .txt file in 81dojo.com cannot have Access-Control-Allow-Origin header set for some with_reason. As it has to be .html, a symbolic link infoData.html -> infoData.txt is prepared on 81dojo.com side
+
   sp = new SoundPlayer()
 
   $.getJSON("dat/config.json?" + new Date().getTime(), function(data){
@@ -278,6 +311,7 @@ $(function(){
   // Load localStorage
   if (localStorage.login) $('#usernameInput').val(localStorage.login)
   if (localStorage.dat) $('#passwordInput').val(decaesar(decaesar(localStorage.dat, 81), 3))
+  if (localStorage.dat2) _loginHistory = decaesar(decaesar(localStorage.dat2, 81), 3).split(",")
   if (localStorage.save) $('#loginSave').prop('checked', localStorage.save == 'true')
   $('#languageSelector').val(localStorage.locale || args["locale"] || 'ja')
   if (localStorage.openingMusic) {
@@ -472,6 +506,7 @@ function _loginButtonClick(){
     alert('Please select a server.')
     return
   }
+  if (_bannedLoginInHistory()) return
   $('#loginButton, #passwordInput, #usernameInput').attr('disabled', true)
   if (client != null) client.close();
   $('#loginAlert').text(i18next.t("login.connecting"))
@@ -514,6 +549,13 @@ function _reloginButtonClick(){
   $('img#entrance-img').prop('src', 'img/entrance_ja.jpg')
   _prepareForLogin()
   _fadeInLoginView()
+}
+
+function _bannedLoginInHistory(){
+  for (let i = 0; i < _loginHistory.length; i++) {
+    if (infoFetcher.banned.includes(_loginHistory[i])) return true
+  }
+  return false
 }
 
 /* ====================================
@@ -1063,7 +1105,7 @@ function _openPlayerInfo(user, doOpen = true){
   if (!element[0]) {
     element = $("<div></div>",{
       id: 'player-info-window-' + user.name,
-      title: user.name,
+      title: user.name + '  ' + user.titleName(),
       html: '<div id="player-info-layer-1" class="hbox" style="pointer-events:none">\
         <div class="avatar-wrapper"><img class="avatar"/></div>\
         <div style="flex:1;margin-left:10px"><p id="p1"></p><p id="p2"></p><p id="p3"></p><p id="p4"></p><p id="p5"></p></div>\
@@ -1211,6 +1253,9 @@ function _handleLoggedIn(str){
   premium = makePremiumNum(parseInt(tokens[13]),tokens[14])
   hidden_prm = premium
   _enforcePremium()
+  if (_loginHistory.indexOf(client.username) >= 0) _loginHistory.splice(_loginHistory.indexOf(client.username), 1)
+  _loginHistory.push(client.username)
+  localStorage.dat2 = caesar(caesar(_loginHistory.join(","), 3), 81)
   apiClient.getOptions()
   apiClient.getTournaments()
   _updateLobbyHeader()

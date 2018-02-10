@@ -242,7 +242,7 @@ class Board{
       let user = i == 0 ? this.game.black : this.game.white
       this.playerInfos[i].find("img.avatar").attr("src", user.avatarURL())
       this.playerInfos[i].find("#player-info-name").html(user.name)
-      this.playerInfos[i].find("#player-info-rate").html('R: ' + user.rate + ' (' + makeRankFromRating(user.rate) + ')')
+      this.playerInfos[i].find("#player-info-rate").html('R: ' + user.rate + ' (' + makeRankFromRating(user.rate) + ')&ensp;' + user.titleTag())
       this._flags[i].html(user.country.flagImgTagMovie())
     }
   }

@@ -142,7 +142,7 @@ class User{
 
     return {
       statStr: statStr,
-      title: "",
+      title: this.titleTag(),
       rank: rankStr,
       name: this.name,
       nameStr: this.idle ? coloredSpan(this.name, '#00f') : this.name,
@@ -158,7 +158,25 @@ class User{
     if (this._countryCode == 1 || this._countryCode == 2) {
       return "http://81dojo.com/dojo/images/avatars/" + (this._countryCode == 1 ? "study_black" : "study_white") + ".jpg"
     } else {
-      return "http://system.81dojo.com/players/" + this.name + "/avatar"
+      let titleAvatar = infoFetcher.titleAvatars[this.name.toLowerCase()]
+      if (titleAvatar && titleAvatar != "*") return "http://81dojo.com/dojo/images/avatars/" + titleAvatar + ".jpg"
+      else return "http://system.81dojo.com/players/" + this.name + "/avatar"
+    }
+  }
+
+  titleTag(){
+    if (infoFetcher.titleNames[this.name.toLowerCase()]) {
+      return '<span title="' + infoFetcher.titleNameTips[this.name.toLowerCase()] + '">' + infoFetcher.titleNames[this.name.toLowerCase()] + '</span>'
+    } else {
+      return ''
+    }
+  }
+
+  titleName(){
+    if (infoFetcher.titleNames[this.name.toLowerCase()]) {
+      return infoFetcher.titleNames[this.name.toLowerCase()]
+    } else {
+      return ''
     }
   }
 
