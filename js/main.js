@@ -563,10 +563,7 @@ function _enterGame(game){
     }
     return
   }
-  if (board.game) {
-    if (board.myRoleType == null) board.close()
-    else return
-  }
+  if (board.game) return
   if (game.isVariant()) {
     writeUserMessage(EJ("This game rule is not supported by HTML client yet.", "この対局ルールはHTML版アプリでは未対応です。"), 1, "#ff0000")
     return
@@ -582,7 +579,6 @@ function _enterGame(game){
       client.reconnect(game.gameId)
     }
   } else { // Monitor
-  	//if (_watch_game.password != "" && !_watch_game.isStudyHost(login_name) && !InfoFetcher.isAdminLv1(login_name)) _openInputDialog(LanguageSelector.lan.private_room, LanguageSelector.lan.enter_pass, _enterPrivateRoom, gameListGrid);
     client.watchers(game.gameId)
     client.monitor(game.gameId, true)
   }
@@ -1643,6 +1639,9 @@ function _handleMonitor(str){
       positionStr += line + "\n"
     } else if (line.match(/^#(SENTE_WIN|GOTE_WIN|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|OUTE_SENNICHITE|JISHOGI|DISCONNECT|SUSPEND|CATCH|TRY)/)) {
       gameEndStr += RegExp.$1 + "\n"
+    } else if (line.match(/^NOT_FOUND$/)) {
+      board.close()
+      return
     }
   })
   if (kifu_id) { // Start of watching game
