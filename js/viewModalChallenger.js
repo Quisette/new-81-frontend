@@ -1,6 +1,6 @@
 function _initModalChallenger(user){
   $('p#challengerName').html(coloredSpan('■', makeColorFromRating(user.rate)) + ' ' + user.name + '&emsp;' + user.country.flagImgTagMovie())
-  $('span#challengerRate').html(': ' + user.rate + ' (' + makeRankFromRating(user.rate) + ')')
+  $('span#challengerRate').html(': ' + user.rate + ' (' + makeRankFromRating(user.rate) + ') ' + user.mobileIconTag())
   $('#modalChallenger').find('div.check-game').attr('id', 'check-game-' + user.name).css('display', 'none').text('')
   $('#modalChallenger').find('span.get-evaluation').attr('id', 'get-evaluation-' + user.name).text('?')
   if (getPremium() >= 2) apiClient.getEvaluation(user.name)

@@ -33,10 +33,11 @@ class Board{
     this._rematchReady = [false, false]
     this._arrowsSelf = []
     this._arrowsPublic = []
-    this._generateParts()
-    this._setTheme()
     this._scale = 1
     this._promotionDialog = null
+    this.hostMark = null
+    this._generateParts()
+    this._setTheme()
   }
 
   _generateParts(){
@@ -56,6 +57,7 @@ class Board{
     $('[id=player-info-name]').dblclick(function(){_playerNameDblClick($(this).text())})
     this._arrowCanvas = $('<canvas></canvas>', {id: 'boardCanvas'}).attr({width: this._originalWidth, height: this._originalHeight}).appendTo(this._div)
     this._pickedPiece = $('<div></div>', {class: 'picked-piece'})
+    this.hostMark = $('<i></i>', {class: 'fa fa-graduation-cap fa-lg'}).css('color', '#008')
   }
 
   _setTheme(){

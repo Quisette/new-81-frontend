@@ -41,6 +41,7 @@ var _opponentDisconnectCount = 0
 var _dialogOnBoardClose = false
 var _worldClocks = []
 var _loginHistory = []
+var hostPlayerName = null
 
 /* ====================================
     On document.ready
@@ -253,7 +254,7 @@ $(function(){
   watcherGrid = $('#watcherGrid').DataTable({
     data: [],
     columns: [
-      {data: "name", width: "55%", className: "dt-body-left"},
+      {name: "name_column", data: "watcher", width: "55%", className: "dt-body-left"},
       {data: "country", width: "25%", className: "dt-body-left"},
       {data: "rate", width: "20%", className: "dt-body-right", type: "rate-str"}
     ],
@@ -877,6 +878,7 @@ function _closeBoard(){
   _studyBase = null
   _studyBranchMoves = null
   _opponentDisconnectCount = 0
+  _updateHostPlayer(null)
   forceKifuMode(1)
   _kifuModeRadioChange()
 }
@@ -899,11 +901,6 @@ function sendMoveAsPlayer(move){
   client.move(move)
   board.moves.push(move)
   /*
-  if (board.since_last_move > 0) {
-	  board.timers[board.my_turn == board.last_pos.turn ? 0 : 1].accumulateTime( - board.since_last_move);
-	  board.since_last_move = 0;
-  }
-  board.makeMove(str + ",T0", true, true);
   _myMoveSent = true;
   _myMoveSentTimer.reset();
   _myMoveSentTimer.start();
@@ -992,6 +989,23 @@ function _restorePublicKifu(){
   kifuGrid.clear()
   kifuGrid.rows.add(board.moves)
   drawGridMaintainScroll(kifuGrid)
+}
+
+function _updateHostPlayer(name){
+  if (name == hostPlayerName) return
+  let prevHostName = hostPlayerName
+  hostPlayerName = name
+
+  board.hostMark.detach()
+  if (watcherGrid.row('#' + prevHostName).data()) {
+    watcherGrid.row('#' + prevHostName).data(users[prevHostName].gridObject())
+  }
+
+  if (watcherGrid.row('#' + hostPlayerName).data()) {
+    watcherGrid.row('#' + hostPlayerName).data(users[hostPlayerName].gridObject())
+  } else if (hostPlayerName == board.game.black.name || hostPlayerName == board.game.white.name) {
+    board.playerInfos[hostPlayerName == board.game.black.name ? 0 : 1].find("#player-info-rate").prepend(board.hostMark)
+  }
 }
 
 function sendTimeout(){
@@ -1152,7 +1166,7 @@ function _openPlayerInfo(user, doOpen = true){
   }
   element.find("img.avatar").attr("src", user.avatarURL())
   element.find("p#p1").html(user.country.flagImgTag27() + ' ' + user.country.toString())
-  element.find("p#p2").html('R: ' + user.rate + ' (' + makeRankFromRating(user.rate) + ') <img class="icon-evaluation" src="img/icon_like.png"><span class="get-evaluation" id="get-evaluation-' + user.name + '">?</span>')
+  element.find("p#p2").html('R: ' + user.rate + ' (' + makeRankFromRating(user.rate) + ') ' + user.mobileIconTag() + '<img class="icon-evaluation" src="img/icon_like.png"><span class="get-evaluation" id="get-evaluation-' + user.name + '">?</span>')
   return element
 }
 
@@ -1367,22 +1381,14 @@ function _handleLobbyIn(line){
 		writeUserMessage("  -  " + _name2link(name) + EJ(" logged in" + (mobile ? " via mobile" : "") + ". " + rank + " from " + countries[parseInt(tokens[3])].name_en + "." + (parseInt(tokens[6]) >= 3 ? "　Now on " + tokens[6] + "-win streak!" : ""), " さんが" + (mobile ? "モバイルから" : "") + "ログインしました。 (" + countries[parseInt(tokens[3])].name_ja + ", " + rank + ")" + (parseInt(tokens[6]) >= 3 ? "　現在" + tokens[6] + "連勝中!" : "")), 1, "#008800", _isFavorite(name) || _isColleague(name));
 		// TODO if (mainViewStack.selectedIndex == 1 && _chat_sound1_play) {
 	}
-	let add = false;
 	if (name == me.name) return;
 	if (!users[name]) {
 		users[name] = new User(name);
-		add = true;
+    $('#findUser').autocomplete('option', 'source', Object.keys(users))
 	} else {
 		// TODO users[name].initialize();
 	}
-	users[name].setFromLobbyIn(parseInt(tokens[1]), tokens[2], parseInt(tokens[3]))
-	// TODO if (isMobile) _users[tokens[0]].isMobile = true;
-	// TODO if (isFavorite) _users[tokens[0]].markFavorite();
-	// TODO if (isColleague) _users[tokens[0]].markColleague();
-	// TODO if (isOpponent) _users[tokens[0]].markTournamentOpponent();
-	if (add) {
-		// TODO serverLabel.text = serverName + LanguageSelector.EJ(" : ", "サーバ : ") + LanguageSelector.lan.lobby + LanguageSelector.EJ(" (", " (ログイン数 ") + _user_list.length + LanguageSelector.EJ(" players)", "名)");
-	}
+	users[name].setFromLobbyIn(parseInt(tokens[1]), tokens[2], parseInt(tokens[3]), tokens[12])
   playerGrid.row.add(users[name].gridObject())
   drawGridMaintainScroll(playerGrid)
 }
@@ -1935,9 +1941,10 @@ function _handleGameChat(sender, message){
       _runTypingIndicator(sender)
 		}
 	} else if (message.match(/\[\#\#STUDY\](\d+)\/(.+)$/)) {
+    if (hostPlayerName == null) _updateHostPlayer(sender)
     let singleMove = _updateStudyState(sender, parseInt(RegExp.$1), RegExp.$2)
   	board.clearArrows(true)
-  	if (board.isHost() && name == me.name) return
+  	if (board.isHost() && sender == me.name) return
 		if (!(board.isPostGame && board.onListen)) return
     if (sender != me.name) _handleStudy(singleMove)
 	} else if (message.match(/^\[##ARROW\]CLEAR$/)) {
@@ -1963,13 +1970,7 @@ function _handleGameChat(sender, message){
     } else {
       writeUserMessage(EJ("Study Host status given to " + RegExp.$1, "感想戦ホストは、" + RegExp.$1 + "さんに引き継がれました。"), 2, "#008800")
     }
-    /*
-		if (_users[match[1]]) {
-			for each (var user:Object in _users) user.isHost = false;
-			_users[match[1]].isHost = true;
-			_updateStatusMarks();
-		}
-    */
+    _updateHostPlayer(RegExp.$1)
 	} else if (message.match(/^\[##SUBHOST_ON\](.+)$/)) {
 		if (RegExp.$1 == me.name) {
 			writeUserMessage(i18next.t("msg.subhost_given"), 2, "#008800", true)
@@ -2033,6 +2034,7 @@ function _handlePrivateChat(sender, message){
     _updateStudyState(sender, parseInt(RegExp.$1), RegExp.$2)
 		if (!(board.isPostGame && board.onListen)) return
     if (sender != me.name) _handleStudy()
+    _updateHostPlayer(sender)
     // TODO If the user has been forced to become Host after entering room, he should be demoted to subHost as soon as receiving this private message
 		return
 	} else if (message.match(/^\[\#\#FITNESS\](\d),(\d)$/)) {
@@ -2044,10 +2046,8 @@ function _handlePrivateChat(sender, message){
 //		_handleInvitation(name, parseInt(match[1]), parseInt(match[2]), match[3]);
 		return
 	} else if (message.match(/^\[\#\#REJECT\]/)) {
-    /*
-		if ((match = message.match(/^\[\#\#REJECT\]([A-Z]\d{3})/))) _interpretCommunicationCode(name, match[1], 1, true, false);
-		else _writeUserMessage(name + LanguageSelector.EJ(" did not accept your invitation.\n", "さんに招待メッセージが送信出来ませんでした。\n"), 1, "#008800", true);
-    */
+		if (message.match(/^\[\#\#REJECT\]([A-Z]\d{3})/)) _interpretCommunicationCode(sender, RegExp.$1, 1, true, false)
+		else writeUserMessage(sender + EJ(" did not accept your invitation.", "さんに招待メッセージが送信出来ませんでした。"), 1, "#008800", true)
 		return
 	} else if (message.match(/^\[auto\-PM\]/)) {
 		if (message.match(/^\[auto\-PM\]\s#([A-Z]\d{3})/)) _interpretCommunicationCode(sender, RegExp.$1, 2, false, true)
@@ -2512,7 +2512,10 @@ function _loadDefaultOptions(){
     postgame_study_level: 0,
     english_level: 0,
     receive_kifu_comment: 0,
-    board_size: 0
+    board_size: 0,
+    favorites: [],
+    members: [],
+    opponents: []
   }
   _enforceOptions()
   _loadOptionsToDialog()

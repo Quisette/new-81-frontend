@@ -16,6 +16,10 @@ class User{
     this._waitingTurn = "*"
     this._waitingComment = ""
     this._waitingTournamentId = null
+    this._isSelf = name == client.username
+    this._isCircleMember = options.members.includes(name)
+    this._isTournamentMember = options.opponents.includes(name)
+    this._isFavorite = options.favorites.includes(name)
   }
 
   setFromWho(tokens){
@@ -72,11 +76,12 @@ class User{
     this.rate = tokens[1]
   }
 
-	setFromLobbyIn(rate, provisional, country_code) {
+	setFromLobbyIn(rate, provisional, country_code, protocol) {
     //int, string, int,
 		this.rate = rate
     this.provisional = provisional == "true"
 		this._countryCode = country_code
+    if (protocol == "x2|81AR") this.isMobile = true
   }
 
   setFromStudy(sente){
@@ -140,12 +145,22 @@ class User{
     if (this.rate == 0) rateStr = "????"
     let rankStr = this.provisional ? "-" : coloredSpan(makeRankFromRating(this.rate), makeColorFromRating(this.rate))
 
+    let markStr = ""
+    if (this._isSelf) markStr += coloredSpan('<i class="fa fa-info-circle"></i>', '#5b1', 13, i18next.t("lobby.attr_self"))
+    else {
+      if (this._isTournamentMember) markStr += coloredSpan('<i class="fa fa-crosshairs"></i>', 'red', 12, i18next.t("lobby.attr_tournament"))
+      if (this._isFavorite) markStr += coloredSpan('<i class="fa fa-star"></i>', 'orange', 12, i18next.t("lobby.attr_favorite"))
+      if (this._isCircleMember) markStr += coloredSpan('<i class="fa fa-circle-o"></i>', '#5b1', 12, i18next.t("lobby.attr_club"))
+    }
+    let hostStr = this.name == hostPlayerName ? coloredSpan('<i class="fa fa-graduation-cap"></i>', '#008', 15, i18next.t("board.attr_host")) : ''
+
     return {
       statStr: statStr,
       title: this.titleTag(),
       rank: rankStr,
       name: this.name,
-      nameStr: this.idle ? coloredSpan(this.name, '#00f') : this.name,
+      nameStr: markStr + (this.idle ? coloredSpan(this.name, '#00f') : this.name),
+      watcher: hostStr + markStr + this.name,
       country: this.country.flagImgTag16() + ' ' + this.country.name3Tag(),
       rate: rateStr,
       waiter: this.country.flagImgTag27() + ' ' + coloredSpan('■', makeColorFromRating(this.rate)) + ' ' + (this.idle ? coloredSpan(this.name, '#00f') : this.name),
@@ -180,6 +195,10 @@ class User{
     }
   }
 
+  mobileIconTag(){
+    return this.isMobile ? '<i class="fa fa-mobile fa-2x" style="vertical-align:-3px"></i>' : ''
+  }
+
   isWatchingGame(game){
     return this._monitorGame == game.shortId
   }
@@ -201,7 +220,7 @@ class User{
 
   get country(){
     if (this._countryCode == 1 || this._countryCode == 2) return new Country(this._countryCode, "", "", "")
-    else return countries[this._countryCode]
+    else return countries[this._countryCode] || countries[392] // falls back to JPN in case of unexpected error having no country found
   }
 
   get waitingGameName(){
