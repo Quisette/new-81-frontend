@@ -3,6 +3,7 @@
 class Movement{
   constructor(previousMove = null){
     this.num = previousMove == null ? 0 : (previousMove.num + 1)
+    this._accumulatedTime = null
     this.previousMove = previousMove
     this.endTypeKey = null
     this.owner = Position.CONST.SENTE
@@ -90,6 +91,11 @@ class Movement{
       // Set promoted to true temporarily even if the piece is already promoted
       if (this.pieceType >= 8) this.promote = true
     }
+  }
+
+  setTime(time, currentBoard){
+    this.time = time
+    this._accumulatedTime = (currentBoard.accumulatedTimes[this.owner ? 0 : 1] += time)
   }
 
   setGameEnd(endTypeKey){
@@ -212,7 +218,13 @@ class Movement{
     if (this.time == null) {
       return ""
     } else {
-      return this.time.toString()
+      let time = options.show_accumulated_time == 1 ? (this._accumulatedTime || this.time) : this.time
+      if (time < 60) return time.toString()
+      else {
+        let min = Math.floor(time/60).toString()
+        let sec = (100 + (time % 60)).toString()
+        return min + ':' + sec.slice(sec.length - 2)
+      }
     }
   }
 

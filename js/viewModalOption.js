@@ -64,7 +64,7 @@ _loadPieceDesignToDialog("blind_extreme", 102)
 
 $('div#optionTabs').tabs()
 //Change event for checkboxes
-$('div#optionTabs').find('input[type=checkbox]').change(function(){
+$('div#optionTabs').find('input[type=checkbox]:not(.no-save)').change(function(){
   apiClient.postOption($(this).prop('id'), $(this).prop('checked') ? 1 : 0)
 })
 //Change event for radiobuttons

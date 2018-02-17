@@ -13,6 +13,7 @@ class Board{
     this._komadais = new Array(2)
     this.playerInfos = new Array(2)
     this._timers = new Array(2)
+    this.accumulatedTimes = new Array(2)
     this._flags = new Array(2)
     this._publicPosition
     this._position
@@ -297,6 +298,8 @@ class Board{
     this.onListen = true
     this._timers[0].initialize(this.game.total, this.game.byoyomi)
     this._timers[1].initialize(this.game.total, this.game.byoyomi)
+    this.accumulatedTimes[0] = 0
+    this.accumulatedTimes[1] = 0
     if (this.isPlayer()) this._timers[this.myRoleType].myPlayingTimer = true
     this._rematchReady = [false, false]
     /*
@@ -308,7 +311,7 @@ class Board{
         if (move_str.match(/^%TORYO/)) return
         let move = new Movement(board.getFinalMove())
         move.setFromCSA(move_str.split(",")[0])
-        move.time = parseInt(move_str.split(",")[1])
+        move.setTime(parseInt(move_str.split(",")[1]), this)
         this.runningTimer.useTime(move.time)
         move = this._publicPosition.makeMove(move, false)
         this.moves.push(move)

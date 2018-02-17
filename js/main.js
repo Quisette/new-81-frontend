@@ -1539,12 +1539,12 @@ function _handleMove(csa, time){
     let owner = csa.substr(0, 1) == "+"
     board.getPlayersTimer(owner).useTime(time)
     if (owner && board.myRoleType == 0 || !owner && board.myRoleType == 1) {
-      board.moves[board.moves.length - 1].time = time
+      board.moves[board.moves.length - 1].setTime(time, board)
       board.addMoveToKifuGrid(board.moves[board.moves.length - 1])
     } else {
       let move = new Movement(board.getFinalMove())
       move.setFromCSA(csa)
-      move.time = time
+      move.setTime(time, board)
       board.handleReceivedMove(move)
       board.updateTurnHighlight()
     }
@@ -1724,7 +1724,7 @@ function _handleMonitor(str){
       if (move_str.match(/^%TORYO/)) return
       let move = new Movement(board.getFinalMove())
       move.setFromCSA(move_str.split(",")[0])
-      move.time = parseInt(move_str.split(",")[1])
+      move.setTime(parseInt(move_str.split(",")[1]), board)
       board.handleMonitorMove(move)
     })
   }
@@ -1951,8 +1951,8 @@ function _handleGameChat(sender, message){
       _runTypingIndicator(sender)
 		}
 	} else if (message.match(/\[\#\#STUDY\](\d+)\/(.+)$/)) {
-    if (hostPlayerName == null) _updateHostPlayer(sender)
     let singleMove = _updateStudyState(sender, parseInt(RegExp.$1), RegExp.$2)
+    if (hostPlayerName == null) _updateHostPlayer(sender)
   	board.clearArrows(true)
   	if (board.isHost() && sender == me.name) return
 		if (!(board.isPostGame && board.onListen)) return
@@ -2540,7 +2540,8 @@ function _loadDefaultOptions(){
     board_size: 0,
     favorites: [],
     members: [],
-    opponents: []
+    opponents: [],
+    show_accumulated_time: 0
   }
   _enforceOptions()
   _loadOptionsToDialog()
