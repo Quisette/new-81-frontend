@@ -14,6 +14,7 @@ class SoundPlayer{
     this._loadChannel("PIECE_NORMAL", "piece")
     this._loadChannel("PIECE_DOUBLE", "piece_double")
     this._loadChannel("CHALLENGER", "challenger")
+    this._loadChannel("INVITATION", "invitation")
     this._loadChannel("CHIME", "chime")
     this._loadChannel("GAME_START", "start")
     this._loadChannel("WIN", "win")

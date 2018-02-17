@@ -1,0 +1,23 @@
+div#modalInvitation data-i18n-title="invitation.title"
+  p
+    span#inviterInfo
+    img.icon-evaluation src="img/icon_like.png"
+    span.get-evaluation ?
+  p data-i18n="invitation.caption"
+  p#invitedGameInfo style="font-weight:bold"
+  div.check-game
+  div.hbox style="justify-content: center; margin-top:5px"
+    span#invitationTimerText style="font-size:20px; line-height:30px; width:50px; margin-right:5px; text-align:center"
+    input id="invitationAcceptButton" type="button" data-i18n-value="player_info.challenge" class="simplemodal-close"
+    input id="invitationDeclineButton" type="button" data-i18n-value="invitation.decline" style="margin-left:5px" class="simplemodal-close"
+    select#declineReasonSelector data-i18n-title="challenger.with_reason"
+      option value="C014"
+      option value="C015" data-i18n="invitation.C015"
+      option value="C016" data-i18n="invitation.C016"
+      option value="C017" data-i18n="invitation.C017"
+      option value="C018" data-i18n="invitation.C018"
+      option value="C019" data-i18n="invitation.C019"
+      option value="C020" data-i18n="invitation.C020"
+
+javascript:
+  _jsInclude("js/viewModalInvitation.js")

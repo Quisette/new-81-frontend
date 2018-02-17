@@ -63,7 +63,7 @@ function _testFunction(phase){
   } else if (phase == 1) { // After servers are loaded
     _loginButtonClick()
   } else if (phase == 2) { // After logged in
-    //client.send("%%GAME hc2pd_test2-900-30 -")
+    //client.send("%%GAME hc2pd_test1-900-30 -")
     //_optionButtonClick()
   }
 }
@@ -482,8 +482,9 @@ function _updateLanguage(){
     if (key == "r" || key.match(/^va/)) return true
     $('#newGameRuleSelect, #newGameStudyRuleSelect').append($("<option />").val(key).text(handicaps[key]))
   })
-  $('#modalNewGame, #modalChallenger, #modalImpasse, #modalOption, #modalChatTemplate').each(function(){
+  $('#modalNewGame, #modalChallenger, #modalInvitation, #modalImpasse, #modalOption, #modalChatTemplate').each(function(){
     $(this).dialog('option', 'title', i18next.t($(this).attr('data-i18n-title')))
+    $(this).prop('title', '')
   })
   $('[id^=i18n-]').each(function(){
     $(this).button('option', 'label', i18next.t($(this).attr('id').split("-")[1]))
@@ -1114,6 +1115,15 @@ function _handleRejectChallenge(challenger, declineCode = null){
 	writeUserMessage(EJ("Rejected the challenge from " + challenger.name + ".", challenger.name + "さんからの挑戦をパスしました。"), 1, "#008800", true)
 }
 
+function _handleAcceptInvitation(user){
+  _playerChallengeClick(user)
+}
+
+function _handleDeclineInvitation(user, declineCode = ""){
+  client.privateChat(user.name, "[##REJECT]" + declineCode)
+	writeUserMessage(EJ("Declined the invitation from " + user.name + ".", user.name + "さんからの招待をパスしました。"), 1, "#008800", true)
+}
+
 function _openPlayerInfo(user, doOpen = true){
   let element = $("#player-info-window-" + user.name)
   if (!element[0]) {
@@ -1192,7 +1202,7 @@ function _playerChallengeClick(user){
 		  _challengeUser = user
 		  writeUserMessage(EJ("Challenging " + _challengeUser.name + "..... (Must wait for 20 seconds max)", _challengeUser.name + "さんに挑戦中..... (待ち時間 最大で20秒)"), 1, "#008800", true)
 		  client.challenge(_challengeUser)
-      setGeneralTimeout("CHALLENGE", 30000)
+      setGeneralTimeout("CHALLENGE", 28000)
 	  }
   // Opponent is not waiting -> Send invitation if possible
   } else if (me.isGuest || user.isMobile) {
@@ -1445,7 +1455,7 @@ function _handleChallenger(name){
 }
 
 function _handleAccept(str){
-	//_challengeCancelTimer.stop();
+  clearGeneralTimeout["CHALLENGE"]
 	_gameAccepted = true
 	//_acceptedCancelTimer.reset();
 	//_acceptedCancelTimer.start();
@@ -1454,8 +1464,8 @@ function _handleAccept(str){
 }
 
 function _handleDecline(str){
-//	_challengeCancelTimer.stop();
 //	_acceptedCancelTimer.stop();
+  clearGeneralTimeout["CHALLENGE"]
 	if (str.match(/^([A-Z]\d{3})/)) {
 		_interpretCommunicationCode("", RegExp.$1, 1, true, false)
 	} else {
@@ -1960,7 +1970,8 @@ function _handleGameChat(sender, message){
     let turn = board.getPlayerRoleFromName(sender)
     if (turn != null) board.playerNameClassChange(turn, 'name-mouse-out', isOut)
 	} else if (message.match(/^\[##GIVEHOST\](.+)$/)) {
-		if (RegExp.$1 == me.name) {
+    let newHost = RegExp.$1
+		if (newHost == me.name) {
       sendStudy()
       board.studyHostType = 2
       $("input[name=kifuModeRadio]:eq(1)").prop("checked", true)
@@ -1968,9 +1979,9 @@ function _handleGameChat(sender, message){
       setBoardConditions()
 			writeUserMessage(i18next.t("msg.host"), 2, "#008800", true)
     } else {
-      writeUserMessage(EJ("Study Host status given to " + RegExp.$1, "感想戦ホストは、" + RegExp.$1 + "さんに引き継がれました。"), 2, "#008800")
+      writeUserMessage(EJ("Study Host status given to " + newHost, "感想戦ホストは、" + newHost + "さんに引き継がれました。"), 2, "#008800")
     }
-    _updateHostPlayer(RegExp.$1)
+    _updateHostPlayer(newHost)
 	} else if (message.match(/^\[##SUBHOST_ON\](.+)$/)) {
 		if (RegExp.$1 == me.name) {
 			writeUserMessage(i18next.t("msg.subhost_given"), 2, "#008800", true)
@@ -2043,7 +2054,7 @@ function _handlePrivateChat(sender, message){
 		writeUserMessage(str, 2, "#0000AA")
 		return
 	} else if (message.match(/^\[\#\#INVITE\](\d+),(\d+),(.+)$/)) {
-//		_handleInvitation(name, parseInt(match[1]), parseInt(match[2]), match[3]);
+		_handleInvitation(sender)
 		return
 	} else if (message.match(/^\[\#\#REJECT\]/)) {
 		if (message.match(/^\[\#\#REJECT\]([A-Z]\d{3})/)) _interpretCommunicationCode(sender, RegExp.$1, 1, true, false)
@@ -2066,6 +2077,20 @@ function _handlePrivateChat(sender, message){
 		writeUserMessage("PM: [" + _name2link(sender) + "] " + message.replace(/^\[\#\#URGENT\]/, ""), 1, "#FF0000")
 		if (currentLayer == 2) writeUserMessage("PM: [" + _name2link(name) + "] " + message.replace(/^\[\#\#URGENT\]/, ""), 2, "#FF0000")
 	}
+}
+
+function _handleInvitation(name){
+  let inviter = users[name]
+  if (!inviter) { client.privateChat(name, "[##REJECT]"); return; }
+  if (board.isPlayer()) { client.privateChat(name, "[##REJECT]C011"); return; }
+  if ($('#modalInvitation').dialog('isOpen') || _challengeUser) { client.privateChat(name, "[##REJECT]C012"); return; }
+
+  if (inviter.listAsWaiter()) {
+    sp.play("INVITATION")
+    $('#modalInvitation').dialog('open')
+    _initModalInvitation(inviter)
+  }
+  //TODO if (me.waitingTournamentId) apiClient.checkTournamentOpponent(me.waitingTournamentId, name)
 }
 
 function _handleMile(result) {

@@ -14,6 +14,12 @@ function _initModalChallenger(user){
     _handleRejectChallenge(user, "C004")
     $('#modalChallenger').dialog('close')
   })
+  $('#rejectReasonSelector').val("C004")
+  $('#rejectReasonSelector').unbind().change(function(){
+    clearInterval(timer)
+    _handleRejectChallenge(user, $(this).val())
+    $('#modalChallenger').dialog('close')
+  })
   let count = 20
   $('#challengerTimerText').html(count)
   let timer = setInterval(function(){
