@@ -50,6 +50,7 @@ class Movement{
         OUTE_SENNICHITE: '反則手',
         SENNICHITE: '千日手',
         JISHOGI: '27点宣言',
+        SUSPEND: '中断',
         CATCH: 'キャッチ!',
         TRY: 'トライ!'
       },
@@ -61,6 +62,7 @@ class Movement{
         OUTE_SENNICHITE: 'Illegal',
         SENNICHITE: 'Repetition',
         JISHOGI: '27-point Rule',
+        SUSPEND: 'Suspended',
         CATCH: 'CATCH!',
         TRY: 'TRY!'
       }
@@ -191,8 +193,16 @@ class Movement{
     } else {
       str = this.toJapaneseNotation(true)
     }
-    str = this.num.toString() + "\t" + str
-    if (this.time != null) str = str + "\t(" + Math.floor(this.time/60) + ":" + (this.time % 60) + "/)"
+    str = this.num.toString() + "   " + str
+    if (this.time != null) str = str + "   (" + Math.floor(this.time/60) + ":" + (this.time % 60) + "/)"
+    return str
+  }
+
+  toKifuNote(){
+    if (this.num == 0 || this.endTypeKey) return ","
+    let str = this.toJapaneseNotation().replace(/[☗☖]/, '') + ","
+    if (this.time != null) str += sec2minsec(this.time)
+    if (this._accumulatedTime != null) str+= "/<br>" + sec2minsec(this._accumulatedTime)
     return str
   }
 
@@ -219,12 +229,7 @@ class Movement{
       return ""
     } else {
       let time = options.show_accumulated_time == 1 ? (this._accumulatedTime || this.time) : this.time
-      if (time < 60) return time.toString()
-      else {
-        let min = Math.floor(time/60).toString()
-        let sec = (100 + (time % 60)).toString()
-        return min + ':' + sec.slice(sec.length - 2)
-      }
+      return sec2minsec(time)
     }
   }
 

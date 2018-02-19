@@ -56,9 +56,9 @@ const RANK_THRESHOLDS = [3500, 2300,
 	800, 700, 600, 500, 1, 0]
 const RANK_NAMES34 = ['GOD', 'KING', 'MINISTER', 'SENATOR', 'SAGE', 'MASTER', 'PROFESSOR', 'DOCTOR', 'TEACHER', 'STUDENT', 'KID', 'INFANT', 'BABY', 'EGG']
 const RANK_THRESHOLDS34 = [15000, 10000, 7000, 5000, 3000, 2000, 1000, 500, 200, 100, 50, 20, 5, 0]
-function makeRankFromRating(v){
+function makeRankFromRating(v, forceJapanese = false){
 	for (let i = 0; i < RANK_THRESHOLDS.length; i++) {
-		if (v >= RANK_THRESHOLDS[i]) return EJ(RANK_NAMES_EN[i], RANK_NAMES_JA[i])
+		if (v >= RANK_THRESHOLDS[i]) return (forceJapanese || i18next.language == "ja") ? RANK_NAMES_JA[i] : RANK_NAMES_EN[i]
 	}
 	return ""
 }
@@ -238,7 +238,7 @@ const OPENING_NAME_EN = {
 	"yagura": "Yagura",
 	"double_ranging": "Double Swinging Rook"
 }
-function openingTypeObject(key){
+function openingTypeObject(key, forceJapanese = false){
   let short = ""
   let tip = ""
   if (key.match(/opposition_(black|white)[01]/)) key = "unknown" // Countermeasure to shogi-server bug
@@ -259,17 +259,17 @@ function openingTypeObject(key){
       default:
         short = HANDICAPS_JA[key]
     }
-    tip = i18next.language == "ja" ? HANDICAPS_JA[key] : HANDICAPS_EN[key]
+    tip = (forceJapanese || i18next.language == "ja") ? HANDICAPS_JA[key] : HANDICAPS_EN[key]
   } else if (key.match(/opposition_(black|white)(\d)/)) {  // key is opening type, and it is swinging rook
     short = "対抗" + (RegExp.$1 == "black" ? "☗" : "☖") + SWINGING_FILE_NAME_JA[RegExp.$2][0]
-    if (i18next.language == "ja") {
+    if (forceJapanese || i18next.language == "ja") {
       tip = "対抗形 " + (RegExp.$1 == "black" ? "☗" : "☖") + SWINGING_FILE_NAME_JA[RegExp.$2]
     } else {
       tip = "Opposition, " + (RegExp.$1 == "black" ? "Black's " : "White's ") + SWINGING_FILE_NAME_EN[RegExp.$2]
     }
 	} else { // key is other opening types
     short = OPENING_NAME_JA[key]
-    if (i18next.language == "ja") {
+    if (forceJapanese || i18next.language == "ja") {
       tip = key == "double_ranging" ? (short + "飛車") : short
     } else {
       tip = OPENING_NAME_EN[key]
@@ -533,4 +533,14 @@ function numJapaneseToInt(str) {
 		}
 	})
 	return i;
+}
+
+function sec2minsec(sec){
+  //integer
+  if (sec < 60) return sec.toString()
+  else {
+    let min = Math.floor(sec/60).toString()
+    let res = (100 + (sec % 60)).toString()
+    return min + ':' + res.slice(1)
+  }
 }

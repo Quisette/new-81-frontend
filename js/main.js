@@ -50,7 +50,7 @@ var hostPlayerName = null
 function _testFunction(phase){
   //phase:integer
   if (phase == 0) { // After creation
-    if (false) {
+    if (true) {
       board.loadNewPosition()
       _switchLayer(2)
       return
@@ -817,6 +817,15 @@ function _kifuDownloadButtonClick(){
   downloadToFile(_generateKIF(), "81Dojo-" + formatDateToText(new Date()) + "-" + board.game.black.name + "-" + board.game.white.name + ".kif")
 }
 
+function _kifuNoteButtonClick(){
+  if (board.game.isStudy()) {
+    writeUserMessage(EJ('This game cannot be exported.', 'この対局は出力できません'), 2, "#FF0000")
+    return
+  }
+  let win = window.open('./kifu_note.html', 'kifu_note')
+  if (!win) alert(EJ('New window could not be opened', 'ウインドウ作成に失敗しました'))
+}
+
 function _shareKifuButtonClick(mode){
   if (board.toKifuURL() != "") shareKifu(mode)
   else writeUserMessage(EJ('This board does not have a kifu URL.', 'この盤面には棋譜URLの設定がありません'), 2, "#FF0000")
@@ -993,6 +1002,7 @@ function _restorePublicKifu(){
 }
 
 function _updateHostPlayer(name){
+  if (!board.game) return
   if (name == hostPlayerName) return
   let prevHostName = hostPlayerName
   hostPlayerName = name
@@ -1059,8 +1069,8 @@ function setBoardConditions(){
   }
   if (board.game.isStudy() && board.isHost()) $("#uploadKifuButton").removeClass("submenu-button-disabled")
   else $("#uploadKifuButton").addClass("submenu-button-disabled")
-  if (board.isPostGame) $("#shareKifuTwitterButton, #shareKifuFacebookButton").removeClass("submenu-button-disabled")
-  else $("#shareKifuTwitterButton, #shareKifuFacebookButton").addClass("submenu-button-disabled")
+  if (board.isPostGame) $("#kifuNoteButton, #shareKifuTwitterButton, #shareKifuFacebookButton").removeClass("submenu-button-disabled")
+  else $("#kifuNoteButton, #shareKifuTwitterButton, #shareKifuFacebookButton").addClass("submenu-button-disabled")
   _allowWatcherChat = $("#receiveWatcherChatCheckBox").is(":checked")
   _kifuModeRadioChange()
 }
@@ -1556,6 +1566,7 @@ function _handleGameEnd(lines, atReconnection = false){
   board.pauseAllTimers()
   _checkLobbyButtonClick(true) //Cancel see lobby button if activated
   let gameEndType = lines.split("\n")[0]
+  board.game.gameEndType = gameEndType
   let result = lines.split("\n")[1]
   clearInterval(_disconnectTimer)
   $("p#disconnectTimer").remove()
@@ -1571,8 +1582,8 @@ function _handleGameEnd(lines, atReconnection = false){
 	//if (GameTimer.soundType >= 2) Byoyomi.sayTimeUp();
   switch (result) {
     case "LOSE":
+      board.setResult(1 - board.myRoleType)
     	board.studyHostType = 2
-    	board.playerNameClassChange(1 - board.myRoleType, "name-winner", true)
       writeUserMessage(EJ("### You Lose ###", "### あなたの負けです ###"), 2, "#DD0088", true)
       sp.gameEnd(false)
     	openResult(-1)
@@ -1585,8 +1596,8 @@ function _handleGameEnd(lines, atReconnection = false){
       */
       break
     case "WIN":
+    	board.setResult(board.myRoleType)
       board.studyHostType = 1
-    	board.playerNameClassChange(board.myRoleType, "name-winner", true)
       writeUserMessage(EJ("### You Win ###\n", "### あなたの勝ちです ###\n"), 2, "#DD0088", true)
       sp.gameEnd(true)
     	openResult(1)
@@ -1596,6 +1607,7 @@ function _handleGameEnd(lines, atReconnection = false){
       */
       break
     case "DRAW":
+    	board.setResult(-1)
     	if (board.myRoleType == 1) board.studyHostType = 2
     	else if (board.myRoleType == 0) board.studyHostType = 1
       writeUserMessage(EJ("### Draw ###\n", "### 引き分け ###\n"), 2, "#DD0088", true)
@@ -1604,12 +1616,12 @@ function _handleGameEnd(lines, atReconnection = false){
     	//history = "  引";
       break
     case "SENTE_WIN":
-    	board.playerNameClassChange(0, "name-winner", true)
+    	board.setResult(0)
       writeUserMessage(EJ("### Sente (or Shitate) Wins ###\n", "### 先手(または下手)の勝ち ###\n"), 2, "#DD0088", true)
       sp.gameEnd(true)
       break
     case "GOTE_WIN":
-    	board.playerNameClassChange(1, "name-winner", true)
+    	board.setResult(1)
       writeUserMessage(EJ("### Gote (or Uwate) Wins ###\n", "### 後手(または上手)の勝ち ###\n"), 2, "#DD0088", true)
       sp.gameEnd(true)
       break
@@ -2495,6 +2507,49 @@ function _generateKIF(){
     }
   })
   return lines.join("\r\n")
+}
+
+function generateKifuNoteObject(){
+  let tmp = board.game.gameId.split("+")[4]
+  let result = ''
+  if (board.result != null){
+    if (board.result == -1) result = '引き分け'
+    else if (board.result == 0) result = (board.game.gameType.match(/^hc/) ? '下手' : '先手') + '勝ち'
+    else if (board.result == 1) result = (board.game.gameType.match(/^hc/) ? '上手' : '後手') + '勝ち'
+    if (board.game.gameEndType && board.game.gameEndType != "RESIGN") result += '(' + Movement.CONST.special_notations_ja[board.game.gameEndType] + ')'
+  }
+  let moveSets = []
+  let moves = []
+  let count = 0
+  board.moves.forEach(function(move){
+    if (move.num == 1 && move.owner == Position.CONST.GOTE) moves.push(',')
+    if (move.num != 0 && !move.endTypeKey) {
+      moves.push(move.toKifuNote())
+      count += 1
+    }
+    if (moves.length == 150) {
+      moveSets.push(moves)
+      moves = []
+    }
+  })
+  if (moves.length > 0) moveSets.push(moves)
+  let obj = {
+    rule: HANDICAPS_JA[board.game.gameType] || "",
+    startedAt: tmp.substr(0,4) + "/" + tmp.substr(4,2) + "/" + tmp.substr(6,2) + "　" + tmp.substr(8,2) + ":" + tmp.substr(10,2),
+    place: '81道場 ' + client.serverName + 'サーバ',
+    thinkingTime: '各 ' + Math.floor(board.game.total/60) + "分 (切れたら1手" + board.game.byoyomi + "秒)",
+    blackName: board.game.black.name + '&nbsp;' + board.game.black.titleName(),
+    whiteName: board.game.white.name + '&nbsp;' + board.game.white.titleName(),
+    blackRank: (board.game.black.provisional ? "(" : "") + makeRankFromRating(board.game.black.rate, true) + (board.game.black.provisional ? ")" : ""),
+    whiteRank: (board.game.white.provisional ? "(" : "") + makeRankFromRating(board.game.white.rate, true) + (board.game.white.provisional ? ")" : ""),
+    moveSets: moveSets,
+    movesCount: count.toString() + '手',
+    result: result,
+    opening: board.game.opening != "*" ? openingTypeObject(board.game.opening, true).tip : '',
+    tournament: board.game.getTournament() ? board.game.getTournament().name() : '',
+    usedTime: '☗ ' + sec2minsec(board.accumulatedTimes[0]) + '&emsp;☖ ' + sec2minsec(board.accumulatedTimes[1])
+  }
+  return obj
 }
 
 function _countGuestGame(){

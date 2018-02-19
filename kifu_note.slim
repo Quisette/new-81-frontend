@@ -1,0 +1,60 @@
+doctype html
+html
+  head
+    meta charset="utf-8"
+    meta http-equiv="X-UA-Compatible" content="IE=edge"
+    title 81Dojo 棋譜ノート
+    link rel="shortcut icon" href="favicon.ico"
+    link rel="stylesheet" type="text/css" href="css/kifu_note.min.css" media="all"
+    script src="js/jquery-2.2.4.min.js"
+    script src="js/kifu_note.js"
+  body
+    section.page
+      table.header
+        tr
+          td.center#head1 rowspan=2 対<br>局<br>者
+          td.center#blackRank
+          td#blackName
+          td.center#head2 棋戦
+          td#tournament
+          td.center#head3 開始
+          td#startedAt
+        tr
+          td.center#whiteRank
+          td#whiteName
+          td.center 対局場
+          td#place
+          td.center 終了
+          td#endedAt
+        tr
+          td.center colspan=2 手合割
+          td#gameType
+          td#comment colspan=2 rowspan=3 備<br>考
+          td.center 手数
+          td#movesCount
+        tr
+          td.center colspan=2 持時間
+          td#thinkingTime
+          td.center 結果
+          td#result
+        tr
+          td.center colspan=2 消費時間
+          td#usedTime
+          td.center 戦型
+          td#opening
+      textarea
+      div#movesWrapper
+        - 3.times do
+          div
+            table.table-moves
+              tr
+                td.center.header-move ☗
+                td.center.header-time 消費/<br>累計
+                td.center.header-move ☖
+                td.center.header-time 消費/<br>累計
+              - 25.times do
+                tr
+                  td.move-box
+                  td.center.time-box
+                  td.move-box
+                  td.center.time-box

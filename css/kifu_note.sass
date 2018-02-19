@@ -1,0 +1,84 @@
+body
+  font-family: serif
+  font-size: 13px
+div
+  margin: 0
+  padding: 0
+
+section
+  width: 185mm
+  border: 1px solid black
+  margin: 0 0 10px 0
+  padding: 0
+  position: relative
+  page-break-after: always
+
+table
+  table-layout: fixed
+  border-collapse: collapse
+  margin: 0
+  td
+    margin: 0
+    padding: 0 0 0 1mm
+    overflow: hidden
+    white-space: nowrap
+  td#comment
+    padding: 0 0 0 2px
+td.center
+  text-align: center
+  padding: 0 0 0 0
+
+table.header
+  border: 1px solid black
+  width: 100%
+  td
+    height: 9mm
+    lien-height: 9mm
+    border: 1px solid black
+  td#head1
+    width: 6mm
+    line-height: 17px
+  td#head2
+    width: 13mm
+  td#head3
+    width: 10mm
+  td#blackRank
+    width: 11mm
+  td#blackName
+    width: 45mm
+  td#tournament
+    width: 55mm
+
+div#movesWrapper
+  display: flex
+  div
+    flex: 1
+
+table.table-moves
+  border: none
+  width: 100%
+  tr:nth-of-type(5n+2)
+    td
+      border-top: 2px solid black
+  td
+    height: 8.3mm
+    line-height: 8.3mm
+    border: 1px solid black
+    &.header-move
+      width: 22mm
+    &.header-time, &.time-box
+      width: 7mm
+      font-size: 2mm
+      line-height: 3.5mm
+      text-align: right
+      padding-right: 3px
+
+textarea
+  position: absolute
+  left: 69mm
+  top: 20mm
+  width: 61mm
+  height: 24mm
+  border: none
+  overflow: hidden
+  background: none

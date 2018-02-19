@@ -30,6 +30,7 @@ class Board{
     this._initialPositionStr = null
     this.moves = new Array()
     this.game = null
+    this.result = null // 0: sente win, 1: gote win, -1: draw
     this._kid = null
     this._rematchReady = [false, false]
     this._arrowsSelf = []
@@ -561,6 +562,13 @@ class Board{
     $("#sq" + x + "_" + y).addClass("square-selected")
   }
 
+  setResult(v){
+    this.result = v // 0: sente win, 1: gote win, -1: draw
+    if (v >= 0) {
+    	board.playerNameClassChange(v, "name-winner", true)
+    }
+  }
+
   setBoardConditions(){
     if (this.isPlaying()) {
       this._canMoveMyPiece = true
@@ -616,6 +624,7 @@ class Board{
     this.myRoleType = null
     this.studyHostType = null
     this.game = null
+    this.result = null
     this.playerInfos[0].find("#player-info-name").removeClass("name-winner name-left name-mouse-out")
     this.playerInfos[1].find("#player-info-name").removeClass("name-winner name-left name-mouse-out")
     this._timers[0].stop()

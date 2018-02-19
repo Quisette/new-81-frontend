@@ -21,6 +21,7 @@ class Game{
     this.password = ""
     this._enteredPassword = ""
     this.status = ""
+    this.gameEndType = null
 		if (game_info[2].match(/\.([0-9a-z]{6})/)) this.password = RegExp.$1
     this.shortId = (this.isStudy() ? "SG" : (black.name.substr(0,1) + white.name.substr(0,1))) + id.substr(id.length - 7, 7)
   }
