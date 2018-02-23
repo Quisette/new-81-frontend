@@ -311,7 +311,11 @@ $(function(){
 
   // Load localStorage
   if (localStorage.login) $('#usernameInput').val(localStorage.login)
-  if (localStorage.dat) $('#passwordInput').val(decaesar(decaesar(localStorage.dat, 81), 3))
+  if (localStorage.dat) {
+    $('#passwordInput').val(decaesar(decaesar(localStorage.dat, 81), 3))
+    $('#hiddenPass').val(decaesar(decaesar(localStorage.dat, 81), 3))
+    maskPass()
+  }
   if (localStorage.dat2) _loginHistory = decaesar(decaesar(localStorage.dat2, 81), 3).split(",")
   if (localStorage.save) $('#loginSave').prop('checked', localStorage.save == 'true')
   $('#languageSelector').val(localStorage.locale || args["locale"] || 'ja')
@@ -513,7 +517,7 @@ function _loginButtonClick(){
   if (client != null) client.close();
   $('#loginAlert').text(i18next.t("login.connecting"))
   let isGuest = $('input[name=loginType]:checked').val() == 1
-  client = new WebSocketClient(server.name, server.host, server.port, isGuest ? 'guest' : $('#usernameInput').val(), isGuest ? 'dojo_guest' : $('#passwordInput').val())
+  client = new WebSocketClient(server.name, server.host, server.port, isGuest ? 'guest' : $('#usernameInput').val(), isGuest ? 'dojo_guest' : $('#hiddenPass').val())
   client.setCallbackFunctions("LOGGED_IN", _handleLoggedIn)
   client.setCallbackFunctions("LOGIN_FAILED", _handleLoginFailed)
   client.setCallbackFunctions("LOBBY_IN", _handleLobbyIn)
@@ -1267,7 +1271,7 @@ function _handleLoggedIn(str){
   $('#loginAlert').text(i18next.t("login.successfull"))
   if ($('input[name=loginType]:checked').val() == 0 && $('#loginSave').prop('checked')) {
     localStorage.login = $('#usernameInput').val()
-    localStorage.dat = caesar(caesar($('#passwordInput').val(), 3), 81)
+    localStorage.dat = caesar(caesar($('#hiddenPass').val(), 3), 81)
     localStorage.save = $('#loginSave').prop('checked')
   }
   $('div#layerLoginContents').animate({opacity: 0}, testMode ? 0 : 1000, function(){

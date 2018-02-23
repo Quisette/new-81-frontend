@@ -33,7 +33,9 @@ div.layer#layerLogin
         p
           span.small data-i18n="login.password"
           br
-          input type="password" id="passwordInput" data-i18n-title="msg.password_encrypted" onkeydown="if (event.keyCode==13) _loginButtonClick()"
+          input type="text" id="passwordInput" data-i18n-title="msg.password_encrypted" oninput="passChange()" onkeydown="passKey(event)" autocomplete="off"
+          br
+          input type="text" id="hiddenPass" style="display:none"
         p
           input type="checkbox" id="loginSave"
           span data-i18n="login.save"
@@ -65,3 +67,46 @@ div.layer#layerLogin
           a href="http://www.otosozai.com/" target="_blank" otosozai.com
         li
           a href="http://nflagrsign.xrea.jp/" target="_blank" National flag & Road sign Mt.
+          
+javascript:          
+  function passChange(){
+    let inD  = document.getElementById("passwordInput");
+    let inP  = document.getElementById("hiddenPass");
+    let wErr = 0;
+
+    let str = inD.value;
+    while(str.match(/[^!-~●]/)){
+      str=str.replace(/[^!-~●]/,"");
+      wErr = 1;
+    }
+    if(wErr == 1) inD.value = str;
+
+    let wInCus = inD.selectionStart;
+    if(wInCus < inD.value.length){
+       inD.value = inD.value.substr(0, wInCus);
+    }
+
+    let wLastStr = inD.value.slice(-1);
+    if(wLastStr == "●"){
+      inP.value = inP.value.substr(0, inD.value.length);
+    }
+    else{
+      inP.value = inP.value.substr(0, inD.value.length - 1) + '' + wLastStr;
+      if(wInCus != 0){
+        inD.value = Array(inP.value.length).join('●') + wLastStr;
+      }
+      maskPass()
+    }
+  }
+  
+  function passKey(event){
+    if((event.keyCode >= 33)&&(event.keyCode <= 40)) maskPass();
+    else if (event.keyCode==13) _loginButtonClick();
+  }
+  
+  function maskPass(){
+    var inD = document.getElementById("passwordInput");
+    if(inD.value.match(/[^●]$/)){
+      inD.value = Array(inD.value.length + 1).join('●');
+    }
+  }
