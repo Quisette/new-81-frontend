@@ -166,11 +166,13 @@ class Position{
 
   getMovableGridsFromSquare(sq){
     //sq:jQuery DIV(square) object
+    return this._getMovableGrids(sq.data('x'), sq.data('y'))
+  }
+
+  _getMovableGrids(x0, y0){
     let squares = new Array()
-    let x0 = sq.data('x')
-    let y0 = sq.data('y')
     if (x0 > 0) {
-      let koma = this.getPieceFromSquare(sq)
+      let koma = this._squares[x0 - 1][y0 - 1]
       let grids = koma.adjacentMoves()
       grids.forEach(function(e){
         let x1 = x0 + e[0]
@@ -211,10 +213,35 @@ class Position{
     // move: Movement
     let koma1
     let koma2
+    // Find piece
     if (move.fromX > 0){
       koma1 = this._squares[move.fromX - 1][move.fromY - 1]
       move.pieceType = koma1.getType()
       if (move.pieceType >= 8) move.promote = false //'promote' might have been set to true temporarily
+      // check promotable
+      if (!koma1.isPromoted() && koma1.isPromotable()){
+        if (koma1.owner) {
+          if (move.fromY <= this._promoteY0 || move.toY <= this._promoteY0) move.promotable = true
+        } else {
+          if (move.fromY >= this._promoteY1 || move.toY >= this._promoteY1) move.promotable = true
+        }
+      }
+    } else {
+      koma1 = this._getPieceFromKomadai(move.owner, move.pieceType)
+    }
+    // Search siblings
+    move.siblingOrigins = []
+    for (let x = this.xmin; x <= this.xmax; x++){
+      for (let y = this.ymin; y <= this.ymax; y++){
+        if (x == move.fromX && y == move.fromY) continue
+        let koma3 = this._squares[x - 1][y - 1]
+        if (koma3 && (koma3.checkSibling() || move.fromX <= 0) && koma3.owner == koma1.owner && koma3.getType() == koma1.getType()) {
+          if (this._getMovableGrids(x, y).map(v => v.toString()).includes(move.toX + ',' + move.toY)) move.siblingOrigins.push([x, y])
+        }
+      }
+    }
+    // Execute move
+    if (move.fromX > 0){
       this._squares[move.fromX - 1][move.fromY - 1] = null
       koma2 = this._squares[move.toX - 1][move.toY - 1]
       if (koma2) {
@@ -224,12 +251,11 @@ class Position{
         move.capture = true
       }
       if (move.promote) koma1.promote()
-      this._squares[move.toX - 1][move.toY - 1] = koma1
     } else {
-      koma1 = this._getPieceFromKomadai(move.owner, move.pieceType)
-      this._squares[move.toX - 1][move.toY - 1] = koma1
       this._removePieceFromKomadai(move.owner, move.pieceType)
     }
+    this._squares[move.toX - 1][move.toY - 1] = koma1
+
     this.turn = !this.turn
     this.lastMove = move
     if (withSound) {

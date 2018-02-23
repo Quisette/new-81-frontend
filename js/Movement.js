@@ -16,7 +16,7 @@ class Movement{
     this.promotable = false
     this.capture = false
     this.toSame = false
-    this.additionalIdentifier = false
+    this.siblingOrigins = []
     this.time = null
     this.branch = false
   }
@@ -136,32 +136,34 @@ class Movement{
     }
   }
 
-  toJapaneseNotation(forFile = false){
-		let alphabet = !forFile && options.notation_style == Movement.CONST.LIST_1TO1
+  toJapaneseNotation(specialPurpose = null){
+    // 1: for KIF file, 2: for Kifu Note
+		let alphabet = !specialPurpose && options.notation_style == Movement.CONST.LIST_1TO1
     let str
 		if (this.toX == this.previousMove.toX && this.toY == this.previousMove.toY) {
 			str = alphabet ? "x " : "同　";
 		} else {
 			str = Movement.CONST.file_japanese_names[this.toX]
-			str += alphabet ? Movement.CONST.file_japanese_names[this.toY] : Movement.CONST.rank_japanese_names[this.toY]
+			str += (specialPurpose == 2 || alphabet) ? Movement.CONST.file_japanese_names[this.toY] : Movement.CONST.rank_japanese_names[this.toY]
 		}
 		str += alphabet ? Movement.CONST.koma_universal_names[this.pieceType] : Movement.CONST.koma_japanese_names[this.pieceType]
 		if (this.fromX == 0 && this.fromY == 0) {
-			if (this.additionalIdentifier || forFile) str += alphabet ? "*" : "打"
+			if (this.siblingOrigins.length > 0 || specialPurpose == 1) str += alphabet ? "*" : "打"
 		} else {
-			if (this.additionalIdentifier && !forFile) {
-				str += "(" + this.fromX.toString() + this.fromY.toString() + ")"
+			if (this.siblingOrigins.length > 0 && specialPurpose != 1) {
+				if (alphabet) str += "(" + this.fromX.toString() + this.fromY.toString() + ")"
+        else str += this._japaneseIdentifier()
 			}
 			if (this.promote) {
 				str += alphabet ? "+" : "成"
-			} else if (!forFile && this.promotable){
+			} else if (specialPurpose != 1 && this.promotable){
 				str += alphabet ? "=" : "不成"
 			}
-			if (forFile) {
+			if (specialPurpose == 1) {
 				str += "(" + this.fromX.toString() + this.fromY.toString() + ")"
 			}
 		}
-    if (!forFile) str = (this.owner == Position.CONST.SENTE ? "☗" : "☖") + str
+    if (!specialPurpose) str = (this.owner == Position.CONST.SENTE ? "☗" : "☖") + str
     return str
   }
 
@@ -170,7 +172,7 @@ class Movement{
 		if (this.fromX == 0 && this.fromY == 0) {
 			str += "*"
 		} else {
-  		if (this.additionalIdentifier) {
+  		if (this.siblingOrigins.length > 0) {
 				str += "(" + this.fromX.toString() + this.fromY.toString() + ")"
   		}
   		str += this.capture ? "x" : "-"
@@ -184,6 +186,53 @@ class Movement{
     return (this.owner == Position.CONST.SENTE ? "☗" : "☖") + str
 	}
 
+  _japaneseIdentifier(){
+    if (this.siblingOrigins.length == 0) return ''
+    let vx = (this.owner == Position.CONST.SENTE ? 1 : -1) * (this.toX - this.fromX)
+    let vy = (this.owner == Position.CONST.SENTE ? 1 : -1) * (this.toY - this.fromY)
+    let selfCandidates = this._identifierCandidates(vx, vy, true)
+    let otherCandidates = []
+    this.siblingOrigins.forEach(function(origin){
+      vx = (this.owner == Position.CONST.SENTE ? 1 : -1) * (this.toX - origin[0])
+      vy = (this.owner == Position.CONST.SENTE ? 1 : -1) * (this.toY - origin[1])
+      otherCandidates = otherCandidates.concat(this._identifierCandidates(vx, vy))
+    }, this)
+    for (let i = 0; i < selfCandidates.length; i++){
+      if (!otherCandidates.includes(selfCandidates[i])) return selfCandidates[i]
+    }
+    return ''
+  }
+
+  _identifierCandidates(vx, vy, self = false){
+    //integer, integer (vector from -> to, direction normalized)
+    let candidates = []
+    if (vy == 0) { // to the sides
+      candidates.push('寄')
+      candidates.push(vx > 0 ? '右' : '左')
+      if (self) candidates.push(vx > 0 ? '右寄' : '左寄')
+    } else if (vx == 0) {
+      if (vy < 0) { // straight forward
+        candidates.push('上')
+        if (self && [3,4,12,13,14,15].includes(this.pieceType)) candidates.push('直')
+      } else { // straight backward
+        candidates.push('引')
+      }
+      if (self && [9, 10].includes(this.pieceType)) {
+        candidates.push('右')
+        candidates.push('左')
+      }
+    } else if (vy < 0) { // diagonally forward
+      candidates.push('上')
+      candidates.push(vx > 0 ? '右' : '左')
+      if (self) candidates.push(vx > 0 ? '右上' : '左上')
+    } else { // diagonally backward
+      candidates.push('引')
+      candidates.push(vx > 0 ? '右' : '左')
+      if (self) candidates.push(vx > 0 ? '右引' : '左引')
+    }
+    return candidates
+  }
+
   toKIF(){
     let str = ""
     if (this.num == 0) return null
@@ -191,7 +240,7 @@ class Movement{
       if (this.endTypeKey == "RESIGN") str = "投了"
       else return null
     } else {
-      str = this.toJapaneseNotation(true)
+      str = this.toJapaneseNotation(1)
     }
     str = this.num.toString() + "   " + str
     if (this.time != null) str = str + "   (" + Math.floor(this.time/60) + ":" + (this.time % 60) + "/)"
@@ -200,7 +249,7 @@ class Movement{
 
   toKifuNote(){
     if (this.num == 0 || this.endTypeKey) return ","
-    let str = this.toJapaneseNotation().replace(/[☗☖]/, '') + ","
+    let str = this.toJapaneseNotation(2) + ","
     if (this.time != null) str += sec2minsec(this.time)
     if (this._accumulatedTime != null) str+= "/<br>" + sec2minsec(this._accumulatedTime)
     return str

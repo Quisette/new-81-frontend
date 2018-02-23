@@ -14,6 +14,7 @@ class Board{
     this.playerInfos = new Array(2)
     this._timers = new Array(2)
     this.accumulatedTimes = new Array(2)
+    this.endTime = null
     this._flags = new Array(2)
     this._publicPosition
     this._position
@@ -629,6 +630,7 @@ class Board{
     this.playerInfos[1].find("#player-info-name").removeClass("name-winner name-left name-mouse-out")
     this._timers[0].stop()
     this._timers[1].stop()
+    this.endTime = null
   }
 
   rematch(turn){

@@ -1573,6 +1573,7 @@ function _handleGameEnd(lines, atReconnection = false){
   board.isPostGame = true
   let move = new Movement(board.getFinalMove())
   move.setGameEnd(gameEndType) //turn too?
+  board.endTime = moment()
   if (gameEndType != "SUSPEND") {
     board.moves.push(move) //refresh list too
     if (!kifuGrid.row(':last').data().branch) board.addMoveToKifuGrid(move)
@@ -1740,7 +1741,10 @@ function _handleMonitor(str){
       board.handleMonitorMove(move)
     })
   }
-  if (gameEndStr != "") _handleGameEnd(gameEndStr)
+  if (gameEndStr != "") {
+    _handleGameEnd(gameEndStr)
+    if (since_last_move > 0) board.endTime.add((-1)*since_last_move, 'seconds')
+  }
 }
 
 function _handleReconnect(str){
@@ -2510,6 +2514,8 @@ function _generateKIF(){
 }
 
 function generateKifuNoteObject(){
+  if (!board.game) return null
+  if (board.game.isStudy() || !board.game.gameEndType) return null
   let tmp = board.game.gameId.split("+")[4]
   let result = ''
   if (board.result != null){
@@ -2536,6 +2542,7 @@ function generateKifuNoteObject(){
   let obj = {
     rule: HANDICAPS_JA[board.game.gameType] || "",
     startedAt: tmp.substr(0,4) + "/" + tmp.substr(4,2) + "/" + tmp.substr(6,2) + "　" + tmp.substr(8,2) + ":" + tmp.substr(10,2),
+    endedAt: board.endTime.tz('Asia/Tokyo').format('YYYY/MM/DD　HH:mm'),
     place: '81道場 ' + client.serverName + 'サーバ',
     thinkingTime: '各 ' + Math.floor(board.game.total/60) + "分 (切れたら1手" + board.game.byoyomi + "秒)",
     blackName: board.game.black.name + '&nbsp;' + board.game.black.titleName(),

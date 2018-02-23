@@ -78,6 +78,10 @@ class Piece{
     // integer (how many rows are ahead of the piece until the end of the opponent side)
     return false
   }
+
+  checkSibling(){ //whether the piece needs to check siblings when moved
+    return true
+  }
 }
 
 class PieceOU extends Piece{
@@ -101,6 +105,9 @@ class PieceOU extends Piece{
     return true
   }
   isPromotable(){
+    return false
+  }
+  checkSibling(){
     return false
   }
 }
@@ -239,6 +246,9 @@ class PieceKY extends Piece{
   mustPromote(rowsAhead){
     return !this._promoted && rowsAhead < 1
   }
+  checkSibling(){
+    return this._promoted
+  }
 }
 
 class PieceFU extends Piece{
@@ -263,5 +273,8 @@ class PieceFU extends Piece{
   }
   mustPromote(rowsAhead){
     return !this._promoted && rowsAhead < 1
+  }
+  checkSibling(){
+    return this._promoted
   }
 }
