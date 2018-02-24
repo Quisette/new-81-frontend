@@ -771,18 +771,20 @@ function _clearArrowsButtonClick(){
 	}
 }
 
-function _giveHostButtonClick(){
+function _giveHostButtonClick(user = null){
   if (!board.isHost()) return
-  let user = null
-  if (!board.game.isStudy()) {
-    if (board.game.white.name != me.name && board.isPlayerPresent(1)) {
-      user = board.game.white
-    } else if (board.game.black.name != me.name && board.isPlayerPresent(0)) {
-      user = board.game.black
+  if (user == null) {
+    if (!board.game.isStudy()) {
+      if (board.game.white.name != me.name && board.isPlayerPresent(1)) {
+        user = board.game.white
+      } else if (board.game.black.name != me.name && board.isPlayerPresent(0)) {
+        user = board.game.black
+      }
     }
+    // TODO give host to one of the watchers if there is no player
   }
-  // TODO give host to one of the watchers is there is no player
   if (user) {
+    // TODO Need to check here again whether the user is present in the game room
 		client.gameChat("[##GIVEHOST]" + user.name)
     board.studyHostType = 1
     setBoardConditions()
@@ -1064,13 +1066,10 @@ function setBoardConditions(){
   else $("#logoutButton").addClass("button-disabled")
   if (board.onListen) $("input[name=kifuModeRadio]:eq(1)").prop("checked", true)
   else $("input[name=kifuModeRadio]:eq(0)").prop("checked", true)
-  if (board.isHost()) {
-    $("#giveHostButton").removeClass("button-disabled")
-    $(".give-subhost-button").css('display', 'initial')
-  } else {
-    $("#giveHostButton").addClass("button-disabled")
-    $(".give-subhost-button").css('display', 'none')
-  }
+  if (board.isHost()) $(".buttons-for-host").css('display', 'initial')
+  else $(".buttons-for-host").css('display', 'none')
+  if (board.isHost() && board.isPlayer()) $("#giveHostButton").removeClass("button-disabled")
+  else $("#giveHostButton").addClass("button-disabled")
   if (board.game.isStudy() && board.isHost()) $("#uploadKifuButton").removeClass("submenu-button-disabled")
   else $("#uploadKifuButton").addClass("submenu-button-disabled")
   if (board.isPostGame) $("#kifuNoteButton, #shareKifuTwitterButton, #shareKifuFacebookButton").removeClass("submenu-button-disabled")
@@ -1161,13 +1160,14 @@ function _openPlayerInfo(user, doOpen = true){
         if (element.find("#privateMessageArea").html() == "") element.dialog('destroy').remove()
       },
       buttons: [
-        {text: "", class: "fa fa-user-plus font-fa give-subhost-button", title: i18next.t("board.give_subhost"), click: function(){_giveSubhostButtonClick(user)}},
+        {text: "", class: "fa fa-graduation-cap font-fa buttons-for-host connected-button-left", title: i18next.t("board.give_host"), click: function(){_giveHostButtonClick(user)}},
+        {text: "", class: "fa fa-user-plus font-fa buttons-for-host connected-button-right", title: i18next.t("board.give_subhost"), click: function(){_giveSubhostButtonClick(user)}},
         {text: i18next.t("player_info.challenge"), click: function(){_playerChallengeClick(user); $(this).dialog('close')}},
-        {text: i18next.t("player_info.detail"), click: function(){_playerDetailClick(user)}},
-        {text: "PM", click: function(){_playerPMClick(this)}}
+        {text: "", class: "fa fa-info-circle font-fa", title: i18next.t("player_info.detail"), click: function(){_playerDetailClick(user)}},
+        {text: "", class: "fa fa-comment font-fa", title: 'PM', click: function(){_playerPMClick(this)}}
       ]
     })
-    if (!board.isHost()) element.siblings('.ui-dialog-buttonpane').find('.give-subhost-button').css('display', 'none')
+    if (!board.isHost()) element.siblings('.ui-dialog-buttonpane').find('.buttons-for-host').css('display', 'none')
     if (user.isGuest) element.find("#privateChatInput").prop('disabled', true)
     element.find("#privateChatInput").on('keyup', function(e){
       if (e.keyCode == 13){

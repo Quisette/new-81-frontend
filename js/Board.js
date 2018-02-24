@@ -234,6 +234,10 @@ class Board{
   setGame(game){
     this.game = game
     this.displayPlayerInfos()
+    if (!this.game.isStudy()) {
+      if (!this.game.isBlackIn && this.game.black.name != me.name) this.playerNameClassChange(0, "name-left", true)
+      if (!this.game.isWhiteIn && this.game.white.name != me.name) this.playerNameClassChange(1, "name-left", true)
+    }
   }
 
   setDirection(direction){
