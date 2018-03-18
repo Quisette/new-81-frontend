@@ -1613,8 +1613,8 @@ function _handleGameEnd(lines, atReconnection = false){
       break
     case "DRAW":
     	board.setResult(-1)
-    	if (board.myRoleType == 1) board.studyHostType = 2
-    	else if (board.myRoleType == 0) board.studyHostType = 1
+    	if (board.myRoleType == 1) board.studyHostType = 1
+    	else if (board.myRoleType == 0) board.studyHostType = 2
       writeUserMessage(EJ("### Draw ###\n", "### 引き分け ###\n"), 2, "#DD0088", true)
       sp.gameEnd(true)
     	if (board.isPlayer() && !atReconnection) openResult(0)
@@ -1632,7 +1632,7 @@ function _handleGameEnd(lines, atReconnection = false){
       break
   }
   // Set host status
-  if (board.isPlayer() && board.game.gameType == "hc") {
+  if (board.isPlayer() && board.game.gameType.match(/^hc/)) {
 	  if (board.myRoleType == 0) board.studyHostType = 1
     else board.studyHostType = 2
   }
@@ -2095,8 +2095,9 @@ function _handlePrivateChat(sender, message){
   _playerPMClick(playerWindow, true)
   if (!playerWindow.dialog('isOpen') && !board.isPlaying()) {
 		writeUserMessage("PM: [" + _name2link(sender) + "] " + message.replace(/^\[\#\#URGENT\]/, ""), 1, "#FF0000")
-		if (currentLayer == 2) writeUserMessage("PM: [" + _name2link(name) + "] " + message.replace(/^\[\#\#URGENT\]/, ""), 2, "#FF0000")
+		if (currentLayer == 2) writeUserMessage("PM: [" + _name2link(sender) + "] " + message.replace(/^\[\#\#URGENT\]/, ""), 2, "#FF0000")
 	}
+  if (!board.isPlaying()) sp.chatPrivate()
 }
 
 function _handleInvitation(name){
@@ -2125,7 +2126,7 @@ function _handleMile(result) {
 }
 
 function _handleWins(wins) {
-	client.chat("[##WINS]" + wins)
+	if (parseInt(wins) % 100 == 0) client.chat("[##WINS]" + wins)
 }
 
 function _handleExp(str) {

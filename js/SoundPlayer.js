@@ -82,8 +82,8 @@ class SoundPlayer{
     if (this.chatBoardEnabled) this.play("CHAT2")
   }
 
-  chatPrivate(currentLayer){
-    if (currentLayer == 1 && this.chatLobbyEnabled || currentLayer == 2 && this.chatBoardEnabled) this.play("NOTIFY")
+  chatPrivate(){
+    this.play("NOTIFY")
   }
 
   gameStart(){

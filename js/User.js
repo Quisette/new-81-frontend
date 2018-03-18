@@ -143,7 +143,9 @@ class User{
     let rateStr = this.rate
     if (this.provisional) rateStr = "*" + this.rate
     if (this.rate == 0) rateStr = "????"
-    let rankStr = this.provisional ? "-" : coloredSpan(makeRankFromRating(this.rate), makeColorFromRating(this.rate))
+    let rankStr = (this.provisional && this.rate < 3000) ? "-" : coloredSpan(makeRankFromRating(this.rate), makeColorFromRating(this.rate))
+
+    let nameLimited = '<span style="display:inline-block;width:100px;">' + this.name + '</span>'
 
     let markStr = ""
     if (this._isSelf) markStr += coloredSpan('<i class="fa fa-info-circle"></i>', '#5b1', 13, i18next.t("lobby.attr_self"))
@@ -159,11 +161,11 @@ class User{
       title: this.titleTag(),
       rank: rankStr,
       name: this.name,
-      nameStr: markStr + (this.idle ? coloredSpan(this.name, '#00f') : this.name),
-      watcher: hostStr + markStr + this.name,
+      nameStr: markStr + (this.idle ? coloredSpan(nameLimited, '#00f') : nameLimited),
+      watcher: hostStr + markStr + nameLimited,
       country: this.country.flagImgTag16() + ' ' + this.country.name3Tag(),
       rate: rateStr,
-      waiter: this.country.flagImgTag27() + ' ' + coloredSpan('■', makeColorFromRating(this.rate)) + ' ' + (this.idle ? coloredSpan(this.name, '#00f') : this.name),
+      waiter: this.country.flagImgTag27() + ' ' + coloredSpan('■', makeColorFromRating(this.rate)) + ' ' + (this.idle ? coloredSpan(nameLimited, '#00f') : nameLimited),
       ruleStr: ruleStr,
       timeStr: timeStr
 		}
