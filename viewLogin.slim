@@ -13,6 +13,8 @@ div.layer#layerLogin
           option value="fr" data-code="250" Français
           option value="pt" data-code="620" Português
           option value="es" data-code="724" Español
+          option value="zh" data-code="156" 简体中文
+          option value="ru" data-code="643" Русский
         input#openingMusicCheckBox data-i18n-title="login.music" style="margin: 4px 0 0 15px" type="checkbox" checked="true" onclick="_openingMusicCheckBoxClick()"
         i.fa.fa-music.fa-lg data-i18n-title="login.music"
     p.margin-medium
@@ -76,8 +78,8 @@ javascript:
     let wErr = 0;
 
     let str = inD.value;
-    while(str.match(/[^!-~●]/)){
-      str=str.replace(/[^!-~●]/,"");
+    while(str.match(/[^!-~☗]/)){
+      str=str.replace(/[^!-~☗]/,"");
       wErr = 1;
     }
     if(wErr == 1) inD.value = str;
@@ -88,13 +90,13 @@ javascript:
     }
 
     let wLastStr = inD.value.slice(-1);
-    if(wLastStr == "●"){
+    if(wLastStr == "☗"){
       inP.value = inP.value.substr(0, inD.value.length);
     }
     else{
       inP.value = inP.value.substr(0, inD.value.length - 1) + '' + wLastStr;
       if(wInCus != 0){
-        inD.value = Array(inP.value.length).join('●') + wLastStr;
+        inD.value = Array(inP.value.length).join('☗') + wLastStr;
       }
       maskPass()
     }
@@ -107,7 +109,7 @@ javascript:
   
   function maskPass(){
     var inD = document.getElementById("passwordInput");
-    if(inD.value.match(/[^●]$/)){
-      inD.value = Array(inD.value.length + 1).join('●');
+    if(inD.value.match(/[^☗]$/)){
+      inD.value = Array(inD.value.length + 1).join('☗');
     }
   }
