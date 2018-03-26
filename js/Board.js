@@ -61,6 +61,10 @@ class Board{
     this._arrowCanvas = $('<canvas></canvas>', {id: 'boardCanvas'}).attr({width: this._originalWidth, height: this._originalHeight}).appendTo(this._div)
     this._pickedPiece = $('<div></div>', {class: 'picked-piece'})
     this.hostMark = $('<i></i>', {class: 'fa fa-graduation-cap fa-lg'}).css('color', '#008')
+    let thisInstance = this
+    $('#senteKomadai, #goteKomadai').click(function(e){
+      thisInstance._handleKomadaiClick()
+    })
   }
 
   _setTheme(){
@@ -189,8 +193,9 @@ class Board{
         hash[piece.CSA].x += hash[piece.CSA].dx
         sq.css('background-image', 'url(img/themes/' + this._theme + '/' + piece.toImagePath(!this._direction) + ')')
         let thisInstance = this
-        sq.on("click", function(){
+        sq.on("click", function(e){
           thisInstance._handleSquareClick($(this))
+          e.stopPropagation()
         })
         sq.on("mousedown", function(){
           thisInstance._handleSquareMouseDown($(this))
@@ -436,6 +441,10 @@ class Board{
         this._cancelSelect()
       }
     }
+  }
+
+  _handleKomadaiClick(){
+    if (this._selectedSquare) this._cancelSelect()
   }
 
   _pickUpPiece(sq){
