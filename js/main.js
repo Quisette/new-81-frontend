@@ -238,12 +238,13 @@ $(function(){
       {data: "ruleShort", width: "16%", bSortable: false},
       {data: "movesStr", width: "7%", bSortable: false},
       {data: "watchersStr", width: "7%", bSortable: false},
-      {data: "openingStr", width: "12%", bSortable: false}
+      {data: "openingStr", width: "12%", bSortable: false},
+      {data: "maxRate", width: "0%", visible: false}
     ],
     rowId: "gameId",
     searching: false, paging: false, info: false,
     select: "single",
-    order: false,
+    order: [[6, 'desc']],
     scrollY: true
   })
   gameGrid.clear()
@@ -1001,9 +1002,11 @@ function _replayButtonClick(v){
 }
 
 function _restorePublicKifu(){
+  let index = kifuGrid.row({selected: true}).index()
   if (board.moves.length <= 1) return
   kifuGrid.clear()
   kifuGrid.rows.add(board.moves)
+  kifuGrid.row(index).select()
   drawGridMaintainScroll(kifuGrid)
 }
 
@@ -1172,11 +1175,15 @@ function _openPlayerInfo(user, doOpen = true){
     element.find("#privateChatInput").on('keyup', function(e){
       if (e.keyCode == 13){
         if ($(this).val().length > 0) {
-          client.privateChat(user.name, $(this).val())
-          let area = element.find("#privateMessageArea")
-          $('<span></span>',{}).css('color', '#33f').text($(this).val()).appendTo(area)
-          area.append('<br>')
-          area.animate({scrollTop: area[0].scrollHeight}, 'fast')
+          if (board.isPlaying()){
+            showAlertDialog("pm_while_playing")
+          } else {
+            client.privateChat(user.name, $(this).val())
+            let area = element.find("#privateMessageArea")
+            $('<span></span>',{}).css('color', '#33f').text($(this).val()).appendTo(area)
+            area.append('<br>')
+            area.animate({scrollTop: area[0].scrollHeight}, 'fast')
+          }
           $(this).val('')
         }
       }
@@ -1369,11 +1376,6 @@ function _handleList(str){
 		game.setFromList(parseInt(tokens[1]), tokens[6], tokens[7] == "true", tokens[8] == "true", parseInt(tokens[9]), tokens[10])
     if (game.isMyDisconnectedGame()) autoReconnectedGame = game
     games.push(game)
-  })
-  games.sort(function(a, b){
-    if (a.maxRate() < b.maxRate()) return 1
-    if (a.maxRate() > b.maxRate()) return -1
-    return 0
   })
   gameGrid.rows.add(games)
   gameGrid.draw()
