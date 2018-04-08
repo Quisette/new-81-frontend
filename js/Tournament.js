@@ -29,4 +29,11 @@ class Tournament{
   url(){
     return 'http://system.81dojo.com/' + EJ('en', 'ja') + '/tournaments/' + this._data.id
   }
+
+  withinPeriod(){
+    let startMoment = moment(this._data.starts_at)
+    let endMoment = moment(this._data.ends_at)
+    let now = moment()
+    return now.isAfter(startMoment) && now.isBefore(endMoment)
+  }
 }

@@ -782,7 +782,7 @@ function _giveHostButtonClick(user = null){
         user = board.game.black
       }
     }
-    // TODO give host to one of the watchers if there is no player
+    // TODO give host to one of the watchers if there is no player or a rematch is agreed
   }
   if (user) {
     // TODO Need to check here again whether the user is present in the game room
@@ -880,12 +880,13 @@ function _allowWatcherChatClick(){
 function _closeBoard(){
   if (board.isHost()) _giveHostButtonClick()
   if (board.isPlayer()) {
-    client.closeGame()
+    client.closeGame() //TODO remove this when rematch is agreed as CLOSE has been already sent
     _writeAfterCloseBoardMessage()
   }
   else if (board.isWatcher()) client.monitor(board.game.gameId, false)
   _checkLobbyButtonClick(true) //Cancel see lobby button if activated
   _refreshLobby()
+  _updateHostPlayer(null)
   board.close() //board.game is null after this line!
   _switchLayer(1)
   $('#boardMessageArea').empty()
@@ -895,7 +896,6 @@ function _closeBoard(){
   _studyBase = null
   _studyBranchMoves = null
   _opponentDisconnectCount = 0
-  _updateHostPlayer(null)
   forceKifuMode(1)
   _kifuModeRadioChange()
 }
@@ -1210,6 +1210,8 @@ function _playerChallengeClick(user){
   } else if (user.listAsWaiter()) {
     if (user.waitingTournamentId && !user.waitingChallengeableTournament()) {
   	  writeUserMessage(EJ("You are not registered to this tournament.", "この大会には参加していません。"), 1, "#ff0000")
+    } else if (user.waitingTournamentId && !tournaments[user.waitingTournamentId].withinPeriod()) {
+  	  writeUserMessage(EJ("It is outside the tournament period right now.", "現在、大会開催期間外です。"), 1, "#ff0000")
     } else if (user.rate >= RANK_THRESHOLDS[2] && me.provisional && user.waitingGameName.match(/^r_/)) {
   	  writeUserMessage(i18next.t("msg.no_challenge_6dan"), 1, "#008800")
     } else if (_checkGuestGamesExpired()) {
@@ -1992,6 +1994,7 @@ function _handleGameChat(sender, message){
     let turn = board.getPlayerRoleFromName(sender)
     if (turn != null) board.playerNameClassChange(turn, 'name-mouse-out', isOut)
 	} else if (message.match(/^\[##GIVEHOST\](.+)$/)) {
+    if (!board.isPostGame) return
     let newHost = RegExp.$1
 		if (newHost == me.name) {
       sendStudy()
@@ -2021,6 +2024,7 @@ function _handleGameChat(sender, message){
 			writeUserMessage(i18next.t("msg.rematch_agreed"), 2, "#008800", true)
 			if (board.isPlayer()) {
         client.closeGame()
+        //TODO Have to give host to one of the watchers
 				client.rematch(board.game, board.myRoleType)
 			} else {
         $("#rematchButton").removeClass("button-disabled")
