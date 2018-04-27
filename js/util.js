@@ -58,7 +58,7 @@ const RANK_NAMES34 = ['GOD', 'KING', 'MINISTER', 'SENATOR', 'SAGE', 'MASTER', 'P
 const RANK_THRESHOLDS34 = [15000, 10000, 7000, 5000, 3000, 2000, 1000, 500, 200, 100, 50, 20, 5, 0]
 function makeRankFromRating(v, forceJapanese = false){
 	for (let i = 0; i < RANK_THRESHOLDS.length; i++) {
-		if (v >= RANK_THRESHOLDS[i]) return (forceJapanese || i18next.language == "ja") ? RANK_NAMES_JA[i] : RANK_NAMES_EN[i]
+		if (v >= RANK_THRESHOLDS[i]) return (forceJapanese || i18next.language == "ja" || i18next.language == "zh") ? RANK_NAMES_JA[i] : RANK_NAMES_EN[i]
 	}
 	return ""
 }

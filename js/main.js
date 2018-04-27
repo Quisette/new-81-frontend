@@ -1204,9 +1204,9 @@ function _openPlayerInfo(user, doOpen = true){
 function _playerChallengeClick(user){
   if (user == me) return
   if (board.isPlayer()) {
-	  writeUserMessage(i18next("msg.still_in_game"), 1, "#008800")
+	  writeUserMessage(i18next.t("msg.still_in_game"), 1, "#008800")
   } else if (_challengeUser) {
-	  writeUserMessage(i18next("msg.challenge_only_one"), 1, "#008800")
+	  writeUserMessage(i18next.t("msg.challenge_only_one"), 1, "#008800")
   } else if (user.listAsWaiter()) {
     if (user.waitingTournamentId && !user.waitingChallengeableTournament()) {
   	  writeUserMessage(EJ("You are not registered to this tournament.", "この大会には参加していません。"), 1, "#ff0000")
@@ -1223,8 +1223,13 @@ function _playerChallengeClick(user){
 			writeUserMessage(i18next.t("msg.no_guest_rating"), 1, "#ff0000")
 	  } else {
 		  _challengeUser = user
-		  writeUserMessage(EJ("Challenging " + _challengeUser.name + "..... (Must wait for 20 seconds max)", _challengeUser.name + "さんに挑戦中..... (待ち時間 最大で20秒)"), 1, "#008800", true)
 		  client.challenge(_challengeUser)
+		  writeUserMessage(EJ("Challenging " + _challengeUser.name + "..... ", _challengeUser.name + "さんに挑戦中..... "), 1, "#008800", true, false)
+      $('#challengeCanceler').remove()
+      $('#lobbyMessageArea').append('<a id="challengeCanceler" href="#" onclick="_cancelChallenge($(this))">[' + i18next.t("cancel") + ']</a><br>')
+      if (getPremium() == 1) setGeneralTimeout("SHOW_CHALLENGE_CANCELER", 10000, true)
+      else if (getPremium() == 2) setGeneralTimeout("SHOW_CHALLENGE_CANCELER", 5000, true)
+      else if (getPremium() >= 3) $('#challengeCanceler').show()
       setGeneralTimeout("CHALLENGE", 28000)
 	  }
   // Opponent is not waiting -> Send invitation if possible
@@ -1240,6 +1245,16 @@ function _playerChallengeClick(user){
 		me.waitingGameName.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/)
 		client.privateChat(user.name, "[##INVITE]" + RegExp.$3 + "," + RegExp.$4 + "," + RegExp.$1)
 		writeUserMessage(EJ("The opponent is not waiting with own game rule. Instead, an invitation to your game has been sent to him.", "相手は対局待をしていません。代わりに自分の対局への招待メッセージを" + user.name + "さんに送信しました。(拒否された場合は連続送信しないで下さい)"), 1, "#008800")
+	}
+}
+
+function _cancelChallenge(canceler){
+  clearGeneralTimeout("CHALLENGE")
+  canceler.after('<span class="canceled">' + i18next.t("lobby.canceled") + '</span>')
+  canceler.remove()
+	if (_challengeUser) {
+		_challengeUser = null
+		client.decline("C031")
 	}
 }
 
@@ -1473,7 +1488,8 @@ function _handleChallenger(name){
 }
 
 function _handleAccept(str){
-  clearGeneralTimeout["CHALLENGE"]
+  $('#challengeCanceler').remove()
+  clearGeneralTimeout("CHALLENGE")
 	_gameAccepted = true
 	//_acceptedCancelTimer.reset();
 	//_acceptedCancelTimer.start();
@@ -1483,7 +1499,8 @@ function _handleAccept(str){
 
 function _handleDecline(str){
 //	_acceptedCancelTimer.stop();
-  clearGeneralTimeout["CHALLENGE"]
+  $('#challengeCanceler').remove()
+  clearGeneralTimeout("CHALLENGE")
 	if (str.match(/^([A-Z]\d{3})/)) {
 		_interpretCommunicationCode("", RegExp.$1, 1, true, false)
 	} else {
@@ -2401,12 +2418,15 @@ function _handleGeneralTimeout(key){
   timeouts[key] = false
   switch (key) {
     case "CHALLENGE":
+      $('#challengeCanceler').remove()
   		if (_challengeUser) {
   			_challengeUser = null
   			writeUserMessage(i18next.t("msg.no_answer"), 1, "#008800", true)
   			client.decline("C031")
   		}
       break
+    case "SHOW_CHALLENGE_CANCELER":
+      $('#challengeCanceler').show()
     case "REFRESH":
       $("#refreshButton").removeClass("button-disabled")
       break
