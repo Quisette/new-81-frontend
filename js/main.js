@@ -968,13 +968,16 @@ function forceKifuMode(val){
   }
 }
 
-function _kifuSelected(index){
+function _kifuSelected(index, subhost_override = false){
+  // If subhost-override is enabled, subhost is allowed to select a position
+  // while acting like a host and staying in listen mode
+  let actAsHost = board.isHost() || subhost_override && board.isSubHost()
   if (kifuGrid.row(':last').data().branch && !kifuGrid.row(index).data().branch) {
     _restorePublicKifu()
-    if (board.isHost()) _sendAutoChat("#G003")
+    if (actAsHost) _sendAutoChat("#G003")
   }
   board.replayMoves(kifuGrid.rows(Array.from(Array(index+1).keys())).data())
-  if (board.isHost()) {
+  if (actAsHost) {
     sendStudy(index)
   } else {
     forceKifuMode(0)
@@ -1007,7 +1010,7 @@ function _replayButtonClick(v){
   }
   kifuGrid.row(index).select()
   scrollGridToSelected(kifuGrid)
-  _kifuSelected(index)
+  _kifuSelected(index, v == -1) // Subhost's-override is enabled if v is -1
 }
 
 function _restorePublicKifu(){
@@ -2037,7 +2040,7 @@ function _handleGameChat(sender, message){
     _updateHostPlayer(newHost)
 	} else if (message.match(/^\[##SUBHOST_ON\](.+)$/)) {
 		if (RegExp.$1 == me.name) {
-			writeUserMessage(i18next.t("msg.subhost_given"), 2, "#008800", true)
+			writeUserMessage(i18next.t("msg.subhost"), 2, "#008800", true)
 			board.studyHostType = 1
       setBoardConditions()
 		} else {
