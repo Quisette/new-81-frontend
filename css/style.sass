@@ -279,6 +279,11 @@ div#worldClocks
   display: flex
   justify-content: center
   align-items: center
+  padding: 0 8px
+  overflow: hidden
+div.clocks-reduced
+  div.clock-secondary
+    display: none
 div.clock-box
   height: 40px
   padding: 5px 7px
@@ -600,10 +605,14 @@ div#modalResult
     padding: 0
     margin: 0
     font-size: 16px
-  .rank-change
+  .rank-up
     margin-left: 4px
     font-weight: bold
     color: $KeyColor
+  .rank-down
+    margin-left: 4px
+    font-weight: bold
+    color: black
 
 div#pieceDesignSelector
   overflow-y: scroll

@@ -144,16 +144,8 @@ class User{
     if (this.provisional) rateStr = "*" + this.rate
     if (this.rate == 0) rateStr = "????"
     let rankStr = (this.provisional && this.rate < 3000) ? "-" : coloredSpan(makeRankFromRating(this.rate), makeColorFromRating(this.rate))
-
     let nameLimited = '<span style="display:inline-block;width:100px;">' + this.name + '</span>'
-
-    let markStr = ""
-    if (this._isSelf) markStr += coloredSpan('<i class="fa fa-info-circle"></i>', '#5b1', 13, i18next.t("lobby.attr_self"))
-    else {
-      if (this._isTournamentMember) markStr += coloredSpan('<i class="fa fa-crosshairs"></i>', 'red', 12, i18next.t("lobby.attr_tournament"))
-      if (this._isFavorite) markStr += coloredSpan('<i class="fa fa-star"></i>', 'orange', 12, i18next.t("lobby.attr_favorite"))
-      if (this._isCircleMember) markStr += coloredSpan('<i class="fa fa-circle-o"></i>', '#5b1', 12, i18next.t("lobby.attr_club"))
-    }
+    let markStr = this.generateMark()
     let hostStr = this.name == hostPlayerName ? coloredSpan('<i class="fa fa-graduation-cap"></i>', '#008', 15, i18next.t("board.attr_host")) : ''
 
     return {
@@ -169,6 +161,17 @@ class User{
       ruleStr: ruleStr,
       timeStr: timeStr
 		}
+  }
+
+  generateMark(){
+    let markStr = ""
+    if (this._isSelf) markStr += coloredSpan('<i class="fa fa-info-circle"></i>', '#5b1', 13, i18next.t("lobby.attr_self"))
+    else {
+      if (this._isTournamentMember) markStr += coloredSpan('<i class="fa fa-crosshairs"></i>', 'red', 12, i18next.t("lobby.attr_tournament"))
+      if (this._isFavorite) markStr += coloredSpan('<i class="fa fa-star"></i>', 'orange', 12, i18next.t("lobby.attr_favorite"))
+      if (this._isCircleMember) markStr += coloredSpan('<i class="fa fa-circle-o"></i>', '#5b1', 12, i18next.t("lobby.attr_club"))
+    }
+    return markStr
   }
 
   avatarURL(){

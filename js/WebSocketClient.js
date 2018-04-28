@@ -13,6 +13,7 @@ class WebSocketClient {
     this._readingGameSummary = false
     this.status = null // 0:connected, 1:challenging, 2:now-playing-my-game
     this.resignTime = 0
+    this._idle = false
   }
 
   setCallbackFunctions(key, func){
@@ -308,6 +309,13 @@ class WebSocketClient {
 		//if (now_date.month == 7 && now_date.date == 1 && diff > 0) diff = 2 * diff;
 		this.send("%%MILE " + pass + " " + diff)
 	}
+
+  idle(onoff) {
+    if (onoff != this._idle) {
+      this._idle = onoff
+      this.send("%%IDLE " + (this._idle ? "1" : "0"))
+    }
+  }
 
   send(str){
     this._socket.send(str);

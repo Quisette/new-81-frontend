@@ -382,7 +382,7 @@ $(function(){
 			}
     }
   })
-  $("#passwordInput").tooltip()
+  $("#passwordInput").tooltip({position:{my:'right middle',at:'left middle'}})
   window.onmousemove = function(event) {
       event = event || window.event
       mouseX = event.clientX
@@ -422,11 +422,21 @@ window.onresize = function () {
 function _resize(){
   $("#layerLobby").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 9.5)
   $("#layerBoard").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 12.5)
+  let clocksInVertical = false
+  $("#worldClocks").removeClass("clocks-reduced")
 	if (window.innerWidth > 1550) {
     $("#lobbyChatBox").insertAfter($("#playerListBox")).css('flex', 'initial')
+    if (window.innerWidth > 1670) clocksInVertical = true
 	} else {
     $("#lobbyChatBox").insertAfter($("#gameGridWrapper")).css('flex', '11 11 1px')
+    if (window.innerWidth > 1090) clocksInVertical = true
+    else $("#worldClocks").addClass("clocks-reduced")
 	}
+  if (clocksInVertical) {
+    $("#worldClocks").insertAfter($("#gameListBox")).css({'height':'100%', 'flex-direction':'column', 'justify-content':'space-around'})
+  } else {
+    $("#worldClocks").insertAfter($("#lobbyHBox")).css({'height':'', 'flex-direction':'', 'justify-content':''})
+  }
 	if (window.innerWidth >= board.actualWidth() + 400 && window.innerHeight < board.actualHeight() + 230) {
     $("#boardChatBox").insertBefore($("#boardRightBottomHBox"))
     $("#watcherBox").insertAfter($("#kifuBox"))
@@ -494,7 +504,6 @@ function _updateLanguage(){
   $('[id^=i18n-]').each(function(){
     $(this).button('option', 'label', i18next.t($(this).attr('id').split("-")[1]))
   })
-  $('#passwordInput').tooltip()
 }
 
 function _openingMusicCheckBoxClick(){
@@ -1158,6 +1167,7 @@ function _openPlayerInfo(user, doOpen = true){
     }).dialog({
       autoOpen: false,
       width: 'auto',
+      resizable: false,
       position: {at:'left+'+mouseX+' top+'+mouseY},
       close: function(e){
         if (element.find("#privateMessageArea").html() == "") element.dialog('destroy').remove()
@@ -1297,6 +1307,7 @@ function _handleLoggedIn(str){
     localStorage.login = $('#usernameInput').val()
     localStorage.dat = caesar(caesar($('#hiddenPass').val(), 3), 81)
     localStorage.save = $('#loginSave').prop('checked')
+    localStorage.server = client.serverName
   }
   $('div#layerLoginContents').animate({opacity: 0}, testMode ? 0 : 1000, function(){
     _switchLayer(1)
@@ -2110,7 +2121,8 @@ function _handlePrivateChat(sender, message){
 //	if (_ignore_list.indexOf(name.toLowerCase()) >= 0) return;
   if (me.isGuest) return
   let playerWindow = $("div#player-info-window-" + sender)
-  if (!playerWindow[0] && users[sender]) playerWindow = _openPlayerInfo(users[sender], false)
+  if (!playerWindow[0] && users[sender]) playerWindow = _openPlayerInfo(users[sender], options.pm_auto_open)
+  else if (options.pm_auto_open) playerWindow.dialog('open')
   let area = playerWindow.find("#privateMessageArea")
   $('<span></span>',{}).css('color', '#f35').text(message).appendTo(area)
   area.append('<br>')
@@ -2323,6 +2335,7 @@ function _handleServers(data){
   serverGrid.rows.add(data)
   serverGrid.draw()
   serverGrid.row(0).select()
+  if (localStorage.server) serverGrid.row('#' + localStorage.server).select()
   $('input[name=loginType], input#usernameInput, input#passwordInput, input#loginSave, input#loginButton').prop('disabled', false)
   _loginTypeChange()
   if (testMode) _testFunction(1)
@@ -2412,6 +2425,7 @@ function _enforceOptions(){
     _resize()
   }
   kifuGrid.rows().invalidate()
+  if (client) client.idle(options.reject_invitation == 1)
 }
 
 function _handleGeneralTimeout(key){
@@ -2634,7 +2648,8 @@ function _loadDefaultOptions(){
     favorites: [],
     members: [],
     opponents: [],
-    show_accumulated_time: 0
+    show_accumulated_time: 0,
+    reject_invitation: 0
   }
   _enforceOptions()
   _loadOptionsToDialog()
@@ -2642,7 +2657,7 @@ function _loadDefaultOptions(){
 
 function _generateWorldClocks(){
   WorldClock.CONST.SEEDS.forEach(function(data){
-    let clock = new WorldClock(data.key, data.timezone)
+    let clock = new WorldClock(data.key, data.timezone, data.secondary)
     $('#worldClocks').append(clock.div)
     _worldClocks.push(clock)
   })

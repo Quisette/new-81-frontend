@@ -1,32 +1,37 @@
 "use strict"
 
 class WorldClock{
-  constructor(key, timezone){
+  constructor(key, timezone, secondary){
     //string, string
     this._key = key
     this._timezone = timezone
+    this._secondary = secondary == true
     this._generateParts()
   }
 
   static get CONST(){
     return {
       SEEDS: [
+        {key: 'pst', timezone: 'America/Los_Angeles'},
+        {key: 'mst', timezone: 'America/Denver', secondary: true},
+        {key: 'cst', timezone: 'America/Chicago', secondary: true},
+        {key: 'est', timezone: 'America/New_York'},
+        {key: 'sao_paulo', timezone: 'America/Sao_Paulo'},
         {key: 'utc', timezone: 'UTC'},
         {key: 'cet', timezone: 'Europe/Berlin'},
         {key: 'moscow', timezone: 'Europe/Moscow'},
+        {key: 'mumbai', timezone: 'Asia/Kolkata', secondary: true},
+        {key: 'bangkok', timezone: 'Asia/Bangkok', secondary: true},
         {key: 'shanghai', timezone: 'Asia/Shanghai'},
         {key: 'tokyo', timezone: 'Asia/Tokyo'},
-        {key: 'sydney', timezone: 'Australia/Sydney'},
-        {key: 'pst', timezone: 'America/Los_Angeles'},
-        {key: 'est', timezone: 'America/New_York'},
-        {key: 'sao_paulo', timezone: 'America/Sao_Paulo'}
+        {key: 'sydney', timezone: 'Australia/Sydney'}
       ],
       WEEK_DAY_KEYS: ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
     }
   }
 
   _generateParts(){
-    this._div = $('<div></div>', {class: 'clock-box'})
+    this._div = $('<div></div>', {class: 'clock-box' + (this._secondary ? ' clock-secondary' : '')})
     this._label = $('<span></span>', {class: 'clock-label', "data-i18n": 'clock.' + this._key}).appendTo(this._div)
     this._clock = $('<span></span>', {class: 'clock-digits'}).appendTo(this._div)
   }

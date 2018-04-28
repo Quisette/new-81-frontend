@@ -40,14 +40,14 @@ class Game{
     str += this.black.country.flagImgTag27()
     let nameHTML = this.status == "win" ? ('<span style="text-decoration:underline">' + this.black.name + '</span>') : this.black.name
     nameHTML = (this.isBlackIn || this.isStudy()) ? nameHTML : coloredSpan(nameHTML, '#999')
-    str += '&nbsp;' + nameHTML
+    str += '&nbsp;' + this.black.generateMark() + nameHTML
     return str
   }
 
   goteStr(){
     let nameHTML = this.status == "lose" ? ('<span style="text-decoration:underline">' + this.white.name + '</span>') : this.white.name
     nameHTML = (this.isWhiteIn || this.isStudy()) ? nameHTML : coloredSpan(nameHTML, '#999')
-    let str = nameHTML + '&nbsp;'
+    let str = this.white.generateMark() + nameHTML + '&nbsp;'
     str += this.white.country.flagImgTag27()
     str += coloredSpan(makeRankFromRating(this.white.rate), makeColorFromRating(this.white.rate), 34)
     return str

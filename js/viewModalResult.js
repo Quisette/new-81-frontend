@@ -23,9 +23,15 @@ function loadResult(myFrom, myTo, hisFrom, hisTo){
     let hisRank2 = makeRankFromRating(hisTo)
     let div = $("#modalResult")
     div.find("#my-change").html((board.myRoleType == 0 ? '☗' : '☖') + me.name + ' : ' + myFrom + ' → ' + myTo)
-    if (myRank1 != myRank2) div.find("#my-change").append('<span class="rank-change">' + EJ('Rank change!', '段級更新!') + '</span>')
+    if (myRank1 != myRank2) {
+      if (myTo >= myFrom) div.find("#my-change").append('<span class="rank-up">' + EJ('Rank up!', '昇級!') + '</span>')
+      else div.find("#my-change").append('<span class="rank-down">' + EJ('Rank down', '降級') + '</span>')
+    }
     let opponent = board.myRoleType == 0 ? board.game.white : board.game.black
     div.find("#his-change").html((board.myRoleType == 0 ? '☖' : '☗') + opponent.name + ' : ' + hisFrom + ' → ' + hisTo)
-    if (hisRank1 != hisRank2) div.find("#his-change").append('<span class="rank-change">' + EJ('Rank change!', '段級更新!') + '</span>')
+    if (hisRank1 != hisRank2) {
+      if (hisTo >= hisFrom) div.find("#his-change").append('<span class="rank-up">' + EJ('Rank up!', '昇級!') + '</span>')
+      else div.find("#his-change").append('<span class="rank-down">' + EJ('Rank down', '降級') + '</span>')
+    }
   }
 }
