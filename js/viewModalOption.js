@@ -95,6 +95,6 @@ $('#modalOption').dialog({
   },
   show: 'fade',
   buttons: [
-    {text: "OK", click: function(){_handleOptionClose()}},
+    {text: "OK", click: function(){_handleOptionClose()}, 'data-click':'exec'},
   ]
 })

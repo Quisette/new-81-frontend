@@ -5,16 +5,16 @@ div.layer#layerBoard
         li
           a.button.button-disabled#resignButton href="#" data-i18n="board.resign" onclick="_resignButtonClick()"
         li
-          a.button#impasseButton href="#" data-i18n-title="board.impasse" onclick="_impasseButtonClick()"
+          a.button#impasseButton href="#" data-i18n-title="board.impasse" onclick="_impasseButtonClick()" data-click="normal"
             i.fa.fa-calculator.fa-2x
         li
-          a.button#flipButton href="#" onclick="_flipButtonClick()" data-i18n-title="board.flip"
+          a.button#flipButton href="#" onclick="_flipButtonClick()" data-i18n-title="board.flip" data-click="normal"
             img src="img/icon_flip.png"
         li
-          a.button#clearArrowsButton href="#" onclick="_clearArrowsButtonClick()" data-i18n-title="board.clear_arrows"
+          a.button#clearArrowsButton href="#" onclick="_clearArrowsButtonClick()" data-i18n-title="board.clear_arrows" data-click="normal"
             img src="img/icon_eraser.png"
         li
-          a.button#giveHostButton href="#" onclick="_giveHostButtonClick()" data-i18n-title="board.give_host"
+          a.button#giveHostButton href="#" onclick="_giveHostButtonClick()" data-i18n-title="board.give_host" data-click="normal"
             i.fa.fa-graduation-cap.fa-2x
             i.fa.fa-exchange style="margin-left:-10px"
         li
@@ -24,57 +24,57 @@ div.layer#layerBoard
           a.button#positionMenuButton href="#" data-i18n="board.position" onclick=""
           ul.subMenu
             li
-              a href="#" onclick="_materialBalanceButtonClick()"
+              a href="#" onclick="_materialBalanceButtonClick()" data-click="normal"
                 i.fa.fa-balance-scale.fa-lg.fa-fw
                 span data-i18n="submenu.material_balance"
             li
-              a href="#" onclick="_KyokumenpediaClick()"
+              a href="#" onclick="_KyokumenpediaClick()" data-click="normal"
                 img style="margin: 0 2px" src="img/icon_kyokumenpedia.png"
                 span data-i18n="submenu.kyokumenpedia"
             li
-              a href="#" onclick="_sharePositionButtonClick('TW')"
+              a href="#" onclick="_sharePositionButtonClick('TW')" data-click="normal"
                 i.fa.fa-twitter.fa-lg.fa-fw
                 span data-i18n="submenu.twitter"
             li
-              a href="#" onclick="_sharePositionButtonClick('FB')"
+              a href="#" onclick="_sharePositionButtonClick('FB')" data-click="normal"
                 i.fa.fa-facebook-official.fa-lg.fa-fw
                 span data-i18n="submenu.facebook"
         li
           a.button#kifuMenuButton href="#" data-i18n="board.kifu" onclick=""
           ul.subMenu
             li
-              a#kifuCopyButton href="#" onclick="_kifuCopyButtonClick()"
+              a#kifuCopyButton href="#" onclick="_kifuCopyButtonClick()" data-click="normal"
                 i.fa.fa-clipboard.fa-lg.fa-fw
                 span data-i18n="submenu.kifu_copy"
             li
-              a#kifuDownloadButton href="#" onclick="_kifuDownloadButtonClick()"
+              a#kifuDownloadButton href="#" onclick="_kifuDownloadButtonClick()" data-click="normal"
                 i.fa.fa-download.fa-lg.fa-fw
                 span data-i18n="submenu.kifu_download"
             li
-              a#kifuNoteButton href="#" onclick="_kifuNoteButtonClick()"
+              a#kifuNoteButton href="#" onclick="_kifuNoteButtonClick()" data-click="normal"
                 i.fa.fa-book.fa-lg.fa-fw
                 span data-i18n="submenu.kifu_note"
             li
-              a#shareKifuTwitterButton href="#" onclick="_shareKifuButtonClick('TW')"
+              a#shareKifuTwitterButton href="#" onclick="_shareKifuButtonClick('TW')" data-click="normal"
                 i.fa.fa-twitter.fa-lg.fa-fw
                 span data-i18n="submenu.twitter"
             li
-              a#shareKifuFacebookButton href="#" onclick="_shareKifuButtonClick('FB')"
+              a#shareKifuFacebookButton href="#" onclick="_shareKifuButtonClick('FB')" data-click="normal"
                 i.fa.fa-facebook-official.fa-lg.fa-fw
                 span data-i18n="submenu.facebook"
             li
-              a#uploadKifuButton href="#" onclick="_uploadKifuButtonClick()"
+              a#uploadKifuButton href="#" onclick="_uploadKifuButtonClick()" data-click="normal"
                 i.fa.fa-folder-open.fa-lg.fa-fw
                 span data-i18n="submenu.kifu_load"
         li
-          a.button href="#" onclick="_optionButtonClick()" data-i18n-title="lobby.options"
+          a.button href="#" onclick="_optionButtonClick()" data-i18n-title="lobby.options" data-click="normal"
             img src="img/icon_gear.png"
       ul
         li
-          a.button#checkLobbyButton href="#" onclick="_checkLobbyButtonClick()" data-i18n-title="board.check_lobby"
+          a.button#checkLobbyButton href="#" onclick="_checkLobbyButtonClick()" data-i18n-title="board.check_lobby" data-click="normal"
             i.fa.fa-eye.fa-2x
         li
-          a.button#closeGameButton href="#" onclick="_closeBoard()"
+          a.button#closeGameButton href="#" onclick="_closeBoard()" data-click="cancel"
             i.fa.fa-sign-out.fa-2x
             span data-i18n="board.close_game"
     div#boardContents.hbox style="flex:1"
@@ -105,11 +105,11 @@ div.layer#layerBoard
             div style="text-align:left"
               p
                 label
-                  input type="radio" name="kifuModeRadio" value="0" onchange="_kifuModeRadioChange()"
+                  input type="radio" name="kifuModeRadio" value="0" onchange="_kifuModeRadioChange()" data-click="normal"
                   span.local-kifu data-i18n="board.replay"
               p
                 label
-                  input type="radio" name="kifuModeRadio" value="1" onchange="_kifuModeRadioChange()"
+                  input type="radio" name="kifuModeRadio" value="1" onchange="_kifuModeRadioChange()" data-click="normal"
                   span data-i18n="board.listen"
               div#replayButtons
                 button id="replayButtonFirst" data-i18n-title="board.replay_first" type="button" onclick="_replayButtonClick(-2)"

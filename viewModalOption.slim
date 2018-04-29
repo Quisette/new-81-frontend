@@ -2,11 +2,11 @@ div#modalOption data-i18n-title="lobby.options"
   div#optionTabs
     ul
       li
-        a href="#tabs-1" data-i18n="option.pieces"
+        a href="#tabs-1" data-i18n="option.pieces" data-click="normal"
       li
-        a href="#tabs-2" data-i18n="option.sound"
+        a href="#tabs-2" data-i18n="option.sound" data-click="normal"
       li
-        a href="#tabs-3" data-i18n="option.communication"
+        a href="#tabs-3" data-i18n="option.communication" data-click="normal"
 
     div#tabs-1
       p data-i18n-title="option.board_size_tip"
@@ -34,7 +34,7 @@ div#modalOption data-i18n-title="lobby.options"
       p
         label
           input type="checkbox" id="button_sound_play" checked="true"
-          span data-i18n="option.sound_button" style="text-decoration: line-through"
+          span data-i18n="option.sound_button"
       p
         label
           input type="checkbox" id="end_sound_play" checked="true"

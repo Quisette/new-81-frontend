@@ -233,12 +233,12 @@ $(function(){
   gameGrid = $('#gameGrid').DataTable({
     data: [],
     columns: [
-      {data: "senteStr", width: "29%", className: "dt-body-left", bSortable: false},
-      {data: "goteStr", width: "29%", className: "dt-body-right", bSortable: false},
-      {data: "ruleShort", width: "16%", bSortable: false},
+      {data: "senteStr", width: "31%", className: "dt-body-left", bSortable: false},
+      {data: "goteStr", width: "31%", className: "dt-body-right", bSortable: false},
+      {data: "ruleShort", width: "13%", bSortable: false},
       {data: "movesStr", width: "7%", bSortable: false},
       {data: "watchersStr", width: "7%", bSortable: false},
-      {data: "openingStr", width: "12%", bSortable: false},
+      {data: "openingStr", width: "11%", bSortable: false},
       {data: "maxRate", width: "0%", visible: false}
     ],
     rowId: "gameId",
@@ -295,6 +295,7 @@ $(function(){
   $('.subMenu').hide()
   $('.menuBar > ul > li').hover(function(){
     if ($(this).find('a').hasClass('button-disabled')) return
+    sp.buttonHover()
     $("ul:not(:animated)", this).css('min-width', $(this).width()).slideDown()
   }, function(){
     $("ul",this).slideUp()
@@ -389,6 +390,8 @@ $(function(){
       mouseY = event.clientY
   }
   $("#findUser").on('focus', function(){$(this).val('')})
+  $("[data-click]").click(function(){sp.buttonClick($(this).data('click').toUpperCase())})
+  $(".ui-dialog-titlebar-close").click(function(){sp.buttonClick("CANCEL")})
 
   _resize()
 
@@ -963,6 +966,7 @@ function _kifuModeRadioChange(){
 function forceKifuMode(val){
   //0: local, 1: listen
   if ($("input[name=kifuModeRadio]:eq(" + val + ")").prop('checked') == false){
+    sp.buttonClick("NORMAL")
     $("input[name=kifuModeRadio]:eq(" + val + ")").prop('checked', true)
     _kifuModeRadioChange()
   }
@@ -1128,6 +1132,7 @@ function _handleNewGame(){
 }
 
 function _handleAcceptChallenge(){
+  sp.buttonClick("NORMAL")
 	client.accept()
 	_gameAccepted = true
 //	_acceptedCancelTimer.reset();
@@ -1139,15 +1144,18 @@ function _handleAcceptChallenge(){
 }
 
 function _handleRejectChallenge(challenger, declineCode = null){
+  sp.buttonClick("CANCEL")
 	client.decline(declineCode)
 	writeUserMessage(EJ("Rejected the challenge from " + challenger.name + ".", challenger.name + "さんからの挑戦をパスしました。"), 1, "#008800", true)
 }
 
 function _handleAcceptInvitation(user){
+  sp.buttonClick("NORMAL")
   _playerChallengeClick(user)
 }
 
 function _handleDeclineInvitation(user, declineCode = ""){
+  sp.buttonClick("CANCEL")
   client.privateChat(user.name, "[##REJECT]" + declineCode)
 	writeUserMessage(EJ("Declined the invitation from " + user.name + ".", user.name + "さんからの招待をパスしました。"), 1, "#008800", true)
 }
@@ -1183,6 +1191,8 @@ function _openPlayerInfo(user, doOpen = true){
         {text: "", class: "fa fa-comment font-fa", title: 'PM', click: function(){_playerPMClick(this)}}
       ]
     })
+    element.siblings('.ui-dialog-buttonpane').find('button').click(function(){sp.buttonClick("NORMAL")})
+    element.siblings('.ui-dialog-titlebar').find('.ui-dialog-titlebar-close').click(function(){sp.buttonClick("CANCEL")})
     if (!board.isHost()) element.siblings('.ui-dialog-buttonpane').find('.buttons-for-host').css('display', 'none')
     if (user.isGuest) element.find("#privateChatInput").prop('disabled', true)
     element.find("#privateChatInput").on('keyup', function(e){

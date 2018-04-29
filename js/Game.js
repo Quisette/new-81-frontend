@@ -38,14 +38,16 @@ class Game{
   senteStr(){
     let str = coloredSpan(makeRankFromRating(this.black.rate), makeColorFromRating(this.black.rate), 34)
     str += this.black.country.flagImgTag27()
-    let nameHTML = this.status == "win" ? ('<span style="text-decoration:underline">' + this.black.name + '</span>') : this.black.name
+    let nameLimited = '<span style="display:inline-block;max-width:100px;">' + this.black.name + '</span>'
+    let nameHTML = this.status == "win" ? ('<span style="text-decoration:underline">' + nameLimited + '</span>') : nameLimited
     nameHTML = (this.isBlackIn || this.isStudy()) ? nameHTML : coloredSpan(nameHTML, '#999')
     str += '&nbsp;' + this.black.generateMark() + nameHTML
     return str
   }
 
   goteStr(){
-    let nameHTML = this.status == "lose" ? ('<span style="text-decoration:underline">' + this.white.name + '</span>') : this.white.name
+    let nameLimited = '<span style="display:inline-block;max-width:100px;">' + this.white.name + '</span>'
+    let nameHTML = this.status == "lose" ? ('<span style="text-decoration:underline">' + nameLimited + '</span>') : nameLimited
     nameHTML = (this.isWhiteIn || this.isStudy()) ? nameHTML : coloredSpan(nameHTML, '#999')
     let str = this.white.generateMark() + nameHTML + '&nbsp;'
     str += this.white.country.flagImgTag27()

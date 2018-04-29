@@ -3,10 +3,10 @@ div.layer#layerLobby
     div.hbox.menuBar#lobbyMenu
       ul
         li
-          a.button#refreshButton href="#" onclick="_refreshButtonClick()" data-i18n-title="lobby.refresh"
+          a.button#refreshButton href="#" onclick="_refreshButtonClick()" data-i18n-title="lobby.refresh" data-click="normal"
             img src="img/icon_refresh.png"
         li
-          a.button href="#" data-i18n="lobby.wait" onclick="_waitButtonClick()"
+          a.button href="#" data-i18n="lobby.wait" onclick="_waitButtonClick()" data-click="normal"
         li
           a.button href="#" data-i18n-title="lobby.find_player"
             span.fa-stack
@@ -14,54 +14,54 @@ div.layer#layerLobby
               i.fa.fa-user.fa-stack-1x style="font-size:0.8em;top:-3px; left:-2px" 
             input#findUser type="text" style="margin-left:4px;width:60px"
         li
-          a.button href="#" onclick="_optionButtonClick()" data-i18n-title="lobby.options"
+          a.button href="#" onclick="_optionButtonClick()" data-i18n-title="lobby.options" data-click="normal"
             img src="img/icon_gear.png"
         li
           a.button href="#" data-i18n-title="lobby.websystem"
             img src="img/icon_web2.png"
           ul.subMenu
             li
-              a href="#" onclick="_navigateToWebSystem('ranking')"
+              a href="#" onclick="_navigateToWebSystem('ranking')" data-click="normal"
                 i.fa.fa-lg.fa-fw.fa-list-ol
                 span data-i18n="submenu.ranking"
             li
-              a href="#" onclick="_navigateToWebSystem('kifus/search/form')"
+              a href="#" onclick="_navigateToWebSystem('kifus/search/form')" data-click="normal"
                 i.fa.fa-lg.fa-fw.fa-search
                 span data-i18n="submenu.kifu_search"
             li
-              a href="#" onclick="_navigateToWebSystem('forums')"
+              a href="#" onclick="_navigateToWebSystem('forums')" data-click="normal"
                 i.fa.fa-lg.fa-fw.fa-comments
                 span data-i18n="submenu.bbs" 
             li
-              a href="#" onclick="_navigateToWebSystem('tournaments')"
+              a href="#" onclick="_navigateToWebSystem('tournaments')" data-click="normal"
                 i.fa.fa-lg.fa-fw.fa-sitemap
                 span  data-i18n="submenu.tournament"
             li
-              a href="#" onclick="_navigateToWebSystem('circles')"
+              a href="#" onclick="_navigateToWebSystem('circles')" data-click="normal"
                 i.fa.fa-lg.fa-fw.fa-users
                 span data-i18n="submenu.club"
             li
-              a href="#" onclick="_navigateToWebSystem('players/search/form')"
+              a href="#" onclick="_navigateToWebSystem('players/search/form')" data-click="normal"
                 i.fa.fa-lg.fa-fw.fa-address-book
                 span data-i18n="submenu.player_search"
             li
-              a href="#" onclick="_navigateToWebSystem('players/favorites')"
+              a href="#" onclick="_navigateToWebSystem('players/favorites')" data-click="normal"
                 i.fa.fa-lg.fa-fw.fa-star
                 span data-i18n="submenu.favorites"
             li
-              a href="#" onclick="_navigateToWebSystem('certificate')"
+              a href="#" onclick="_navigateToWebSystem('certificate')" data-click="normal"
                 i.fa.fa-lg.fa-fw.fa-graduation-cap
                 span data-i18n="submenu.diploma"
             li#classSurveyButton
-              a href="#" onclick="window.open('http://system.81dojo.com/class_survey')"
+              a href="#" onclick="window.open('http://system.81dojo.com/class_survey')" data-click="normal"
                 i.fa.fa-lg.fa-fw.fa-bar-chart
                 span 棋力対応調査
             li
-              a href="#" onclick="_navigateToWebSystem('inquiries/new')"
+              a href="#" onclick="_navigateToWebSystem('inquiries/new')" data-click="normal"
                 i.fa.fa-lg.fa-fw.fa-question-circle
                 span data-i18n="submenu.inquiry"
         li
-          a.button href="#" onclick="_logoutButtonClick()" data-i18n-title="lobby.logout"
+          a.button href="#" onclick="_logoutButtonClick()" data-i18n-title="lobby.logout" data-click="cancel"
             i.fa.fa-sign-out.fa-2x
       div#lobbyHeader
         img#serverLogo

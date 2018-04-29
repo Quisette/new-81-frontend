@@ -24,6 +24,10 @@ class SoundPlayer{
     this._loadChannel("NOTIFY", "chat_notify")
     this._loadChannel("DOOR_OPEN", "fusuma_open")
     this._loadChannel("DOOR_CLOSE", "fusuma_close")
+    this._loadChannel("HOVER", "hover")
+    this._loadChannel("CLICK_NORMAL", "click_normal")
+    this._loadChannel("CLICK_CANCEL", "click_cancel")
+    this._loadChannel("CLICK_EXEC", "click_exec")
   }
 
   static get CONST(){
@@ -110,7 +114,6 @@ class SoundPlayer{
     let audio = this._channels["OPENING"]
     $(audio).animate({volume: 0}, 4000, function(){
       audio.pause()
-      audio.currentTime = 0
     })
   }
 
@@ -123,11 +126,20 @@ class SoundPlayer{
   }
 
   play(key){
+    this._channels[key].currentTime = 0
     this._channels[key].play()
   }
 
   _loadChannel(key, file){
     this._channels[key] = new Audio(SoundPlayer.CONST.SOUND_PATH + "/" + file + ".mp3")
+  }
+
+  buttonHover(){
+    if (this.buttonEnabled) this.play("HOVER")
+  }
+
+  buttonClick(clickType){
+    if (this.buttonEnabled) this.play("CLICK_" + clickType)
   }
 
 }

@@ -23,6 +23,6 @@ $('#modalImpasse').dialog({
   },
   show: 'fade',
   buttons: [
-    {id: "i18n-declare", click: function(){_handleImpasseDeclare()}}
+    {id: "i18n-declare", click: function(){_handleImpasseDeclare()}, 'data-click':'normal'}
   ]
 })
