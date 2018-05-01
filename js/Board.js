@@ -146,24 +146,26 @@ class Board{
         }
         let sq = $('<div></div>', {id: 'sq' + x + '_' + y, class: 'square'}).data({x: x, y: y})
         sq.css({width: this._komaW + 'px', height: this._komaH + 'px', left: left + 'px', top: top + 'px'})
+        if (x < this.position.xmin || x > this.position.xmax || y < this.position.ymin || y > this.position.ymax) sq.addClass('square-wall')
         sq.appendTo(this._ban)
       }
     }
     let thisInstance = this
-    $('.square').on("click", function(e){
+    $('.square').not('.square-wall').on("click", function(e){
       if (e.ctrlKey) return
       thisInstance._handleSquareClick($(this))
     })
-    $('.square').on("mousedown", function(){
+    $('.square').not('.square-wall').on("mousedown", function(){
       thisInstance._handleSquareMouseDown($(this))
     })
-    $('.square').on("mouseup", function(e){
+    $('.square').not('.square-wall').on("mouseup", function(e){
       thisInstance._handleSquareMouseUp($(this), e.ctrlKey && getPremium() >= 1)
     })
   }
 
   _refreshSquare(sq){
     sq.removeClass("square-last")
+    if (sq.hasClass("square-wall")) return
     let koma = this._position.getPieceFromSquare(sq)
     if (koma) {
       sq.css('background-image', 'url(img/themes/' + this._theme + '/' + koma.toImagePath(!this._direction) + ')')
@@ -270,10 +272,10 @@ class Board{
   }
 
   loadNewPosition(str = Position.CONST.INITIAL_POSITION){
-    this._publicPosition = new Position()
+    this._publicPosition = new Position(this.game.gameType)
     this._publicPosition.superior = this.game ? (!this.game.isHandicap() && this.game.black.rate > this.game.white.rate) : false
     this._publicPosition.loadFromString(str)
-    this._position = new Position()
+    this._position = new Position(this.game.gameType)
     this._position.superior = this.game ? (!this.game.isHandicap() && this.game.black.rate > this.game.white.rate) : false
     this._position.loadFromString(str)
     this._initialPositionStr = str

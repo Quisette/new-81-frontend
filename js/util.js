@@ -122,13 +122,6 @@ const HANDICAPS_JA = {
 	hc10p: "十枚落ち",
 	hcfu3: "歩三兵",
 	hcnaked: "裸玉",
-	vaoa: "青空将棋",
-	vamini: "五々将棋",
-	va5656: "ゴロゴロ将棋",
-	vajudkins: "ジャドケンス将棋",
-	vakyoto: "京都将棋",
-	vazoo: "どうぶつしょうぎ",
-	va33: "９マス将棋",
 	hcpawnrd: "右端歩得",
 	hcpawnld: "左端歩得",
 	hcpawn2d: "両端歩得",
@@ -139,7 +132,14 @@ const HANDICAPS_JA = {
 	hc2pd: "二枚得",
 	hc4pd: "四枚得",
 	hc6pd: "六枚得",
-	hc8pd: "八枚得"
+	hc8pd: "八枚得",
+	vaoa: "青空将棋",
+	vamini: "五々将棋",
+	va5656: "ゴロゴロ将棋",
+	vajudkins: "ジャドケンス将棋",
+	vakyoto: "京都将棋",
+	vazoo: "どうぶつしょうぎ",
+	va33: "９マス将棋"
 	}
 const HANDICAPS_EN = {
 	r: "Even (R)",
@@ -160,13 +160,6 @@ const HANDICAPS_EN = {
 	hc10p: "10p Down",
 	hcfu3: "Three Pawns",
 	hcnaked: "Naked King",
-	vaoa: "Open-air",
-	vamini: "Mini Shogi",
-	va5656: "Goro-Goro",
-	vajudkins: "Judkins",
-	vakyoto: "Kyoto Shogi",
-	vazoo: "Dobutsu",
-	va33: "9-square",
 	hcpawnrd: "R-Pawn Gained",
 	hcpawnld: "L-Pawn Gained",
 	hcpawn2d: "2-Pawns Gained",
@@ -177,7 +170,14 @@ const HANDICAPS_EN = {
 	hc2pd: "2p Gained",
 	hc4pd: "4p Gained",
 	hc6pd: "6p Gained",
-	hc8pd: "8p Gained"
+	hc8pd: "8p Gained",
+	vaoa: "Open-air",
+	vamini: "Mini Shogi",
+	va5656: "Goro-Goro",
+	vajudkins: "Judkins",
+	vakyoto: "Kyoto Shogi",
+	vazoo: "Dobutsu",
+	va33: "9-square"
 }
 function getHandicapShort(key){
   return EJ(HANDICAPS_EN[key], HANDICAPS_JA[key])

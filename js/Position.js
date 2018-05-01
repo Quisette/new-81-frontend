@@ -18,6 +18,22 @@ class Position{
     this.ymax = this.yN
     this._promoteY0 = 3 //for sente
     this._promoteY1 = 7 //for gote
+    switch (gameType) {
+      case 'vamini':
+      case 'vakyoto':
+        [this.xmin, this.xmax, this.ymin, this.ymax] = [3, 7, 3, 7]
+        if (gameType == 'vakyoto') [this._promoteY0, this._promoteY1] = [2, 8]
+        break
+      case 'va33':
+        [this.xmin, this.xmax, this.ymin, this.ymax, this._promoteY0, this._promoteY1] = [4, 6, 4, 6, 4, 6]
+        break
+      case 'va5656':
+        [this.xmin, this.xmax, this.ymin, this.ymax, this._promoteY0] = [3, 7, 3, 8, 4]
+        break
+      case 'vajudkins':
+        [this.xmin, this.xmax, this.ymin, this.ymax, this._promoteY0] = [3, 8, 3, 8, 4]
+        break
+    }
 
     this._squares = new Array(9)
     for (let i = 0; i < 9; i++) {

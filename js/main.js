@@ -497,7 +497,7 @@ function _updateLanguage(){
   $('#newGameRuleSelect, #newGameStudyRuleSelect').empty()
   let handicaps = i18next.language == "ja" ? HANDICAPS_JA : HANDICAPS_EN
   Object.keys(handicaps).forEach(function(key){
-    if (key == "r" || key.match(/^va/)) return true
+    if (key == "r" || key == "vazoo" || key == "vakyoto") return true
     $('#newGameRuleSelect, #newGameStudyRuleSelect').append($("<option />").val(key).text(handicaps[key]))
   })
   $('#modalNewGame, #modalChallenger, #modalInvitation, #modalImpasse, #modalOption, #modalChatTemplate').each(function(){
@@ -627,7 +627,7 @@ function _enterGame(game){
     return
   }
   if (board.game) return
-  if (game.isVariant()) {
+  if (game.gameType == "vazoo" || game.gameType == "vakyoto") {
     writeUserMessage(EJ("This game rule is not supported by HTML client yet.", "この対局ルールはHTML版アプリでは未対応です。"), 1, "#ff0000")
     return
   }
@@ -1240,7 +1240,7 @@ function _playerChallengeClick(user){
     } else if (_checkGuestGamesExpired()) {
     } else if (user.waitingGameName.match(/_automatch\-/)) {
 		  client.seek(user)
-    } else if (user.waitingGameName.match(/^va/)) {
+    } else if (user.waitingGameName.match(/^va(zoo|kyoto)/)) {
   	  writeUserMessage(EJ("This game rule is not supported yet.", "HTML版は特殊ルールには未対応です。"), 1, "#ff0000")
     } else if (me.isGuest && user.waitingGameName.match(/^r_/)) {
 			writeUserMessage(i18next.t("msg.no_guest_rating"), 1, "#ff0000")
