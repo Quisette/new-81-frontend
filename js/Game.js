@@ -68,9 +68,9 @@ class Game{
     if (this.isTournament()) {
       let tournament = this.getTournament()
       if (tournament) {
-        str = '<span title="' + tournament.name() + '">' + tournament.nameShort() + '</span>'
+        str = coloredSpan(tournament.nameShort(), 'crimson', null, tournament.name())
       } else {
-        str = EJ('Tournament', '大会')
+        str = coloredSpan(EJ('Tournament', '大会'), 'crimson')
       }
     }
     return str

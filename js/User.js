@@ -133,9 +133,9 @@ class User{
       ruleStr = getHandicapShort(game_info[1])
 			if (this._waitingTournamentId) {
         if (tournaments[this._waitingTournamentId]){
-          ruleStr = '<span title="' + tournaments[this._waitingTournamentId].name() + '">' + tournaments[this._waitingTournamentId].nameShort() + '</span>'
+          ruleStr = coloredSpan(tournaments[this._waitingTournamentId].nameShort(), 'crimson', null, tournaments[this._waitingTournamentId].name())
         } else {
-          ruleStr = EJ('Tournament', '大会')
+          ruleStr = coloredSpan(EJ('Tournament', '大会'), 'crimson')
         }
       }
 			timeStr = (parseInt(game_info[3]) / 60) + "-" + game_info[4]

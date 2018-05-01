@@ -95,6 +95,8 @@ $(function(){
   xhr.send()
 
   infoFetcher = {
+    initialMessageEn: [],
+    initialMessageJa: [],
     titleNames: new Object(),
     titleNameTips: new Object(),
     titleAvatars: new Object(),
@@ -108,6 +110,12 @@ $(function(){
         header = RegExp.$1
       } else {
         switch (header) {
+          case "INITIAL_MESSAGE":
+            infoFetcher.initialMessageEn.push(line.trim())
+            break
+          case "INITIAL_MESSAGE_JP":
+            infoFetcher.initialMessageJa.push(line.trim())
+            break
           case "TITLE_HOLDERS":
             let tokens = line.split("\t")
             infoFetcher.titleNames[tokens[0]] = tokens[1]
@@ -1353,7 +1361,7 @@ function _handleLoggedIn(str){
 }
 
 function _writeWelcomeMessage(){
-  writeUserMessage(i18next.t("msg.html5_initial"), 1, "#008800")
+  writeUserMessage(EJ(infoFetcher.initialMessageEn.join("\n"), infoFetcher.initialMessageJa.join("\n")), 1, "#000000")
   if (getPremium()) writeUserMessage(EJ("You have " + makePremiumName(getPremium()) + " status. Thank you for choosing 81Dojo.", makePremiumName(getPremium()) + "クラス" + me.name + "様、いつもご利用有難うございます。＜(_ _)＞"), 1, "#FFBB00", true)
 }
 
