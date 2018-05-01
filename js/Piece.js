@@ -82,6 +82,10 @@ class Piece{
   checkSibling(){ //whether the piece needs to check siblings when moved
     return true
   }
+
+  convertKyoto(){
+    return this
+  }
 }
 
 class PieceOU extends Piece{
@@ -132,6 +136,9 @@ class PieceHI extends Piece{
   soundVolume(){
     return this._promoted ? 1 : 0.9
   }
+  convertKyoto(){
+    return new PieceFU(this.owner)
+  }
 }
 
 class PieceKA extends Piece{
@@ -154,6 +161,9 @@ class PieceKA extends Piece{
   soundVolume(){
     return this._promoted ? 1 : 0.9
   }
+  convertKyoto(){
+    return new PieceGI(this.owner)
+  }
 }
 
 class PieceKI extends Piece{
@@ -173,6 +183,9 @@ class PieceKI extends Piece{
   }
   soundVolume(){
     return 0.65
+  }
+  convertKyoto(){
+    return new PieceKE(this.owner)
   }
 }
 
@@ -195,6 +208,9 @@ class PieceGI extends Piece{
   }
   soundVolume(){
     return 0.65
+  }
+  convertKyoto(){
+    return new PieceKA(this.owner)
   }
 }
 
@@ -220,6 +236,9 @@ class PieceKE extends Piece{
   }
   mustPromote(rowsAhead){
     return !this._promoted && rowsAhead < 2
+  }
+  convertKyoto(){
+    return new PieceKI(this.owner)
   }
 }
 
@@ -249,6 +268,9 @@ class PieceKY extends Piece{
   checkSibling(){
     return this._promoted
   }
+  convertKyoto(){
+    return new PieceFU(this.owner, true)
+  }
 }
 
 class PieceFU extends Piece{
@@ -276,5 +298,8 @@ class PieceFU extends Piece{
   }
   checkSibling(){
     return this._promoted
+  }
+  convertKyoto(){
+    return this._promoted ? new PieceKY(this.owner) : new PieceHI(this.owner)
   }
 }

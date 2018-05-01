@@ -111,6 +111,10 @@ class Game{
     return this.gameType.match(/^va/)
   }
 
+  isKyoto(){
+    return this.gameType == 'vakyoto'
+  }
+
   hasNoOpeningTypes(){
     return this.gameType.match(/^(hc|va)/) && this.gameType != "hcfixed"
   }

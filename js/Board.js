@@ -436,7 +436,8 @@ class Board{
       if (sq.hasClass("square-movable")) {
       	$(this._div).unbind("mouseleave")
         let res = this._position.canPromote(this._selectedSquare, sq)
-        if (res == 2) this._manualMoveCommandComplete(sq, true)
+        if (this.game.isKyoto() && this._selectedSquare.data().x <= 0) this._openPromotionDialog(sq, true) // Kyoto-shogi drop dialog
+        else if (res == 2) this._manualMoveCommandComplete(sq, true)
         else if (res == 1) this._openPromotionDialog(sq)
         else this._manualMoveCommandComplete(sq, false)
       } else {
@@ -473,11 +474,11 @@ class Board{
 		})
   }
 
-  _openPromotionDialog(sq){
+  _openPromotionDialog(sq, kyotoFlipDrop = false){
     //square
     let thisInstance = this
     this._promotionDialog = $("<div></div>",{
-      title: 'Promote?',
+      title: kyotoFlipDrop ? i18next.t("board.ask_flip") : i18next.t("board.ask_promote"),
       html: '<div id="promotion-window">\
         <button type=button id="promote-yes" class="promotion-button"><img class="promotion-image" id="promote-yes-image"></button>\
         <button type=button id="promote-no" class="promotion-button"><img class="promotion-image" id="promote-no-image"></button>\
@@ -495,7 +496,7 @@ class Board{
       }
     })
     let koma = this._position.getPieceFromSquare(this._selectedSquare)
-    this._promotionDialog.find('#promote-yes-image').attr('src', 'img/themes/' + this._theme + '/' + koma.toImagePath(!this._direction, true))
+    this._promotionDialog.find('#promote-yes-image').attr('src', 'img/themes/' + this._theme + '/' + (kyotoFlipDrop ? koma.convertKyoto().toImagePath(!this._direction) : koma.toImagePath(!this._direction, true)))
     this._promotionDialog.find('#promote-no-image').attr('src', 'img/themes/' + this._theme + '/' + koma.toImagePath(!this._direction))
     $('#promote-yes').click(function(){
       thisInstance._manualMoveCommandComplete(sq, true)

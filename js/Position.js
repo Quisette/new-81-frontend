@@ -156,28 +156,18 @@ class Position{
     }
   }
 
-  _getPieceFromKomadai(owner, pieceType){
-    // owner: boolean, pieceType: int
-    let returnedPiece
-    this.komadais[owner ? 0 : 1].every(function(piece){
-      if (piece.getType() == pieceType) {
-        returnedPiece = piece
-        return false
-      }
-      return true
-    })
-    return returnedPiece
-  }
-
-  _removePieceFromKomadai(owner, pieceType){
-    // owner: boolean, pieceType: int
+  _getPieceFromKomadai(owner, pieceType, remove = false){
+    // owner: boolean, pieceType: int, find_and_then_remove: boolean
+    let returnedPiece = null
     this.komadais[owner ? 0 : 1].every(function(piece, i){
       if (piece.getType() == pieceType) {
-        this.komadais[owner ? 0 : 1].splice(i, 1)
+        returnedPiece = piece
+        if (remove) this.komadais[owner ? 0 : 1].splice(i, 1)
         return false
       }
       return true
     }, this)
+    return returnedPiece
   }
 
   getMovableGridsFromSquare(sq){
@@ -232,6 +222,7 @@ class Position{
     // Find piece
     if (move.fromX > 0){
       koma1 = this._squares[move.fromX - 1][move.fromY - 1]
+      if (this._gameType == "vakyoto") koma1 = koma1.convertKyoto() // <<< Kyoto-shogi only
       move.pieceType = koma1.getType()
       if (move.pieceType >= 8) move.promote = false //'promote' might have been set to true temporarily
       // check promotable
@@ -243,7 +234,10 @@ class Position{
         }
       }
     } else {
-      koma1 = this._getPieceFromKomadai(move.owner, move.pieceType)
+      koma1 = this._getPieceFromKomadai(move.owner, move.pieceType, true)
+      if (!koma1 && this._gameType == 'vakyoto') { // <<< Rescue for Kyoto-shogi flipped drop
+        koma1 = this._getPieceFromKomadai(move.owner, pieceTypeKyotoConversion[move.pieceType], true).convertKyoto()
+      }
     }
     // Search siblings
     move.siblingOrigins = []
@@ -256,19 +250,18 @@ class Position{
         }
       }
     }
-    // Execute move
+    // Execute move (In case of drop, hand piece is already removed from komadai)
     if (move.fromX > 0){
       this._squares[move.fromX - 1][move.fromY - 1] = null
       koma2 = this._squares[move.toX - 1][move.toY - 1]
       if (koma2) {
         koma2.owner = move.owner
+        if (this._gameType == 'vakyoto' && koma2.isPromoted()) koma2 = koma2.convertKyoto()
         koma2.depromote()
         this.komadais[move.owner ? 0 : 1].push(koma2)
         move.capture = true
       }
       if (move.promote) koma1.promote()
-    } else {
-      this._removePieceFromKomadai(move.owner, move.pieceType)
     }
     this._squares[move.toX - 1][move.toY - 1] = koma1
 

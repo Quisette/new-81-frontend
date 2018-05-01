@@ -73,10 +73,13 @@ class Movement{
     this.owner = owner
     this.fromX = sq1.data('x') > 0 ? sq1.data('x') : 0
     this.fromY = sq1.data('x') > 0 ? sq1.data('y') : 0
-    if (sq1.data('x') <= 0) this.pieceType = sq1.data('y')
     this.toX = sq2.data('x')
     this.toY = sq2.data('y')
-    this.promote = promote
+    if (sq1.data('x') <= 0) { // When dropped, need to set this.pieceType (If promote, then it is fli-drop in Kyoto-shogi)
+      this.pieceType = promote ? pieceTypeKyotoConversion[sq1.data('y')] : sq1.data('y')
+    } else { // When moving on board, update promote
+      this.promote = promote
+    }
   }
 
   setFromCSA(csa){
