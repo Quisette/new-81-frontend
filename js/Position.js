@@ -300,13 +300,13 @@ class Position{
   handCoordinateHash(i){
     // i: sente/gote (integer)
     let hash = {
-      HI: {x: 10, y: 10, n: 0, dx: 0},
-      KA: {x: 85, y: 10, n: 0, dx: 0},
-      KI: {x: 10, y: 55, n: 0, dx: 0},
-      GI: {x: 85, y: 55, n: 0, dx: 0},
-      KE: {x: 10, y: 100, n: 0, dx: 0},
-      KY: {x: 85, y: 100, n: 0, dx: 0},
-      FU: {x: 10, y: 145, n: 0, dx: 0}
+      HI: {fanmax: 2, xmin: 3, xmax: 43, y: 9, originH: 174, n: 0, dx: 0, i: 0},
+      KA: {fanmax: 2, xmin: 83, xmax: 123, y: 9, originH: 174, n: 0, dx: 0, i: 0},
+      KI: {fanmax: 2, xmin: 3, xmax: 45, y: 55, originH: 167, n: 0, dx: 0, i: 0},
+      GI: {fanmax: 2, xmin: 83, xmax: 125, y: 55, originH: 164, n: 0, dx: 0, i: 0},
+      KE: {fanmax: 2, xmin: 1, xmax: 45, y: 100, originH: 152, n: 0, dx: 0, i: 0},
+      KY: {fanmax: 2, xmin: 82, xmax: 127, y: 100, originH: 147, n: 0, dx: 0, i: 0},
+      FU: {fanmax: 5, xmin: 0, xmax: 128, y: 144, originH: 142, n: 0, dx: 0, i: 0}
     }
     this.komadais[i].forEach(function(piece){
       if (hash[piece.CSA] == null) return

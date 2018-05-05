@@ -546,3 +546,8 @@ function sec2minsec(sec){
 }
 
 const pieceTypeKyotoConversion = [0, 7, 4, 5, 2, 3, 15, 1, 8, 9, 10, 11, 12, 13, 14, 6]
+
+function getRotation(elem){
+  let cos = elem.css('transform').match(/\((.+)\)/)[1]
+  return Math.acos(parseFloat(cos))
+}

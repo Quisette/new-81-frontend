@@ -187,13 +187,13 @@ class Board{
 //    $(".square-last").removeClass("square-last")
     for (let i = 0; i < 2; i++){
       let hash = this._position.handCoordinateHash(i)
+      this._position.komadais[i].sort(function(a,b){return a.type - b.type})
       this._position.komadais[i].forEach(function(piece){
         if (hash[piece.CSA] == null) return
         let sq = $('<div></div>', {id: 'sq' + (piece.owner ? 0 : -1) + '_' + piece.getType(), class: 'square'}).data({x: piece.owner ? 0 : -1, y: piece.getType()})
         sq.css({width: this._komaW + 'px', height: this._komaH + 'px'})
-        sq.css({left: hash[piece.CSA].x + 'px', top: hash[piece.CSA].y + 'px'})
-        hash[piece.CSA].x += hash[piece.CSA].dx
         sq.css('background-image', 'url(img/themes/' + this._theme + '/' + piece.toImagePath(!this._direction) + ')')
+        this._layoutHandPiece(sq, hash[piece.CSA], i == 0)
         let thisInstance = this
         sq.on("click", function(e){
           thisInstance._handleSquareClick($(this))
@@ -211,6 +211,25 @@ class Board{
     }
     if ($("#modalImpasse").dialog('isOpen')) this.calcImpasse()
     $(".name-popup").remove()
+  }
+
+  _layoutHandPiece(sq, h, sente){
+    //square, hash[piece.CSA], boolean
+    let direction = this._direction == sente
+    let dirSign = direction ? 1 : -1
+    if (h.i == 0) h.dx = h.n > 1 ? ((h.xmax - h.xmin) / (h.n - 1)) : 0
+    if (h.n > h.fanmax) {
+      let sqX = h.xmin + h.i * h.dx
+      let sqY = h.y
+      sq.css({left: sqX + 'px', top: sqY + 'px'})
+    } else {
+      let theta = direction ? (Math.floor((h.n - 1) / 2) * 11.2 - h.i * 11.2) : (Math.floor(h.n / 2) * (-11.2) + h.i * 11.2)
+      let sqX = 0.5 * (h.xmin + h.xmax) - 3 + (h.n % 2 == 0 ? (direction ? -0.35 : 0.45) * this._komaW : 0)
+      let sqY = h.y + (h.n > 3 && direction ? 8 : 0) + Math.abs(theta)*0.1*dirSign
+      let oY = 24 - dirSign * h.originH
+      sq.css({left: sqX + 'px', top: sqY + 'px', 'transform-origin': '50% ' + oY + 'px', transform: 'rotate(' + theta + 'deg)'})
+    }
+    h.i += 1
   }
 
   setPieceDesignType(v){
@@ -272,10 +291,10 @@ class Board{
   }
 
   loadNewPosition(str = Position.CONST.INITIAL_POSITION){
-    this._publicPosition = new Position(this.game.gameType)
+    this._publicPosition = new Position(this.game ? this.game.gameType : null)
     this._publicPosition.superior = this.game ? (!this.game.isHandicap() && this.game.black.rate > this.game.white.rate) : false
     this._publicPosition.loadFromString(str)
-    this._position = new Position(this.game.gameType)
+    this._position = new Position(this.game ? this.game.gameType : null)
     this._position.superior = this.game ? (!this.game.isHandicap() && this.game.black.rate > this.game.white.rate) : false
     this._position.loadFromString(str)
     this._initialPositionStr = str
@@ -407,11 +426,17 @@ class Board{
         }
       })
     }
-    this.addArrow(fromType, fromX, fromY, toX, toY, options.arrow_color, isPublic, me.name)
+    this.addArrow(fromType, fromX, fromY, toX, toY, options.arrow_color, isPublic, me ? me.name : null)
     if (isPublic) client.gameChat("[##ARROW]" + fromType + "," + fromX + "," + fromY + "," + toX + "," + toY + ",0x" + options.arrow_color.toString(16))
   }
 
   _handleSquareClick(sq){
+    if (false) {
+      let koma_test = this._position.getPieceFromSquare(sq)
+      if (koma_test) this._position.komadais[koma_test.owner ? 0 : 1].push(koma_test)
+      this._refreshPosition()
+      return
+    }
     if (!this._selectedSquare) {
       let koma = this._position.getPieceFromSquare(sq)
       if (this._canMovePieceNow() && koma && koma.owner == this._position.turn) {
@@ -693,7 +718,7 @@ class Board{
     arrows.push(arrow)
     if (this.onListen == isPublic) {
       arrow.draw(this._scale)
-      if (sender != me.name) this.popupName(toX, toY, sender, color)
+      if (sender && sender != me.name) this.popupName(toX, toY, sender, color)
     }
   }
 

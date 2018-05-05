@@ -25,10 +25,13 @@ class BoardArrow{
   draw(scale){
     let fromSq = this._findSquare(this._fromType, this._fromX, this._fromY)
     let toSq = this._findSquare(-1, this._toX, this._toY)
-    let fromX = fromSq.offset().left + scale * fromSq.width()/2 - this._parentCanvas.offset().left
-    let fromY = fromSq.offset().top + scale * fromSq.height()/2 - this._parentCanvas.offset().top
-    let toX = toSq.offset().left + scale * fromSq.width()/2 - this._parentCanvas.offset().left
-    let toY = toSq.offset().top + scale * fromSq.height()/2 - this._parentCanvas.offset().top
+    let fromSqRotation = getRotation(fromSq)
+    let fromWidth = fromSqRotation == 0 ? fromSq.width() : (fromSq.width()*Math.cos(fromSqRotation)+fromSq.height()*Math.sin(fromSqRotation))
+    let fromHeight = fromSqRotation == 0 ? fromSq.height() : (fromSq.width()*Math.sin(fromSqRotation)+fromSq.height()*Math.cos(fromSqRotation))
+    let fromX = fromSq.offset().left + scale * fromWidth/2 - this._parentCanvas.offset().left
+    let fromY = fromSq.offset().top + scale * fromHeight/2 - this._parentCanvas.offset().top
+    let toX = toSq.offset().left + scale * toSq.width()/2 - this._parentCanvas.offset().left
+    let toY = toSq.offset().top + scale * toSq.height()/2 - this._parentCanvas.offset().top
     fromX = fromX / scale
     fromY = fromY / scale
     toX = toX / scale
