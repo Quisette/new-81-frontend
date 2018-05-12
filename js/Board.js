@@ -442,7 +442,7 @@ class Board{
       if (this._canMovePieceNow() && koma && koma.owner == this._position.turn) {
         this._selectedSquare = sq
         sq.addClass("square-selected")
-        if (options.hold_piece) this._pickUpPiece(sq)
+        if (options.hold_piece && options.piece_type != 102) this._pickUpPiece(sq)
         if (this.isPlaying()) { //Send ##GRAB message
           let x = sq.data().x
           let y = sq.data().y
@@ -454,7 +454,7 @@ class Board{
         }
         this._position.getMovableGridsFromSquare(sq).forEach(function(e){
           $("#sq" + e[0] + "_" + e[1]).addClass("square-movable")
-          if (options.highlight_movable == 1) $("#sq" + e[0] + "_" + e[1]).addClass("square-movable-highlight")
+          if (options.highlight_movable == 1 && options.piece_type != 102) $("#sq" + e[0] + "_" + e[1]).addClass("square-movable-highlight")
         })
       }
     } else {

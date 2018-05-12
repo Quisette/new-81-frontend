@@ -25,6 +25,7 @@ class BoardArrow{
   draw(scale){
     let fromSq = this._findSquare(this._fromType, this._fromX, this._fromY)
     let toSq = this._findSquare(-1, this._toX, this._toY)
+    if (!fromSq[0]) return
     let fromSqRotation = getRotation(fromSq)
     let fromWidth = fromSqRotation == 0 ? fromSq.width() : (fromSq.width()*Math.cos(fromSqRotation)+fromSq.height()*Math.sin(fromSqRotation))
     let fromHeight = fromSqRotation == 0 ? fromSq.height() : (fromSq.width()*Math.sin(fromSqRotation)+fromSq.height()*Math.cos(fromSqRotation))

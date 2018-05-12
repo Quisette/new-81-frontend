@@ -1022,7 +1022,7 @@ function _replayButtonClick(v){
   }
   kifuGrid.row(index).select()
   scrollGridToSelected(kifuGrid)
-  _kifuSelected(index, v == -1) // Subhost's-override is enabled if v is -1
+  _kifuSelected(index, v == -1 && board.onListen) // Subhost's-override is enabled if v is -1
 }
 
 function _restorePublicKifu(){
@@ -2024,12 +2024,12 @@ function _handleGameChat(sender, message){
       _runTypingIndicator(sender)
 		}
 	} else if (message.match(/\[\#\#STUDY\](\d+)\/(.+)$/)) {
-    let singleMove = _updateStudyState(sender, parseInt(RegExp.$1), RegExp.$2)
+    let branchDelta = _updateStudyState(sender, parseInt(RegExp.$1), RegExp.$2)
     if (hostPlayerName == null) _updateHostPlayer(sender)
   	board.clearArrows(true)
   	if (board.isHost() && sender == me.name) return
 		if (!(board.isPostGame && board.onListen)) return
-    if (sender != me.name) _handleStudy(singleMove)
+    if (sender != me.name || (branchDelta < 0 && !board.isHost())) _handleStudy(branchDelta == 1)
 	} else if (message.match(/^\[##ARROW\]CLEAR$/)) {
 		if (sender != me.name) board.clearArrows(true, sender)
 	} else if (message.match(/^\[##ARROW\](.+),(.+),(.+),(.+),(.+),(.+)$/)) {
@@ -2228,22 +2228,25 @@ function _clearAllParams(){
 
 function _updateStudyState(sender, base, branch = "*"){
   // integer, string
-  let singleMove = false
+  let branchDelta = null
   _studyBase = base
   _studySender = sender
   if (branch == "*") {
-    _studyBranchMoves = null
+    if (_studyBranchMoves) {
+      branchDelta = - _studyBranchMoves.length
+      _studyBranchMoves = null
+    }
   } else {
     let branchMoves = branch.split("/")
     if (_studyBranchMoves == null) {
       writeUserMessage(sender + ": " + EJ("Studying a branch from move #" + base, base + "手目からの分岐手順を検討"), 2, "#008800")
-      if (branchMoves.length == 1) singleMove = true
+      branchDelta = branchMoves.length
     } else {
-      if (branchMoves.length == _studyBranchMoves.length + 1) singleMove = true
+      branchDelta = branchMoves.length - _studyBranchMoves.length
     }
     _studyBranchMoves = branch.split("/")
   }
-  return singleMove
+  return branchDelta
   /*
 	if (!board.studyOn) { //TODO check what 'studyOn' had been used in Flahs ver.
 		board.studyOn = true;
