@@ -505,7 +505,7 @@ function _updateLanguage(){
   $('#newGameRuleSelect, #newGameStudyRuleSelect').empty()
   let handicaps = i18next.language == "ja" ? HANDICAPS_JA : HANDICAPS_EN
   Object.keys(handicaps).forEach(function(key){
-    if (key == "r" || key == "vazoo") return true
+    if (key == "r" || key == "vazoo2") return true
     $('#newGameRuleSelect, #newGameStudyRuleSelect').append($("<option />").val(key).text(handicaps[key]))
   })
   $('#modalNewGame, #modalChallenger, #modalInvitation, #modalImpasse, #modalOption, #modalChatTemplate').each(function(){
@@ -635,10 +635,7 @@ function _enterGame(game){
     return
   }
   if (board.game) return
-  if (game.gameType == "vazoo") {
-    writeUserMessage(EJ("Dobutsu-shogi is not supported by HTML client yet.", "HTML版アプリはどうぶつしょうぎ未対応です。"), 1, "#ff0000")
-    return
-  }
+  _prepareCorrectBoard(game.gameType)
   board.setGame(game)
   //TODO watching or reconnecting ?
 	if (!game.gameId.match(/^STUDY/) && board.getPlayerRoleFromName(me.name) != null) { // Reconnect
@@ -694,6 +691,22 @@ function _interpretCommunicationCode(name, code, n, bold, sound) {
 /* ====================================
     Board View functions
 ===================================== */
+
+function _prepareCorrectBoard(gameType){
+  if (gameType == "vazoo") {
+    if (board.constructor.name != "DobutsuBoard") {
+      console.log('Changed to dobutsu')
+      board = null
+      board = new DobutsuBoard($('#boardBox'))
+    }
+  } else {
+    if (board.constructor.name != "Board") {
+      console.log('Changed to normal')
+      board = null
+      board = new Board($('#boardBox'))
+    }
+  }
+}
 
 function _checkLobbyButtonClick(forceDefault = false){
   if ($('#boardContents').css('pointer-events') == 'none') { // Back to normal
@@ -820,11 +833,12 @@ function _giveSubhostButtonClick(user){
 function _materialBalanceButtonClick(){
   let num = kifuGrid.row({selected: true}).index()
   if (board.game.canCalculateMaterialBalance()) writeUserMessage(EJ("Material balance (move #", "駒割計算結果(") + num + EJ("):　", "手まで):　") + board.getMaterialBalance(num <= 40), 2, "#008800")
-	else writeUserMessage(EJ("This function is only for even games.", "平手以外では使えません"), 2, "#008800")
+	else writeUserMessage(EJ("This function is only for even games.", "平手以外では使えません"), 2, "#FF0000")
 }
 
 function _KyokumenpediaClick(){
-  window.open("http://kyokumen.jp/positions/" + board.position.toSFEN(), "_blank")
+  if (['r', 'nr', 'hclance', 'hcbishop', 'hcrook', 'hcrooklance', 'hc2p', 'hc4p', 'hc6p'].indexOf(board.game.gameType) >= 0) window.open("http://kyokumen.jp/positions/" + board.position.toSFEN(), "_blank")
+  else writeUserMessage(EJ('This game variant is not suppported.', 'このルールには非対応です'), 2, "#FF0000")
 }
 
 function _sharePositionButtonClick(mode){
@@ -833,15 +847,19 @@ function _sharePositionButtonClick(mode){
 }
 
 function _kifuCopyButtonClick(){
-  let textArea = $('<textarea></textarea>', {id: 'clip-board-area'}).text(_generateKIF()).appendTo($('body'))
-  $("#clip-board-area").select()
-	document.execCommand("copy")
-  $("#clip-board-area").remove()
+  if (!board.game.gameType.match(/^va/)) {
+    let textArea = $('<textarea></textarea>', {id: 'clip-board-area'}).text(_generateKIF()).appendTo($('body'))
+    $("#clip-board-area").select()
+  	document.execCommand("copy")
+    $("#clip-board-area").remove()
+  } else writeUserMessage(EJ('This game cannot be exported.', 'この対局は出力できません'), 2, "#FF0000")
 }
 
 function _kifuDownloadButtonClick(){
-  let date = Date.now()
-  downloadToFile(_generateKIF(), "81Dojo-" + formatDateToText(new Date()) + "-" + board.game.black.name + "-" + board.game.white.name + ".kif")
+  if (!board.game.gameType.match(/^va/)) {
+    let date = Date.now()
+    downloadToFile(_generateKIF(), "81Dojo-" + formatDateToText(new Date()) + "-" + board.game.black.name + "-" + board.game.white.name + ".kif")
+  } else writeUserMessage(EJ('This game cannot be exported.', 'この対局は出力できません'), 2, "#FF0000")
 }
 
 function _kifuNoteButtonClick(){
@@ -1248,7 +1266,7 @@ function _playerChallengeClick(user){
     } else if (_checkGuestGamesExpired()) {
     } else if (user.waitingGameName.match(/_automatch\-/)) {
 		  client.seek(user)
-    } else if (user.waitingGameName.match(/^vazoo/)) {
+    } else if (user.waitingGameName.match(/^vazoo2/)) {
   	  writeUserMessage(EJ("Dobutsu-shogi is not supported yet.", "HTML版はどうぶつしょうぎ未対応です。"), 1, "#ff0000")
     } else if (me.isGuest && user.waitingGameName.match(/^r_/)) {
 			writeUserMessage(i18next.t("msg.no_guest_rating"), 1, "#ff0000")
@@ -1572,7 +1590,9 @@ function _handleGameSummary(str){
 //	  _waiting = false;
 //	  _rematching = false;
   if (board.game) _closeBoard()
-  board.setGame(new Game(0, gameId, black, white))
+  let game = new Game(0, gameId, black, white)
+  _prepareCorrectBoard(game.gameType)
+  board.setGame(game)
   board.startGame(initialPosition, myTurn ? 0 : 1)
   board.setKifuId(kid)
   _dialogOnBoardClose = false
@@ -1609,7 +1629,7 @@ function _handleMove(csa, time){
       board.moves[board.moves.length - 1].setTime(time, board)
       board.addMoveToKifuGrid(board.moves[board.moves.length - 1])
     } else {
-      let move = new Movement(board.getFinalMove())
+      let move = board.getFinalMove().constructNextMove()
       move.setFromCSA(csa)
       move.setTime(time, board)
       board.handleReceivedMove(move)
@@ -1628,7 +1648,7 @@ function _handleGameEnd(lines, atReconnection = false){
   clearInterval(_disconnectTimer)
   $("p#disconnectTimer").remove()
   board.isPostGame = true
-  let move = new Movement(board.getFinalMove())
+  let move = board.getFinalMove().constructNextMove()
   move.setGameEnd(gameEndType) //turn too?
   if (move.endTypeKey == 'RESIGN' && client.resignTime) {
     move.setTime(client.resignTime, board)
@@ -1799,7 +1819,7 @@ function _handleMonitor(str){
         client.resignTime = parseInt(move_str.split(",")[1])
         return
       }
-      let move = new Movement(board.getFinalMove())
+      let move = board.getFinalMove().constructNextMove()
       move.setFromCSA(move_str.split(",")[0])
       move.setTime(parseInt(move_str.split(",")[1]), board)
       board.handleMonitorMove(move)
@@ -2281,7 +2301,7 @@ function _handleStudy(singleMove = false) {
     board.replayMoves(kifuGrid.rows(Array.from(Array(_studyBase + 1).keys())).data())
     let prevMove = board.moves[_studyBase]
     _studyBranchMoves.forEach(function(csa, index){
-      let move = new Movement(prevMove)
+      let move = prevMove.constructNextMove()
       move.setFromCSA(csa)
       move.branch = true
       prevMove = board.handleBranchMove(move, singleMove && index == _studyBranchMoves.length - 1)
@@ -2449,7 +2469,7 @@ function _enforceOptions(){
   sp.chatLobbyEnabled = options.lobbychat_sound_play == 1
   sp.chatBoardEnabled = options.gamechat_sound_play == 1
   sp.buttonEnabled = options.button_sound_play == 1
-  board.setPieceDesignType(options.piece_type)
+  board.loadPieceDesignOption()
   let scale = [1, 1.5, 2][options.board_size]
   if (board.setScale(scale)) {
     $('#boardLeftBottomHBox').width(scale * board.div.width())
@@ -2598,7 +2618,7 @@ function generateKifuNoteObject(){
     if (board.result == -1) result = '引き分け'
     else if (board.result == 0) result = (board.game.gameType.match(/^hc/) ? '下手' : '先手') + '勝ち'
     else if (board.result == 1) result = (board.game.gameType.match(/^hc/) ? '上手' : '後手') + '勝ち'
-    if (board.game.gameEndType && board.game.gameEndType != "RESIGN") result += '(' + Movement.CONST.special_notations_ja[board.game.gameEndType] + ')'
+    if (board.game.gameEndType && board.game.gameEndType != "RESIGN") result += '(' + board.constructor.MOVEMENT_CONST.special_notations_ja[board.game.gameEndType] + ')'
   }
   let moveSets = []
   let moves = []

@@ -167,7 +167,7 @@ class PieceKA extends Piece{
 }
 
 class PieceKI extends Piece{
-  constructor(owner){
+  constructor(owner, promoted){
     super(owner, false)
     this.point = 1
     this.type = 3
@@ -301,5 +301,63 @@ class PieceFU extends Piece{
   }
   convertKyoto(){
     return this._promoted ? new PieceKY(this.owner) : new PieceHI(this.owner)
+  }
+}
+
+class PieceZL extends PieceOU{
+  constructor(owner, promoted){
+    super(owner, promoted)
+    this._img = "ra"
+    this._promotedImg = "ra"
+  }
+}
+
+class PieceZG extends Piece{
+  constructor(owner, promoted){
+    super(owner, false)
+    this.type = 1
+    this.CSA = "ZG"
+    this._img = "ki"
+  }
+  normalMoves(){
+    return [[0, +1], [+1, +0], [-1, +0], [0, -1]]
+  }
+  isPromotable(){
+    return false
+  }
+}
+
+class PieceZE extends Piece{
+  constructor(owner, promoted){
+    super(owner, false)
+    this.type = 2
+    this.CSA = "ZE"
+    this._img = "zo"
+  }
+  normalMoves(){
+    return [[+1, +1], [-1, +1], [+1, -1], [-1, -1]]
+  }
+  isPromotable(){
+    return false
+  }
+}
+
+class PieceZC extends Piece{
+  constructor(owner, promoted){
+    super(owner, promoted)
+    this.type = 7
+    this.CSA = "ZC"
+    this.promotedCSA = "TO"
+    this._img = "hi"
+    this._promotedImg = "ni"
+  }
+  normalMoves(){
+    return [[0, +1]]
+  }
+  promotedMoves(){
+    return [[0, +1], [+1, +1], [-1, +1], [+1, +0], [-1, +0], [0, -1]]
+  }
+  checkSibling(){
+    return this._promoted
   }
 }

@@ -3,10 +3,12 @@ function _jsInclude(path){
 }
 _jsInclude("js/Piece.js")
 _jsInclude("js/Movement.js")
+_jsInclude("js/DobutsuMovement.js")
 _jsInclude("js/Position.js")
 _jsInclude("js/GameTimer.js")
 _jsInclude("js/SoundPlayer.js")
 _jsInclude("js/Board.js")
+_jsInclude("js/DobutsuBoard.js")
 _jsInclude("js/BoardArrow.js")
 _jsInclude("js/Country.js")
 _jsInclude("js/User.js")

@@ -13,6 +13,7 @@ class SoundPlayer{
     this._channels["OPENING"].loop = true
     this._loadChannel("PIECE_NORMAL", "piece")
     this._loadChannel("PIECE_DOUBLE", "piece_double")
+    this._loadChannel("PIECE_DOBUTSU", "piece34")
     this._loadChannel("CHALLENGER", "challenger")
     this._loadChannel("INVITATION", "invitation")
     this._loadChannel("CHIME", "chime")
@@ -58,6 +59,10 @@ class SoundPlayer{
     let key = isDouble ? "PIECE_DOUBLE" : "PIECE_NORMAL"
     this._setVolume(key, volume)
     this.play(key)
+  }
+
+  piece34(isDouble = false, volume = 1){
+    this.play("PIECE_DOBUTSU")
   }
 
   sayByoyomi(){

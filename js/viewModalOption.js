@@ -7,6 +7,7 @@ function _loadOptionsToDialog(){
   //Radiobuttons
   $('input[name=timer_sound_type]').val([options.timer_sound_type])
   $('input[name=piece_type]').val([options.piece_type])
+  $('input[name=piece_type_34]').val([options.piece_type_34])
   $('input[name=board_size]').val([options.board_size])
   $('input[name=notation_style]').val([options.notation_style])
   //Selectboxes
@@ -24,6 +25,7 @@ function _setOptionsFromDialog(){
   //Radiobuttons
   options.timer_sound_type = parseInt($('input[name=timer_sound_type]:checked').val())
   options.piece_type = parseInt($('input[name=piece_type]:checked').val())
+  options.piece_type_34 = parseInt($('input[name=piece_type_34]:checked').val())
   options.board_size = parseInt($('input[name=board_size]:checked').val())
   options.notation_style= parseInt($('input[name=notation_style]:checked').val())
   //Selectboxes

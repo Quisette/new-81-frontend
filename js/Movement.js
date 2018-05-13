@@ -1,10 +1,10 @@
 "use strict"
 
 class Movement{
-  constructor(previousMove = null){
-    this.num = previousMove == null ? 0 : (previousMove.num + 1)
+  constructor(){
+    this.num = 0
     this._accumulatedTime = null
-    this.previousMove = previousMove
+    this.previousMove = null
     this.endTypeKey = null
     this.owner = Position.CONST.SENTE
     this.pieceType = null
@@ -21,6 +21,13 @@ class Movement{
     this.branch = false
   }
 
+  constructNextMove(){
+    let move = new this.constructor()
+    move.num = this.num + 1
+    move.previousMove = this
+    return move
+  }
+
   static get CONST(){
     return {
   		RESIGN: 1,
@@ -30,8 +37,6 @@ class Movement{
   		ILLEGAL: 5,
   		OUTE_SENNICHITE: 6,
   		DISCONNECT: 7,
-  		CATCH: 8,
-  		TRY: 9,
       SUSPEND: 10,
   		LIST_UNIVERSAL: 0, // Chess-style
   		LIST_JAPANESE: 1, // Default in WebSystem options database
@@ -50,9 +55,7 @@ class Movement{
         OUTE_SENNICHITE: '反則手',
         SENNICHITE: '千日手',
         JISHOGI: '27点宣言',
-        SUSPEND: '中断',
-        CATCH: 'キャッチ!',
-        TRY: 'トライ!'
+        SUSPEND: '中断'
       },
       special_notations_en: {
         TIME_UP: 'Time-up',
@@ -62,9 +65,7 @@ class Movement{
         OUTE_SENNICHITE: 'Illegal',
         SENNICHITE: 'Repetition',
         JISHOGI: '27-point Rule',
-        SUSPEND: 'Suspended',
-        CATCH: 'CATCH!',
-        TRY: 'TRY!'
+        SUSPEND: 'Suspended'
       }
     }
   }
@@ -75,7 +76,7 @@ class Movement{
     this.fromY = sq1.data('x') > 0 ? sq1.data('y') : 0
     this.toX = sq2.data('x')
     this.toY = sq2.data('y')
-    if (sq1.data('x') <= 0) { // When dropped, need to set this.pieceType (If promote, then it is fli-drop in Kyoto-shogi)
+    if (sq1.data('x') <= 0) { // When dropped, need to set this.pieceType (If promote, then it is flip-drop in Kyoto-shogi)
       this.pieceType = promote ? pieceTypeKyotoConversion[sq1.data('y')] : sq1.data('y')
     } else { // When moving on board, update promote
       this.promote = promote
@@ -92,7 +93,7 @@ class Movement{
       this.toX = parseInt(csa.substr(3, 1))
       this.toY = parseInt(csa.substr(4, 1))
       // Set pieceType temporarily even if the piece is already promoted (pieceType >= 8)
-      this.pieceType = Movement.CONST.PIECE_NAMES_CSA.indexOf(csa.substr(5,2))
+      this.pieceType = this.constructor.CONST.PIECE_NAMES_CSA.indexOf(csa.substr(5,2))
       // Set promoted to true temporarily even if the piece is already promoted
       if (this.pieceType >= 8) this.promote = true
     }
@@ -110,7 +111,7 @@ class Movement{
   toCSA(){
     let str = this.owner ? "+" : "-"
     str += this.fromX.toString() + this.fromY.toString() + this.toX.toString() + this.toY.toString()
-    str += Movement.CONST.PIECE_NAMES_CSA[this.pieceType + (this.promote && this.pieceType < 8 ? 8 : 0)]
+    str += this.constructor.CONST.PIECE_NAMES_CSA[this.pieceType + (this.promote && this.pieceType < 8 ? 8 : 0)]
     return str
   }
 
@@ -130,10 +131,6 @@ class Movement{
         return i18next.t("msg.game_end.repetition")
       case "JISHOGI":
         return i18next.t("msg.game_end.jishogi")
-      case "CATCH":
-        return EJ("CATCH!", "キャッチ!")
-      case "TRY":
-        return EJ("REACH!", "トライ!")
       case "SUSPEND":
         return i18next.t("msg.game_end.suspend")
     }
@@ -141,15 +138,15 @@ class Movement{
 
   toJapaneseNotation(specialPurpose = null){
     // 1: for KIF file, 2: for Kifu Note
-		let alphabet = !specialPurpose && options.notation_style == Movement.CONST.LIST_1TO1
+		let alphabet = !specialPurpose && options.notation_style == this.constructor.CONST.LIST_1TO1
     let str
 		if (this.toX == this.previousMove.toX && this.toY == this.previousMove.toY) {
 			str = alphabet ? "x " : "同　";
 		} else {
-			str = Movement.CONST.file_japanese_names[this.toX]
-			str += (specialPurpose == 2 || alphabet) ? Movement.CONST.file_japanese_names[this.toY] : Movement.CONST.rank_japanese_names[this.toY]
+			str = this.constructor.CONST.file_japanese_names[this.toX]
+			str += (specialPurpose == 2 || alphabet) ? this.constructor.CONST.file_japanese_names[this.toY] : this.constructor.CONST.rank_japanese_names[this.toY]
 		}
-		str += alphabet ? Movement.CONST.koma_universal_names[this.pieceType] : Movement.CONST.koma_japanese_names[this.pieceType]
+		str += alphabet ? this.constructor.CONST.koma_universal_names[this.pieceType] : this.constructor.CONST.koma_japanese_names[this.pieceType]
 		if (this.fromX == 0 && this.fromY == 0) {
 			if (this.siblingOrigins.length > 0 || specialPurpose == 1) str += alphabet ? "*" : "打"
 		} else {
@@ -171,7 +168,7 @@ class Movement{
   }
 
 	toChessNotation() {
-		let str = Movement.CONST.koma_universal_names_condensed[this.pieceType]
+		let str = this.constructor.CONST.koma_universal_names_condensed[this.pieceType]
 		if (this.fromX == 0 && this.fromY == 0) {
 			str += "*"
 		} else {
@@ -268,11 +265,11 @@ class Movement{
 
   get moveStr(){
     if (this.num == 0) {
-      return options.notation_style == Movement.CONST.LIST_JAPANESE ? '開始' : 'Start'
+      return options.notation_style == this.constructor.CONST.LIST_JAPANESE ? '開始' : 'Start'
     } else if (this.endTypeKey) {
-      return options.notation_style == Movement.CONST.LIST_JAPANESE ? Movement.CONST.special_notations_ja[this.endTypeKey] : Movement.CONST.special_notations_en[this.endTypeKey]
+      return options.notation_style == this.constructor.CONST.LIST_JAPANESE ? this.constructor.CONST.special_notations_ja[this.endTypeKey] : this.constructor.CONST.special_notations_en[this.endTypeKey]
     } else {
-      return options.notation_style == Movement.CONST.LIST_UNIVERSAL ? this.toChessNotation() : this.toJapaneseNotation()
+      return options.notation_style == this.constructor.CONST.LIST_UNIVERSAL ? this.toChessNotation() : this.toJapaneseNotation()
     }
   }
 

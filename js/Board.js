@@ -19,7 +19,6 @@ class Board{
     this._publicPosition
     this._position
     this._direction = Position.CONST.SENTE
-    this._theme = "ichiji"
     this.pieceDesignType = 0
     this._selectedSquare = null
     this._lastSquare = null
@@ -41,9 +40,11 @@ class Board{
     this.hostMark = null
     this._generateParts()
     this._setTheme()
+    this.loadPieceDesignOption()
   }
 
   _generateParts(){
+    this._div.empty()
     this._ban = $('<div></div>', {id: 'banField'}).appendTo(this._div)
     this._coord = $('<div></div>', {id: 'coord'}).appendTo(this._div)
     this._komadais[0] = $('<div></div>', {id: 'senteKomadai', class: 'komadai'}).appendTo(this._div)
@@ -68,6 +69,7 @@ class Board{
   }
 
   _setTheme(){
+    this._theme = "ichiji"
     this._banW = 410
     this._banH = 454
     this._banX = 185
@@ -96,7 +98,6 @@ class Board{
     this._banEdgeY = 11
 
     this._partSize()
-    this._imagePath()
     this._partLayout()
   }
 
@@ -110,7 +111,7 @@ class Board{
   _imagePath(){
     let dir = ['dobutsu', 'blind_extreme'].includes(this._theme) ? this._theme : 'default'
     this._ban.css('background-image', 'url(img/themes/' + dir + '/ban.jpg)')
-    this._coord.css('background-image', 'url(img/themes/' + dir + (this._direction ? '/Scoord_e.png)' : '/Gcoord_e.png)'))
+    this._coord.css('background-image', 'url(img/themes/' + dir + (this._direction ? '/Scoord.png)' : '/Gcoord.png)'))
     this._komadais[0].css('background-image', 'url(img/themes/' + dir + '/Shand.jpg)')
     this._komadais[1].css('background-image', 'url(img/themes/' + dir + '/Ghand.jpg)')
   }
@@ -186,14 +187,14 @@ class Board{
     $(".square-selected").removeClass("square-selected")
 //    $(".square-last").removeClass("square-last")
     for (let i = 0; i < 2; i++){
-      let hash = this._position.handCoordinateHash(i)
+      let _layoutHandPiece = this._layoutHandPieceClosureFunc(i)
       this._position.komadais[i].sort(function(a,b){return a.type - b.type})
       this._position.komadais[i].forEach(function(piece){
-        if (hash[piece.CSA] == null) return
+        if (piece.CSA == 'OU' && this.game.gameType != 'vazoo') return
         let sq = $('<div></div>', {id: 'sq' + (piece.owner ? 0 : -1) + '_' + piece.getType(), class: 'square'}).data({x: piece.owner ? 0 : -1, y: piece.getType()})
         sq.css({width: this._komaW + 'px', height: this._komaH + 'px'})
         sq.css('background-image', 'url(img/themes/' + this._theme + '/' + piece.toImagePath(!this._direction) + ')')
-        this._layoutHandPiece(sq, hash[piece.CSA], i == 0)
+        _layoutHandPiece(sq, piece)
         let thisInstance = this
         sq.on("click", function(e){
           thisInstance._handleSquareClick($(this))
@@ -204,6 +205,7 @@ class Board{
         })
         sq.appendTo(this._komadais[i])
       }, this)
+      _layoutHandPiece = null
     }
     if (this._position.lastMove) {
       $('#sq' + this._position.lastMove.toX + '_' + this._position.lastMove.toY).addClass('square-last')
@@ -213,28 +215,34 @@ class Board{
     $(".name-popup").remove()
   }
 
-  _layoutHandPiece(sq, h, sente){
-    //square, hash[piece.CSA], boolean
-    let direction = this._direction == sente
-    let dirSign = direction ? 1 : -1
-    if (h.i == 0) h.dx = h.n > 1 ? ((h.xmax - h.xmin) / (h.n - 1)) : 0
-    if (h.n > h.fanmax) {
-      let sqX = h.xmin + h.i * h.dx
-      let sqY = h.y
-      sq.css({left: sqX + 'px', top: sqY + 'px'})
-    } else {
-      let theta = direction ? (Math.floor((h.n - 1) / 2) * 11.2 - h.i * 11.2) : (Math.floor(h.n / 2) * (-11.2) + h.i * 11.2)
-      let sqX = 0.5 * (h.xmin + h.xmax) - 3 + (h.n % 2 == 0 ? (direction ? -0.35 : 0.45) * this._komaW : 0)
-      let sqY = h.y + (h.n > 3 && direction ? 8 : 0) + Math.abs(theta)*0.1*dirSign
-      let oY = 24 - dirSign * h.originH
-      sq.css({left: sqX + 'px', top: sqY + 'px', 'transform-origin': '50% ' + oY + 'px', transform: 'rotate(' + theta + 'deg)'})
+  _layoutHandPieceClosureFunc(i){
+    let hash = this._position.handCoordinateHash(i)
+    let direction = this._direction == (i == 0)
+    let komaW = this._komaW
+    return function(sq, piece){
+      //square, piece
+      let dirSign = direction ? 1 : -1
+      let h = hash[piece.CSA]
+      if (h.i == 0) h.dx = h.n > 1 ? ((h.xmax - h.xmin) / (h.n - 1)) : 0
+      if (h.n > h.fanmax) {
+        let sqX = h.xmin + h.i * h.dx
+        let sqY = h.y
+        sq.css({left: sqX + 'px', top: sqY + 'px'})
+      } else {
+        let theta = direction ? (Math.floor((h.n - 1) / 2) * 11.2 - h.i * 11.2) : (Math.floor(h.n / 2) * (-11.2) + h.i * 11.2)
+        let sqX = 0.5 * (h.xmin + h.xmax) - 3 + (h.n % 2 == 0 ? (direction ? -0.35 : 0.45) * komaW : 0)
+        let sqY = h.y + (h.n > 3 && direction ? 8 : 0) + Math.abs(theta)*0.1*dirSign
+        let oY = 24 - dirSign * h.originH
+        sq.css({left: sqX + 'px', top: sqY + 'px', 'transform-origin': '50% ' + oY + 'px', transform: 'rotate(' + theta + 'deg)'})
+      }
+      h.i += 1
     }
-    h.i += 1
   }
 
-  setPieceDesignType(v){
-    if (v <= 8) this._theme = ['ichiji', 'ninju', 'hidetchi', 'ichiji_ryoko', 'dobutsu', 'kinki', 'ryoko', 'kiyoyasu', 'shogicz'][v]
-    else if (v >= 100) this._theme = ['blind_middle', 'blind_hard', 'blind_extreme'][v - 100]
+  loadPieceDesignOption(){
+    if (!options.piece_type) return
+    if (options.piece_type <= 8) this._theme = ['ichiji', 'ninju', 'hidetchi', 'ichiji_ryoko', 'dobutsu', 'kinki', 'ryoko', 'kiyoyasu', 'shogicz'][options.piece_type]
+    else if (options.piece_type >= 100) this._theme = ['blind_middle', 'blind_hard', 'blind_extreme'][options.piece_type - 100]
     this._imagePath()
     this._refreshPosition()
   }
@@ -300,11 +308,19 @@ class Board{
     this._initialPositionStr = str
     this._generateSquares()
     this._refreshPosition()
+    this._scratchKifu()
+  }
+
+  _scratchKifu(){
     this.moves = new Array()
     let firstMove = new Movement()
     this.moves.push(firstMove)
     kifuGrid.clear()
     this.addMoveToKifuGrid(firstMove)
+  }
+
+  static get MOVEMENT_CONST(){
+    return Movement.CONST
   }
 
   addMoveToKifuGrid(move, highlight = true){
@@ -341,7 +357,7 @@ class Board{
     if (move_strings.length > 0) {
       move_strings.forEach(function(move_str){
         if (move_str.match(/^%TORYO/)) return
-        let move = new Movement(board.getFinalMove())
+        let move = this.getFinalMove().constructNextMove()
         move.setFromCSA(move_str.split(",")[0])
         move.setTime(parseInt(move_str.split(",")[1]), this)
         this.runningTimer.useTime(move.time)
@@ -534,7 +550,7 @@ class Board{
 
   _manualMoveCommandComplete(destinationSquare, promote){
     //sqaure, boolean
-    let move = new Movement(kifuGrid.row({selected: true}).data())
+    let move = kifuGrid.row({selected: true}).data().constructNextMove()
     move.setFromManualMove(this._position.turn, this._selectedSquare, destinationSquare, promote)
     this._cancelSelect()
     this._executeManualMove(move)

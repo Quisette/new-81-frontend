@@ -5,17 +5,10 @@ class Position{
     this._gameType = gameType
     this.turn = Position.CONST.SENTE
     this.superior = Position.CONST.GOTE
-    if (gameType == "vazoo") {
-      this.xN = 3
-      this.yN = 4
-    } else {
-      this.xN = 9
-      this.yN = 9
-    }
     this.xmin = 1
-    this.xmax = this.xN
+    this.xmax = 9
     this.ymin = 1
-    this.ymax = this.yN
+    this.ymax = 9
     this._promoteY0 = 3 //for sente
     this._promoteY1 = 7 //for gote
     switch (gameType) {
@@ -32,6 +25,9 @@ class Position{
         break
       case 'vajudkins':
         [this.xmin, this.xmax, this.ymin, this.ymax, this._promoteY0] = [3, 8, 3, 8, 4]
+        break
+      case 'vazoo':
+        [this.xmin, this.xmax, this.ymin, this.ymax, this._promoteY0, this._promoteY1] = [7, 9, 1, 4, 1, 4]
         break
     }
 
@@ -65,7 +61,7 @@ class Position{
   }
 
   createPiece(CSA, owner, x, y){
-    if (CSA == "OU") return new PieceOU(owner)
+    if (CSA == "OU") return this._gameType == 'vazoo' ? new PieceZL(owner) : new PieceOU(owner)
     if (CSA == "HI") return new PieceHI(owner)
     if (CSA == "KA") return new PieceKA(owner)
     if (CSA == "KI") return new PieceKI(owner)
@@ -78,7 +74,11 @@ class Position{
     if (CSA == "NG") return new PieceGI(owner, true)
     if (CSA == "NK") return new PieceKE(owner, true)
     if (CSA == "NY") return new PieceKY(owner, true)
-    if (CSA == "TO") return new PieceFU(owner, true)
+    if (CSA == "TO") return this._gameType == 'vazoo' ? new PieceZC(owner, true) : new PieceFU(owner, true)
+    if (CSA == "ZG") return new PieceZG(owner)
+    if (CSA == "ZE") return new PieceZE(owner)
+    if (CSA == "ZC") return new PieceZC(owner)
+    if (CSA == "ZH") return new PieceZC(owner, true)
   }
 
   loadFromString(position_str){
@@ -276,7 +276,9 @@ class Position{
         koma3 = this._squares[move.toX - 1][move.toY - 2]
       }
       if (koma3 && koma3.owner == move.owner) soundDouble = true
-      sp.piece(soundDouble, koma1.soundVolume())
+      console.log(move.constructor.name)
+      if (move.constructor.name == 'DobutsuMovement') sp.piece34(soundDouble, koma1.soundVolume())
+      else sp.piece(soundDouble, koma1.soundVolume())
     }
     return move
   }
