@@ -1630,6 +1630,10 @@ function _handleGameEnd(lines, atReconnection = false){
   board.isPostGame = true
   let move = new Movement(board.getFinalMove())
   move.setGameEnd(gameEndType) //turn too?
+  if (move.endTypeKey == 'RESIGN' && client.resignTime) {
+    move.setTime(client.resignTime, board)
+    client.resignTime = null
+  }
   board.endTime = moment()
   if (gameEndType != "SUSPEND") {
     board.moves.push(move) //refresh list too
@@ -1791,7 +1795,10 @@ function _handleMonitor(str){
     }
   } else {
     move_strings.forEach(function(move_str){
-      if (move_str.match(/^%TORYO/)) return
+      if (move_str.match(/^%TORYO/)) {
+        client.resignTime = parseInt(move_str.split(",")[1])
+        return
+      }
       let move = new Movement(board.getFinalMove())
       move.setFromCSA(move_str.split(",")[0])
       move.setTime(parseInt(move_str.split(",")[1]), board)

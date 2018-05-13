@@ -35,7 +35,7 @@ function _setOptionsFromDialog(){
 }
 
 function _DisableOptionsByPremium(){
-  $('input[name=timer_sound_type]:gt(0), input[name=piece_type]:lt(9):gt(3)').prop({'disabled': getPremium() == 0, 'title': getPremium() == 0 ? i18next.t("option.for_premium") : ''})
+  $('input[name=timer_sound_type]:gt(1), input[name=piece_type]:lt(9):gt(3)').prop({'disabled': getPremium() == 0, 'title': getPremium() == 0 ? i18next.t("option.for_premium") : ''})
 }
 function _loadPieceDesignToDialog(key, val, checked = false){
   let p = $('<p></p>').css('margin-bottom', '5px')
