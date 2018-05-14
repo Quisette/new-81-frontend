@@ -240,9 +240,9 @@ class Board{
   }
 
   loadPieceDesignOption(){
-    if (!options.piece_type) return
-    if (options.piece_type <= 8) this._theme = ['ichiji', 'ninju', 'hidetchi', 'ichiji_ryoko', 'dobutsu', 'kinki', 'ryoko', 'kiyoyasu', 'shogicz'][options.piece_type]
-    else if (options.piece_type >= 100) this._theme = ['blind_middle', 'blind_hard', 'blind_extreme'][options.piece_type - 100]
+    let v = options.piece_type || 0
+    if (v <= 8) this._theme = ['ichiji', 'ninju', 'hidetchi', 'ichiji_ryoko', 'dobutsu', 'kinki', 'ryoko', 'kiyoyasu', 'shogicz'][v]
+    else if (v >= 100) this._theme = ['blind_middle', 'blind_hard', 'blind_extreme'][v - 100]
     this._imagePath()
     this._refreshPosition()
   }

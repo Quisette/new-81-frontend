@@ -42,6 +42,7 @@ var _dialogOnBoardClose = false
 var _worldClocks = []
 var _loginHistory = []
 var hostPlayerName = null
+var _loserLeaveDisabled = false
 
 /* ====================================
     On document.ready
@@ -1086,6 +1087,7 @@ function setBoardConditions(){
       $("#resignButton").addClass("button-disabled")
       $("#clearArrowsButton, #positionMenuButton, #kifuMenuButton, #rematchButton, #closeGameButton").removeClass("button-disabled")
       $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: true})
+      if (_loserLeaveDisabled) $('#closeGameButton').addClass("button-disabled")
     } else {
       kifuGrid.select.style('api')
       $("#replayButtons").find("button").prop("disabled", true)
@@ -1669,6 +1671,8 @@ function _handleGameEnd(lines, atReconnection = false){
       writeUserMessage(EJ("### You Lose ###", "### あなたの負けです ###"), 2, "#DD0088", true)
       sp.gameEnd(false)
     	openResult(-1)
+      _loserLeaveDisabled = true
+      setGeneralTimeout("LOSER_LEAVE", 4500)
     	//if (adviseIllegal) _writeUserMessage(LanguageSelector.EJ("( For details of illegal moves in shogi, see: http://81dojo.com/documents/Illegal_Move )\n", "( 将棋の反則手についてはこちらでご確認下さい: http://81dojo.com/documents/反則手 )\n"), 2, "#DD0088");
       /*
     	if (board.gameType == "r") _losses_session += 1;
@@ -1908,6 +1912,7 @@ function _handleLeave(name) {
 		writeUserMessage(name + i18next.t("code.G031"), 2, board.getPlayerRoleFromName(name) == 0 ? "#000000" : "#666666", true)
     board.playerNameClassChange(board.getPlayerRoleFromName(name), "name-left", true)
     sp.door(false)
+    _allowLoserLeave()
   } else {
 		let importantUser = false
 		if (watcherGrid.rows().count() < 10 || importantUser) {
@@ -2122,9 +2127,11 @@ function _handleGameChat(sender, message){
 		if (sender == board.game.black.name) {
       _stopTypingIndicator(0)
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#000000")
+      if (_loserLeaveDisabled && sender != me.name) _allowLoserLeave()
 		} else if (sender == board.game.white.name) {
       _stopTypingIndicator(1)
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#666666")
+      if (_loserLeaveDisabled && sender != me.name) _allowLoserLeave()
 		} else if (sender == me.name) {
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#0033DD")
 		} else if (board.isPlaying() && !_allowWatcherChat) {
@@ -2522,6 +2529,16 @@ function _handleGeneralTimeout(key){
     case "WORLD_CLOCK":
       _refreshWorldClocks()
       break
+    case "LOSER_LEAVE":
+      _allowLoserLeave()
+      break
+  }
+}
+
+function _allowLoserLeave(){
+  if (_loserLeaveDisabled) {
+    _loserLeaveDisabled = false
+    $('#closeGameButton').removeClass("button-disabled")
   }
 }
 

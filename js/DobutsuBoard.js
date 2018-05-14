@@ -84,8 +84,8 @@ class DobutsuBoard extends Board{
   }
 
   loadPieceDesignOption(){
-    if (!options.piece_type_34) return
-    this._theme = ['3x4_pieco', '3x4_pieco', '3x4_hidetchi'][options.piece_type_34]
+    let v = options.piece_type_34 || 1
+    this._theme = ['3x4_pieco', '3x4_pieco', '3x4_hidetchi'][v]
     this._imagePath()
     this._refreshPosition()
   }

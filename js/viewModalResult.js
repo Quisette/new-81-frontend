@@ -1,18 +1,27 @@
+$('#modalResult').click(function(){
+  _closeResult(1000)
+})
+
 function openResult(result){
   //integer (-1:Lose, 0:Draw, 1:Win)
   let div = $("#modalResult")
-  div.css({left: board.div.offset().left + board.actualWidth()/2 - div.width()/2, top: board.div.offset().top + board.actualHeight()/2 - div.height()/2})
+  div.css({left: board.div.offset().left + board.actualWidth()/2 - div.width()/2, top: board.div.offset().top + board.actualHeight()/2 - div.height()/2, 'pointer-events': 'auto'})
   if (result > 0) {
     div.css('background-image', 'url(img/fan_win.png)').find("#resultBanner").css('color', 'red').html(EJ('You Win', '勝利'))
   } else {
     div.css('background-image', 'url(img/fan_lose.png)').find("#resultBanner").css('color', 'black').html(result < 0 ? EJ('You Lose', '敗北') : EJ('Draw', '引分'))
   }
   div.fadeIn()
-  setTimeout(function(){
-    div.fadeOut(2000, function(){
-      div.find(".rate-change").empty()
-    })
-  }, 4000)
+  setTimeout(function(){_closeResult()}, 4000)
+}
+
+function _closeResult(fadeTime = 2000){
+  let div = $("#modalResult")
+  if (div.css('pointer-events') == 'none') return
+  div.css('pointer-events', 'none')
+  div.fadeOut(fadeTime, function(){
+    div.find(".rate-change").empty()
+  })
 }
 
 function loadResult(myFrom, myTo, hisFrom, hisTo){
