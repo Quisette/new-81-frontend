@@ -8,6 +8,7 @@ function openResult(result){
   div.css({left: board.div.offset().left + board.actualWidth()/2 - div.width()/2, top: board.div.offset().top + board.actualHeight()/2 - div.height()/2, 'pointer-events': 'auto'})
   if (result > 0) {
     div.css('background-image', 'url(img/fan_win.png)').find("#resultBanner").css('color', 'red').html(EJ('You Win', '勝利'))
+    snowfall.start("SAKURA_PINK", 16, 0.9)
   } else {
     div.css('background-image', 'url(img/fan_lose.png)').find("#resultBanner").css('color', 'black').html(result < 0 ? EJ('You Lose', '敗北') : EJ('Draw', '引分'))
   }
@@ -22,6 +23,7 @@ function _closeResult(fadeTime = 2000){
   div.fadeOut(fadeTime, function(){
     div.find(".rate-change").empty()
   })
+  snowfall.stop()
 }
 
 function loadResult(myFrom, myTo, hisFrom, hisTo){

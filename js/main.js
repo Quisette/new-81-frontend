@@ -43,6 +43,7 @@ var _worldClocks = []
 var _loginHistory = []
 var hostPlayerName = null
 var _loserLeaveDisabled = false
+var snowfall = null
 
 /* ====================================
     On document.ready
@@ -316,6 +317,9 @@ $(function(){
   // World clocks
   _generateWorldClocks()
 
+  // Snowfall
+  snowfall = new Snowfall('snowfallCanvas')
+
   // Hide all layers other than login
   _switchLayer(0)
   _fadeInLoginView()
@@ -459,6 +463,7 @@ function _resize(){
   $("#playerGridWrapper, #waiterGridWrapper, #gameGridWrapper, #watcherGridWrapper, #kifuGridWrapper").each(function(){
     $(this).find('.dataTables_scrollBody').css('height', $(this).height() - $(this).find($("thead")).height())
   })
+  snowfall.resize(window.innerWidth, window.innerHeight)
 }
 
 /* ====================================
@@ -470,6 +475,7 @@ function _fadeInLoginView(){
 }
 
 function _prepareForLogin(){
+  setTimeout(function(){snowfall.start("SAKURA_WHITE", 10, 1)}, 1100)
   sp.startOpening()
   $('input[name=loginType], input#usernameInput, input#passwordInput, input#loginSave, input#loginButton').prop('disabled', true)
   serverGrid.clear().draw()
@@ -1342,6 +1348,7 @@ function _handleGeneralResponse(tokens){
 }
 
 function _handleLoggedIn(str){
+  snowfall.stop()
   sp.stopOpening()
   $('#loginAlert').text(i18next.t("login.successfull"))
   if ($('input[name=loginType]:checked').val() == 0 && $('#loginSave').prop('checked')) {
