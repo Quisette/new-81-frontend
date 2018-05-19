@@ -373,7 +373,7 @@ $(function(){
     if (board.isHost()) _giveHostButtonClick()
   })
   document.getElementById('layerBoard').ondragstart = function(){return false}
-  $("#lobbyChatInput").on('keyup', function(e){
+  $("#lobbyChatInput").on('keypress', function(e){
     if (e.keyCode == 13){
       if ($(this).val().length > 0) {
         client.chat($(this).val())
@@ -381,15 +381,19 @@ $(function(){
       }
     }
   })
-  $("#boardChatInput").on('keyup', function(e){
+  $("#boardChatInput").on('keypress', function(e){
     if (e.keyCode == 13){
       if ($(this).val().length > 0) {
         clearGeneralTimeout("SEND_TYPE")
         client.gameChat($(this).val())
         $(this).val('')
       }
-    } else if (board.isPlayer()) {
-			if (e.keyCode == 8) {
+    }
+  })
+  $("#boardChatInput").on('keyup', function(e){
+    if (board.isPlayer()) {
+      if (e.keyCode == 13) {
+			} else if (e.keyCode == 8) {
         if ($(this).val() == "") clearGeneralTimeout("SEND_TYPE")
 			} else {
         if ($(this).val().length > 0) setGeneralTimeout("SEND_TYPE", 2500)
@@ -1216,6 +1220,7 @@ function _openPlayerInfo(user, doOpen = true){
       position: {at:'left+'+mouseX+' top+'+mouseY},
       close: function(e){
         if (element.find("#privateMessageArea").html() == "") element.dialog('destroy').remove()
+        element.find("#privateChatInput").blur()
       },
       buttons: [
         {text: "", class: "fa fa-graduation-cap font-fa buttons-for-host connected-button-left", title: i18next.t("board.give_host"), click: function(){_giveHostButtonClick(user)}},
@@ -1229,7 +1234,7 @@ function _openPlayerInfo(user, doOpen = true){
     element.siblings('.ui-dialog-titlebar').find('.ui-dialog-titlebar-close').click(function(){sp.buttonClick("CANCEL")})
     if (!board.isHost()) element.siblings('.ui-dialog-buttonpane').find('.buttons-for-host').css('display', 'none')
     if (user.isGuest) element.find("#privateChatInput").prop('disabled', true)
-    element.find("#privateChatInput").on('keyup', function(e){
+    element.find("#privateChatInput").on('keypress', function(e){
       if (e.keyCode == 13){
         if ($(this).val().length > 0) {
           if (board.isPlaying()){
@@ -1324,6 +1329,7 @@ function _playerPMClick(e, forcePM = false){
   if (forcePM || $(e).find("div#player-info-layer-1").css('opacity') == 1) {
     $(e).find("div#player-info-layer-1").css('opacity', 0)
     $(e).find("div#player-info-layer-2").css('opacity', 1)
+    $(e).find("#privateChatInput").focus()
   } else {
     $(e).find("div#player-info-layer-1").css('opacity', 1)
     $(e).find("div#player-info-layer-2").css('opacity', 0)
@@ -1669,6 +1675,7 @@ function _handleGameEnd(lines, atReconnection = false){
     if (!kifuGrid.row(':last').data().branch) board.addMoveToKifuGrid(move)
   }
   if (gameEndType == "TIME_UP" && board.isPlayer() && !atReconnection) sp.sayTimeUp()
+  let illegal = gameEndType == "ILLEGAL_MOVE"
   writeUserMessage(move.toGameEndMessage(), 2, "#DD0088")
 	//if (GameTimer.soundType >= 2) Byoyomi.sayTimeUp();
   switch (result) {
@@ -1680,12 +1687,10 @@ function _handleGameEnd(lines, atReconnection = false){
     	openResult(-1)
       _loserLeaveDisabled = true
       setGeneralTimeout("LOSER_LEAVE", 4500)
-    	//if (adviseIllegal) _writeUserMessage(LanguageSelector.EJ("( For details of illegal moves in shogi, see: http://81dojo.com/documents/Illegal_Move )\n", "( 将棋の反則手についてはこちらでご確認下さい: http://81dojo.com/documents/反則手 )\n"), 2, "#DD0088");
+      if (illegal) writeUserMessage(i18next.t("msg.illegal"), 2, "#FF0000")
       /*
     	if (board.gameType == "r") _losses_session += 1;
     	var history = "  ●";
-    	_losersCloseButtonTimer.reset();
-    	_losersCloseButtonTimer.start();
       */
       break
     case "WIN":
