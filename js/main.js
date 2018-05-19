@@ -698,6 +698,24 @@ function _interpretCommunicationCode(name, code, n, bold, sound) {
   if (sound) sp.chatBoard()
 }
 
+function popupWatchers(elem){
+  $(elem).tooltip({
+    items: "[data-gameId]",
+    track: true,
+    position: {my:'left top', at:'right+10px top-2px'},
+    content: function(){
+      let str = ''
+      let index = gameGrid.cell($(elem).closest('td')[0]).index().row
+      let game = gameGrid.row(index).data()
+      playerGrid.rows().every(function(){
+        let user = users[this.data().name]
+        if (user.isWatchingGame(game)) str += user.country.flagImgTag16() + ' ' + user.name + '<br>'
+      })
+      return str
+    }
+  });
+  $(elem).tooltip('open')
+}
 
 /* ====================================
     Board View functions
@@ -751,8 +769,13 @@ function _resignButtonClick(){
 function _rematchButtonClick(){
   if (board.isPlayer()) {
     if (!board.rematchAgreed()){
-  		client.gameChat("[##REMATCH]")
+      if (!board.isPlayerPresent(1 - board.myRoleType)) {
+        writeUserMessage(EJ("The opponent is not in this room.", "相手が退室しています"), 2, "#FF0000")
+        return
+      }
   		if (_checkGuestGamesExpired()) return
+  		client.gameChat("[##REMATCH]")
+      $('#rematchButton').addClass('button-disabled')
     }
   } else {
     let newGameName = ""
@@ -762,7 +785,7 @@ function _rematchButtonClick(){
     let foundRow = gameGrid.rows(function(idx, data, node){
       return data.gameId.split("+")[1] == newGameName// && data.status == "game"
     })
-    if (foundRow) {
+    if (foundRow.data().length > 0) {
       client.monitor(board.game.gameId, false)
       board.close()
       $('#boardMessageArea').empty()
@@ -1220,7 +1243,6 @@ function _openPlayerInfo(user, doOpen = true){
       position: {at:'left+'+mouseX+' top+'+mouseY},
       close: function(e){
         if (element.find("#privateMessageArea").html() == "") element.dialog('destroy').remove()
-        element.find("#privateChatInput").blur()
       },
       buttons: [
         {text: "", class: "fa fa-graduation-cap font-fa buttons-for-host connected-button-left", title: i18next.t("board.give_host"), click: function(){_giveHostButtonClick(user)}},
@@ -1234,6 +1256,7 @@ function _openPlayerInfo(user, doOpen = true){
     element.siblings('.ui-dialog-titlebar').find('.ui-dialog-titlebar-close').click(function(){sp.buttonClick("CANCEL")})
     if (!board.isHost()) element.siblings('.ui-dialog-buttonpane').find('.buttons-for-host').css('display', 'none')
     if (user.isGuest) element.find("#privateChatInput").prop('disabled', true)
+    element.find("#privateChatInput").blur()
     element.find("#privateChatInput").on('keypress', function(e){
       if (e.keyCode == 13){
         if ($(this).val().length > 0) {
@@ -1813,6 +1836,8 @@ function _handleMonitor(str){
       gameEndStr += RegExp.$1 + "\n"
     } else if (line.match(/^NOT_FOUND$/)) {
       board.close()
+      if (currentLayer == 2) _closeBoard()
+      writeUserMessage(EJ('The specified room does not exist anymore.', 'その対局室は既にありません。リストを更新して下さい。'), 1, "#FF0000")
       return
     }
   })
@@ -1925,6 +1950,8 @@ function _handleLeave(name) {
     board.playerNameClassChange(board.getPlayerRoleFromName(name), "name-left", true)
     sp.door(false)
     _allowLoserLeave()
+    board.clearRematch()
+    if (board.isPlayer() && board.isPostGame) $('#rematchButton').removeClass('button-disabled')
   } else {
 		let importantUser = false
 		if (watcherGrid.rows().count() < 10 || importantUser) {
@@ -1945,9 +1972,12 @@ function _handleLeave(name) {
 function _handleDisconnect(name) {
   if (!board.game) return
   if (board.getPlayerRoleFromName(name) != null) {
-		writeUserMessage(name + EJ(" disconnected.", "さんの接続が切れました。"), 2, board.getPlayerRoleFromName(name) == 0 ? "#000000" : "#666666", true)
+		writeUserMessage(name + i18next.t("code.G032"), 2, board.getPlayerRoleFromName(name) == 0 ? "#000000" : "#666666", true)
     board.playerNameClassChange(board.getPlayerRoleFromName(name), "name-left", true)
     sp.door(false)
+    _allowLoserLeave()
+    board.clearRematch()
+    if (board.isPlayer() && board.isPostGame) $('#rematchButton').removeClass('button-disabled')
   	if (board.isPlaying() && name != me.name) {
       board.disconnectTimer(board.getPlayerRoleFromName(name))
       writeUserMessage(i18next.t("msg.opponent_disconnect"), 2, "#ff0000")
@@ -2121,6 +2151,7 @@ function _handleGameChat(sender, message){
 				client.rematch(board.game, board.myRoleType)
 			} else {
         $("#rematchButton").removeClass("button-disabled")
+  			writeUserMessage(i18next.t("msg.rematch_follow"), 2, "#008800")
 			}
     }
 	} else if (message.match(/^\[##.+\]/)) {

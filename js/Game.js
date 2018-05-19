@@ -23,7 +23,7 @@ class Game{
     this.status = ""
     this.gameEndType = null
 		if (game_info[2].match(/\.([0-9a-z]{6})/)) this.password = RegExp.$1
-    this.shortId = (this.isStudy() ? "SG" : (black.name.substr(0,1) + white.name.substr(0,1))) + id.substr(id.length - 7, 7)
+    this.shortId = (this.isStudy() ? "SG" : (black.name.slice(0,1) + white.name.slice(0,1))) + id.slice(-8)
   }
 
 	setFromList(moves, status, isBlackIn, isWhiteIn, watchers, opening){
@@ -84,9 +84,10 @@ class Game{
 
   watchersStr(){
     if (this.watchers == 0) return ""
-		if (this.watchers >= 10) return coloredSpan(this.watchers, 'red')
-		if (this.watchers >= 5) return coloredSpan(this.watchers, '#e80')
-		return this.watchers
+    let str = '<span data-gameid="' + this.shortId + '" onmouseover="popupWatchers(this)" onmouseout="$(this).tooltip(\'close\')" style="padding:0 7px'
+    if (this.watchers >= 10) str += ';color:red'
+		else if (this.watchers >= 5) str += ';color:#e80'
+		return str + '">' + this.watchers + '</span>'
   }
 
   openingStr(){

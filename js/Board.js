@@ -349,7 +349,7 @@ class Board{
     this.accumulatedTimes[0] = 0
     this.accumulatedTimes[1] = 0
     if (this.isPlayer()) this._timers[this.myRoleType].myPlayingTimer = true
-    this._rematchReady = [false, false]
+    this.clearRematch()
     /*
     _board_coord_image.visible = false;
     studyOrigin = 0;
@@ -673,6 +673,11 @@ class Board{
     else this.playerInfos[turn].find("#player-info-name").removeClass(className)
   }
 
+  isPlayerPresent(turn){
+    //int
+    return !this.playerInfos[turn].find("#player-info-name").hasClass("name-left")
+  }
+
   pauseAllTimers(){
     this._timers[0].stop(true)
     this._timers[1].stop(true)
@@ -697,6 +702,10 @@ class Board{
 
   rematchAgreed(){
     return this._rematchReady[0] == true && this._rematchReady[1] == true
+  }
+
+  clearRematch(){
+    this._rematchReady = [false, false]
   }
 
   disconnectTimer(turn){
