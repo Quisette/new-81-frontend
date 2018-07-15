@@ -74,6 +74,7 @@ class User{
 
   setFromLogin(tokens){
     this.rate = tokens[1]
+    this.provisional = (parseInt(tokens[3]) + parseInt(tokens[4])) < 5
   }
 
 	setFromLobbyIn(rate, provisional, country_code, protocol) {

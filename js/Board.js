@@ -424,6 +424,7 @@ class Board{
   }
 
   _addMyArrow(sqTo, isPublic){
+    if (me.isGuest) return
     let fromType = -1
     let fromX = this._mouseDownSquare.data().x
     let fromY = this._mouseDownSquare.data().y

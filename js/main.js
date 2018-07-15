@@ -1373,7 +1373,7 @@ function _playerPMClick(e, forcePM = false){
   if (forcePM || $(e).find("div#player-info-layer-1").css('opacity') == 1) {
     $(e).find("div#player-info-layer-1").css('opacity', 0)
     $(e).find("div#player-info-layer-2").css('opacity', 1)
-    $(e).find("#privateChatInput").prop('disabled', false).focus()
+    if (!me.isGuest) $(e).find("#privateChatInput").prop('disabled', false).focus()
   } else {
     $(e).find("div#player-info-layer-1").css('opacity', 1)
     $(e).find("div#player-info-layer-2").css('opacity', 0)
@@ -1436,10 +1436,14 @@ function _handleLoggedIn(str){
   setGeneralTimeout("HOUR_MILE", 3600000)
   _refreshWorldClocks()
   $('#classSurveyButton').css('display', i18next.language == "ja" ? 'block' : 'none')
+  $('#lobbyChatInput, #boardChatInput').prop('disabled', me.isGuest)
 }
 
 function _writeWelcomeMessage(){
   writeUserMessage(EJ(infoFetcher.initialMessageEn.join("\n"), infoFetcher.initialMessageJa.join("\n")), 1, "#000000")
+  if (me.isGuest) writeUserMessage(i18next.t("msg.guestlogin"), 1, "#000000")
+  if (me.provisional) writeUserMessage(i18next.t("msg.newlogin"), 1, "#000000")
+  if (me.rate >= 2250 && i18next.language == "ja") writeUserMessage("[レーティング2250点以上の方へ]\n- 「棋力証明制度」をご案内中です(https://system.81dojo.com/declaration)", 1, "#000000")
   if (getPremium()) writeUserMessage(EJ("You have " + makePremiumName(getPremium()) + " status. Thank you for choosing 81Dojo.", makePremiumName(getPremium()) + "クラス" + me.name + "様、いつもご利用有難うございます。＜(_ _)＞"), 1, "#FFBB00", true)
 }
 
@@ -2523,6 +2527,7 @@ function _switchLayer(n){
   $('div#layerLobby').css({'z-index': n == 1 ? 2 : 1, opacity: (n == 1 || n == 2) ? 1 : 0})
   $('div#layerBoard').css({'z-index': n == 2 ? 2 : 1, opacity: n == 2 ? 1 : 0})
   currentLayer = n
+  if (n == 2 && me.isGuest) $('#boardChatInput').prop('disabled', !board.isPlayer())
 }
 
 function setGeneralTimeout(key, ms, force = false){
