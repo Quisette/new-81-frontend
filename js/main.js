@@ -1254,7 +1254,7 @@ function _openPlayerInfo(user, doOpen = true){
         </div>\
         <div id="player-info-layer-2" style="margin-top:-128px;opacity:0">\
         <div id="privateMessageArea"></div>\
-        <div class="hbox" style="margin-top:5px"><span style="margin-right:5px;white-space:nowrap">PM:</span><input id="privateChatInput" style="flex:1"></div>\
+        <div class="hbox" style="margin-top:5px"><span style="margin-right:5px;white-space:nowrap">PM:</span><input id="privateChatInput" style="flex:1" disabled="true"></div>\
         </div>\
         <div class="check-game" id="check-game-' + user.name + '"></div>'
     }).dialog({
