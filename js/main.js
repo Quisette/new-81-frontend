@@ -43,6 +43,7 @@ var _worldClocks = []
 var _loginHistory = []
 var hostPlayerName = null
 var _loserLeaveDisabled = false
+var _declinedList = new Object() // _declinedList[name] = false: declined, = true: auto-decline
 var snowfall = null
 
 /* ====================================
@@ -53,9 +54,9 @@ function _testFunction(phase){
   //phase:integer
   if (phase == 0) { // After creation
     if (true) {
-      board.loadNewPosition()
-      _switchLayer(2)
-      return
+      //board.loadNewPosition()
+      //_switchLayer(2)
+      //return
     }
     _handleServers([
       {id:1, name:'MERCURY', description_en: 'test', description_ja: 'テスト', enabled: true, population: 0, host: 'shogihub.com', port: 4084}
@@ -65,7 +66,7 @@ function _testFunction(phase){
   } else if (phase == 1) { // After servers are loaded
     _loginButtonClick()
   } else if (phase == 2) { // After logged in
-    //client.send("%%GAME hc2pd_test1-900-30 -")
+    client.send("%%GAME hc2pd_test1-900-30 -")
     //_optionButtonClick()
   }
 }
@@ -1208,6 +1209,26 @@ function _handleRejectChallenge(challenger, declineCode = null){
   sp.buttonClick("CANCEL")
 	client.decline(declineCode)
 	writeUserMessage(EJ("Rejected the challenge from " + challenger.name + ".", challenger.name + "さんからの挑戦をパスしました。"), 1, "#008800", true)
+  if (_declinedList[challenger.name] == false) {
+    $('#ignoreChallenge').remove()
+    $('#lobbyMessageArea').append('<p id="ignoreChallenge">&nbsp;<a href="#" onclick="_ignoreChallenge(\'' + challenger.name + '\')">[' + i18next.t("msg.ask_auto_reject") + ']</a></p>')
+  } else {
+    _declinedList[challenger.name] = false
+  }
+}
+
+function _ignoreChallenge(name){
+  $('#ignoreChallenge').remove()
+  _declinedList[name] = true
+  writeUserMessage(i18next.t("msg.auto_reject"), 1, "#FF0000")
+}
+
+function _resetDeclinedList(){
+  $('#ignoreChallenge').remove()
+  // If false, delete it. If true, keep it.
+  for (let name in _declinedList){
+    if (_declinedList[name] == false) delete _declinedList[name]
+  }
 }
 
 function _handleAcceptInvitation(user){
@@ -1352,10 +1373,11 @@ function _playerPMClick(e, forcePM = false){
   if (forcePM || $(e).find("div#player-info-layer-1").css('opacity') == 1) {
     $(e).find("div#player-info-layer-1").css('opacity', 0)
     $(e).find("div#player-info-layer-2").css('opacity', 1)
-    $(e).find("#privateChatInput").focus()
+    $(e).find("#privateChatInput").prop('disabled', false).focus()
   } else {
     $(e).find("div#player-info-layer-1").css('opacity', 1)
     $(e).find("div#player-info-layer-2").css('opacity', 0)
+    $(e).find("#privateChatInput").prop('disabled', true)
   }
 }
 
@@ -1569,6 +1591,10 @@ function _handleGame(line) {
 }
 
 function _handleChallenger(name){
+  if (_declinedList[name] == true) {
+  	client.decline("C000")
+    return
+  }
   sp.play("CHALLENGER")
   $('#modalChallenger').dialog('open')
   _initModalChallenger(users[name])
@@ -1642,6 +1668,7 @@ function _handleGameSummary(str){
   _writeGameStartMessage()
   //_nOpponentDisconnect = 0;
   //_study_notified = false;
+  _resetDeclinedList()
 }
 
 function _writeGameStartMessage(){
@@ -2297,6 +2324,7 @@ function _clearAllParams(){
   _checkLobbyButtonClick(true) //Cancel see lobby button if activated
   $('#lobbyMessageArea').empty()
   _loadDefaultOptions()
+  _declinedList = new Object()
 }
 
 /* ====================================
