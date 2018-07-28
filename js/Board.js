@@ -59,6 +59,11 @@ class Board{
       this.playerInfos[i].append('<div class="avatar-wrapper" style="margin:5px 15px;"><img class="avatar"/></div><span id="player-info-mark" style="font-size:15px">' + (i == 0 ? '☗' : '☖') + '</span><span id="player-info-name"></span><br><span id="player-info-rate"></span>')
     }
     $('[id=player-info-name]').dblclick(function(){_playerNameDblClick($(this).text())})
+    $('div.player-info').on('touchstart', function(e){
+      mouseX = e.originalEvent.touches[0].clientX
+      mouseY = e.originalEvent.touches[0].clientY
+      _playerNameDblClick($(this).find('#player-info-name').text())
+    })
     this._arrowCanvas = $('<canvas></canvas>', {id: 'boardCanvas'}).attr({width: this._originalWidth, height: this._originalHeight}).appendTo(this._div)
     this._pickedPiece = $('<div></div>', {class: 'picked-piece'})
     this.hostMark = $('<i></i>', {class: 'fa fa-graduation-cap fa-lg'}).css('color', '#008')

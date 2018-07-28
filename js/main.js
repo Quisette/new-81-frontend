@@ -45,6 +45,7 @@ var hostPlayerName = null
 var _loserLeaveDisabled = false
 var _declinedList = new Object() // _declinedList[name] = false: declined, = true: auto-decline
 var snowfall = null
+var _longTapRow = null
 
 /* ====================================
     On document.ready
@@ -410,6 +411,15 @@ $(function(){
   $("#findUser").on('focus', function(){$(this).val('')})
   $("[data-click]").click(function(){sp.buttonClick($(this).data('click').toUpperCase())})
   $(".ui-dialog-titlebar-close").click(function(){sp.buttonClick("CANCEL")})
+  $('#playerGrid tbody, #waiterGrid tbody, #gameGrid tbody, #watcherGrid tbody').on('touchstart', 'tr', function (e){
+    mouseX = e.originalEvent.touches[0].clientX
+    mouseY = e.originalEvent.touches[0].clientY
+    _longTapRow = $(this)
+    setGeneralTimeout("LONG_TAP", 400, true)
+  })
+  $(window).on('touchend touchmove', function(e){
+    clearGeneralTimeout("LONG_TAP")
+  })
 
   _resize()
 
@@ -2565,6 +2575,10 @@ function _enforceOptions(){
 function _handleGeneralTimeout(key){
   timeouts[key] = false
   switch (key) {
+    case "LONG_TAP":
+      _longTapRow.closest('table').DataTable().row(_longTapRow).select()
+      _longTapRow.dblclick()
+      break
     case "CHALLENGE":
       $('#challengeCanceler').remove()
   		if (_challengeUser) {
