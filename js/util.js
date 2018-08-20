@@ -290,6 +290,7 @@ function gameTypeToKIF(str){
 
 function debugLoop(){
   window.addEventListener('devtoolschange', function(){while(true) debugger})
+  $(window).keydown(function(e){if (e.keyCode == 123) e.preventDefault()})
 }
 
 function restoreIdleConnections(n){

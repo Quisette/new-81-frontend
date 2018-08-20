@@ -36,7 +36,7 @@ div.layer#layerLogin
         p
           span.small data-i18n="login.password"
           br
-          input type="text" id="passwordInput" data-i18n-title="msg.password_encrypted" oninput="passChange()" onkeydown="passKey(event)" autocomplete="off"
+          input type="text" id="passwordInput" data-i18n-title="msg.password_encrypted" oninput="passChange()" onkeydown="passKey(event)" onpaste="return false" autocomplete="off"
           br
           input type="text" id="hiddenPass" style="display:none"
         p
