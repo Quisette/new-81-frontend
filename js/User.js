@@ -116,52 +116,86 @@ class User{
     }
   }
 
-  gridObject(){
-		let statStr = ""
-    if (this.listAsWaiter()) statStr = coloredSpan(i18next.t("lobby.stat_w"), 'green', 13, i18next.t("lobby.stat_w_tip"))
+  statStr(){
+		let str = ""
+    if (this.listAsWaiter()) str = coloredSpan(i18next.t("lobby.stat_w"), 'green', 13, i18next.t("lobby.stat_w_tip"))
 		if (this._monitorGame != "*") {
-		  statStr += coloredSpan(i18next.t("lobby.stat_m"), null, 13, i18next.t("lobby.stat_m_tip"))
+		  str += coloredSpan(i18next.t("lobby.stat_m"), null, 13, i18next.t("lobby.stat_m_tip"))
 		} else if (this.status == 5) {
-		  statStr = coloredSpan(i18next.t("lobby.stat_p"), null, null, i18next.t("lobby.stat_p_tip"))
+		  str = coloredSpan(i18next.t("lobby.stat_p"), null, null, i18next.t("lobby.stat_p_tip"))
 		} else if (this.status == 4) {
-		  statStr = coloredSpan(i18next.t("lobby.stat_g"), 'goldenrod', null, i18next.t("lobby.stat_g_tip"))
+		  str = coloredSpan(i18next.t("lobby.stat_g"), 'goldenrod', null, i18next.t("lobby.stat_g_tip"))
 		}
+    return str
+  }
 
-    let ruleStr = ""
-    let timeStr = ""
+  rankStr(){
+    return (this.provisional && this.rate < 3000) ? "-" : coloredSpan(makeRankFromRating(this.rate), makeColorFromRating(this.rate))
+  }
+
+  statStr(){
+		let str = ""
+    if (this.listAsWaiter()) str = coloredSpan(i18next.t("lobby.stat_w"), 'green', 13, i18next.t("lobby.stat_w_tip"))
+		if (this._monitorGame != "*") {
+		  str += coloredSpan(i18next.t("lobby.stat_m"), null, 13, i18next.t("lobby.stat_m_tip"))
+		} else if (this.status == 5) {
+		  str = coloredSpan(i18next.t("lobby.stat_p"), null, null, i18next.t("lobby.stat_p_tip"))
+		} else if (this.status == 4) {
+		  str = coloredSpan(i18next.t("lobby.stat_g"), 'goldenrod', null, i18next.t("lobby.stat_g_tip"))
+		}
+    return str
+  }
+
+  nameStr(){
+    let nameLimited = '<span style="display:inline-block;width:100px;">' + this.name + '</span>'
+    return this.generateMark() + (this.idle ? coloredSpan(nameLimited, '#00f') : nameLimited)
+  }
+
+  countryStr(){
+    return this.country.flagImgTag16() + ' ' + this.country.name3Tag()
+  }
+
+  rateStr(){
+    let str = this.rate
+    if (this.provisional) str = "*" + this.rate
+    if (this.rate == 0) str = "????"
+    return str
+  }
+
+  watcherStr(){
+    let nameLimited = '<span style="display:inline-block;width:100px;">' + this.name + '</span>'
+    let hostStr = this.name == hostPlayerName ? coloredSpan('<i class="fa fa-graduation-cap"></i>', '#008', 15, i18next.t("board.attr_host")) : ''
+    return hostStr + this.generateMark() + nameLimited
+  }
+
+  waiterStr(){
+    let nameLimited = '<span style="display:inline-block;width:100px;">' + this.name + '</span>'
+    return this.country.flagImgTag27() + ' ' + coloredSpan('■', makeColorFromRating(this.rate)) + ' ' + (this.idle ? coloredSpan(nameLimited, '#00f') : nameLimited)
+  }
+
+  ruleStr(){
+    let str = ""
 		if (this.listAsWaiter()) {
       let game_info = this._waitingGameName.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/)
-      ruleStr = getHandicapShort(game_info[1])
+      str = getHandicapShort(game_info[1])
 			if (this._waitingTournamentId) {
         if (tournaments[this._waitingTournamentId]){
-          ruleStr = coloredSpan(tournaments[this._waitingTournamentId].nameShort(), 'crimson', null, tournaments[this._waitingTournamentId].name())
+          str = coloredSpan(tournaments[this._waitingTournamentId].nameShort(), 'crimson', null, tournaments[this._waitingTournamentId].name())
         } else {
-          ruleStr = coloredSpan(EJ('Tournament', '大会'), 'crimson')
+          str = coloredSpan(EJ('Tournament', '大会'), 'crimson')
         }
       }
-			timeStr = (parseInt(game_info[3]) / 60) + "-" + game_info[4]
 		}
-    let rateStr = this.rate
-    if (this.provisional) rateStr = "*" + this.rate
-    if (this.rate == 0) rateStr = "????"
-    let rankStr = (this.provisional && this.rate < 3000) ? "-" : coloredSpan(makeRankFromRating(this.rate), makeColorFromRating(this.rate))
-    let nameLimited = '<span style="display:inline-block;width:100px;">' + this.name + '</span>'
-    let markStr = this.generateMark()
-    let hostStr = this.name == hostPlayerName ? coloredSpan('<i class="fa fa-graduation-cap"></i>', '#008', 15, i18next.t("board.attr_host")) : ''
+    return str
+  }
 
-    return {
-      statStr: statStr,
-      title: this.titleTag(),
-      rank: rankStr,
-      name: this.name,
-      nameStr: markStr + (this.idle ? coloredSpan(nameLimited, '#00f') : nameLimited),
-      watcher: hostStr + markStr + nameLimited,
-      country: this.country.flagImgTag16() + ' ' + this.country.name3Tag(),
-      rate: rateStr,
-      waiter: this.country.flagImgTag27() + ' ' + coloredSpan('■', makeColorFromRating(this.rate)) + ' ' + (this.idle ? coloredSpan(nameLimited, '#00f') : nameLimited),
-      ruleStr: ruleStr,
-      timeStr: timeStr
-		}
+  timeStr(){
+    let str = ""
+		if (this.listAsWaiter()) {
+      let game_info = this._waitingGameName.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/)
+			str = (parseInt(game_info[3]) / 60) + "-" + game_info[4]
+    }
+    return str
   }
 
   generateMark(){

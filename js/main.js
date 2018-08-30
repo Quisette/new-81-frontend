@@ -192,11 +192,11 @@ $(function(){
     data: [],
     columns: [
       {data: "statStr", width: "10%"},
-      {data: "title", width: "14%"},
-      {data: "rank", width: "14%", bSortable: false},
+      {data: "titleTag", width: "14%"},
+      {data: "rankStr", width: "14%", bSortable: false},
       {data: "nameStr", width: "40%", className: "dt-body-left"},
-      {data: "country", width: "12%", className: "dt-body-left"},
-      {data: "rate", width: "10%", className: "dt-body-right", type: "rate-str"}
+      {data: "countryStr", width: "12%", className: "dt-body-left"},
+      {data: "rateStr", width: "10%", className: "dt-body-right", type: "rate-str"}
     ],
     rowId: "name",
     searching: false, paging: false, info: false,
@@ -219,8 +219,8 @@ $(function(){
   waiterGrid = $('#waiterGrid').DataTable({
     data: [],
     columns: [
-      {data: "waiter", width: "50%", className: "dt-body-left"},
-      {data: "rate", width: "10%", className: "dt-body-right", type: "rate-str"},
+      {data: "waiterStr", width: "50%", className: "dt-body-left"},
+      {data: "rateStr", width: "10%", className: "dt-body-right", type: "rate-str"},
       {data: "ruleStr", width: "27%"},
       {data: "timeStr", width: "13%"}
     ],
@@ -267,9 +267,9 @@ $(function(){
   watcherGrid = $('#watcherGrid').DataTable({
     data: [],
     columns: [
-      {name: "name_column", data: "watcher", width: "55%", className: "dt-body-left"},
-      {data: "country", width: "25%", className: "dt-body-left"},
-      {data: "rate", width: "20%", className: "dt-body-right", type: "rate-str"}
+      {name: "name_column", data: "watcherStr", width: "55%", className: "dt-body-left"},
+      {data: "countryStr", width: "25%", className: "dt-body-left"},
+      {data: "rateStr", width: "20%", className: "dt-body-right", type: "rate-str"}
     ],
     rowId: "name",
     searching: false, paging: false, info: false,
@@ -756,10 +756,15 @@ function _checkLobbyButtonClick(forceDefault = false){
       $('#layerBoard').css('border-bottom', 'none')
       $('#checkLobbyButton').removeClass("button-disabled")
       $('#checkLobbyButton').html('<i class="fa fa-eye fa-2x"></i>')
+      $('#layerLobby').css('display', 'none')
     })
   } else if (!forceDefault) { // Start checking lobby
     $('#checkLobbyButton').addClass("button-disabled")
     $('#boardContents').css('pointer-events', 'none').animate({'opacity': 0}, 1200)
+    playerGrid.clear().draw()
+    waiterGrid.clear().draw()
+    gameGrid.clear().draw()
+    $('#layerLobby').css('display', 'block')
     $('#layerBoard').css('border-bottom', '5px ridge orange').animate({'height': '40px'}, 1200, function(){
       _refreshLobby()
       $('#checkLobbyButton').removeClass("button-disabled")
@@ -1105,11 +1110,11 @@ function _updateHostPlayer(name){
 
   board.hostMark.detach()
   if (watcherGrid.row('#' + prevHostName).data()) {
-    watcherGrid.row('#' + prevHostName).data(users[prevHostName].gridObject())
+    watcherGrid.row('#' + prevHostName).data(users[prevHostName])
   }
 
   if (watcherGrid.row('#' + hostPlayerName).data()) {
-    watcherGrid.row('#' + hostPlayerName).data(users[hostPlayerName].gridObject())
+    watcherGrid.row('#' + hostPlayerName).data(users[hostPlayerName])
   } else if (hostPlayerName == board.game.black.name || hostPlayerName == board.game.white.name) {
     board.playerInfos[hostPlayerName == board.game.black.name ? 0 : 1].find("#player-info-rate").prepend(board.hostMark)
   }
@@ -1480,8 +1485,8 @@ function _handleWho(str){
   playerGrid.clear()
   waiterGrid.clear()
   Object.keys(users).forEach(function(key){
-    playerGrid.row.add(users[key].gridObject())
-    if (users[key].listAsWaiter()) waiterGrid.row.add(users[key].gridObject())
+    playerGrid.row.add(users[key])
+    if (users[key].listAsWaiter()) waiterGrid.row.add(users[key])
   })
   playerGrid.draw()
   playerGrid.row('#' + me.name).select()
@@ -1527,7 +1532,7 @@ function _handleWatchers(str){
   let lines = str.trim().split("\n")
   watcherGrid.clear()
   lines.forEach(function(line){
-    if (users[line]) watcherGrid.row.add(users[line].gridObject())
+    if (users[line]) watcherGrid.row.add(users[line])
   })
   watcherGrid.draw()
 }
@@ -1556,7 +1561,7 @@ function _handleLobbyIn(line){
 		// TODO users[name].initialize();
 	}
 	users[name].setFromLobbyIn(parseInt(tokens[1]), tokens[2], parseInt(tokens[3]), tokens[12])
-  playerGrid.row.add(users[name].gridObject())
+  playerGrid.row.add(users[name])
   drawGridMaintainScroll(playerGrid)
 }
 
@@ -1597,11 +1602,10 @@ function _handleGame(line) {
 		if (!users[name]) return
     users[name].setFromGame(tokens[1], tokens[2], tokens[3] == "*" ? "" : tokens[3])
     waiterGrid.row('#' + name).remove()
-    waiterGrid.row.add(users[name].gridObject())
+    waiterGrid.row.add(users[name])
     drawGridMaintainScroll(waiterGrid)
 	}
-  playerGrid.row('#' + name).data(users[name].gridObject())
-  drawGridMaintainScroll(playerGrid)
+  playerGrid.row('#' + name).invalidate()
 }
 
 function _handleChallenger(name){
@@ -1964,7 +1968,7 @@ function _handleEnter(name){
       //TODO if importantUser && isPostGame then doorOpen-sound
 		}
 		if (users[name]) {
-      watcherGrid.row.add(users[name].gridObject())
+      watcherGrid.row.add(users[name])
       drawGridMaintainScroll(watcherGrid)
   		//_watcherTitle = LanguageSelector.lan.watchers + " (" + _watcher_list.length +")";
     }
@@ -2081,17 +2085,14 @@ function _handleStart(game_id){
 		writeUserMessage(str, 1, "#008800")
 		if (users[tokens[2]]) {
       users[tokens[2]].setFromStart(tokens[1], "+")
-      playerGrid.row("#" + tokens[2]).remove()
-      playerGrid.row.add(users[tokens[2]].gridObject())
+      playerGrid.row("#" + tokens[2]).invalidate()
       waiterGrid.row("#" + tokens[2]).remove()
     }
 		if (users[tokens[3]]) {
       users[tokens[3]].setFromStart(tokens[1], "-")
-      playerGrid.row("#" + tokens[3]).remove()
-      playerGrid.row.add(users[tokens[3]].gridObject())
+      playerGrid.row("#" + tokens[3]).invalidate()
       waiterGrid.row("#" + tokens[3]).remove()
     }
-    drawGridMaintainScroll(playerGrid)
     drawGridMaintainScroll(waiterGrid)
 		game = new Game(0, game_id, users[tokens[2]], users[tokens[3]])
 	}
@@ -2534,7 +2535,7 @@ function _handlePlayerDetail(data, name){
 
 function _switchLayer(n){
   $('div#layerLogin').css({'z-index': n == 0 ? 2 : 1, opacity: n == 0 ? 1 : 0})
-  $('div#layerLobby').css({'z-index': n == 1 ? 2 : 1, opacity: (n == 1 || n == 2) ? 1 : 0})
+  $('div#layerLobby').css({'z-index': n == 1 ? 2 : 1, display: (n == 0 || n == 1) ? 'block' : 'none'})
   $('div#layerBoard').css({'z-index': n == 2 ? 2 : 1, opacity: n == 2 ? 1 : 0})
   currentLayer = n
   if (n == 2 && me.isGuest) $('#boardChatInput').prop('disabled', !board.isPlayer())
