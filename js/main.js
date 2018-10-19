@@ -46,6 +46,7 @@ var _loserLeaveDisabled = false
 var _declinedList = new Object() // _declinedList[name] = false: declined, = true: auto-decline
 var snowfall = null
 var _longTapRow = null
+var isTouchDevice = navigator.userAgent.match(/(iPhone|iPad|Android)/) ? true : false
 
 /* ====================================
     On document.ready
@@ -60,14 +61,14 @@ function _testFunction(phase){
       //return
     }
     _handleServers([
-      {id:1, name:'MERCURY', description_en: 'test', description_ja: 'テスト', enabled: true, population: 0, host: 'shogihub.com', port: 4084}
+      //{id:1, name:'MERCURY', description_en: 'test', description_ja: 'テスト', enabled: true, population: 0, host: 'shogihub.com', port: 4084}
       //{id:1, name:'EARTH', description_en: 'main', description_ja: 'メイン', enabled: true, population: 0, host: 'shogihub.com', port: 4081}
-      //{id:1, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.47.133', port: 4081}
+      {id:1, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.220.131', port: 4081}
     ])
   } else if (phase == 1) { // After servers are loaded
-    _loginButtonClick()
+    //_loginButtonClick()
   } else if (phase == 2) { // After logged in
-    client.send("%%GAME hc2pd_test1-900-30 -")
+    //client.send("%%GAME hc2pd_test1-900-30 -")
     //_optionButtonClick()
   }
 }

@@ -63,6 +63,7 @@ _loadPieceDesignToDialog("dobutsu", 4)
 _loadPieceDesignToDialog("blind_middle", 100)
 _loadPieceDesignToDialog("blind_hard", 101)
 _loadPieceDesignToDialog("blind_extreme", 102)
+if (isTouchDevice) $('input#hold_piece').prop('disabled', true).parent().css('text-decoration','line-through')
 
 $('div#optionTabs').tabs()
 //Change event for checkboxes

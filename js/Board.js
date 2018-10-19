@@ -464,7 +464,7 @@ class Board{
       if (this._canMovePieceNow() && koma && koma.owner == this._position.turn) {
         this._selectedSquare = sq
         sq.addClass("square-selected")
-        if (options.hold_piece && options.piece_type != 102) this._pickUpPiece(sq)
+        if (!isTouchDevice && options.hold_piece && options.piece_type != 102) this._pickUpPiece(sq)
         if (this.isPlaying()) { //Send ##GRAB message
           let x = sq.data().x
           let y = sq.data().y
