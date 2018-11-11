@@ -238,12 +238,14 @@ class Movement{
     if (this.num == 0) return null
     if (this.endTypeKey) {
       if (this.endTypeKey == "RESIGN") str = "投了"
-      else return null
+      else {
+        return "*" + this.constructor.CONST.special_notations_ja[this.endTypeKey] + "にて終局"
+      }
     } else {
       str = this.toJapaneseNotation(1)
     }
     str = this.num.toString() + "   " + str
-    if (this.time != null) str = str + "   (" + Math.floor(this.time/60) + ":" + (this.time % 60) + "/)"
+    if (this.time != null) str = str + "   (" + Math.floor(this.time/60) + ":" + (this.time % 60) + "/" + Math.floor(this._accumulatedTime/3600) + ":" + Math.floor(this._accumulatedTime/60) + ":" + (this._accumulatedTime % 60) + ")"
     return str
   }
 
