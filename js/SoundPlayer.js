@@ -80,7 +80,7 @@ class SoundPlayer{
   }
 
   sayTimeUp(){
-    if (this.byoyomiType != 1) this.play("TIME_UP")
+    if (this.gameStartEndEnabled && this.byoyomiType != 1) this.play("TIME_UP")
   }
 
   chatLobby(){

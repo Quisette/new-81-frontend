@@ -1,5 +1,6 @@
 "use strict";
 var testMode = false
+var viewerKifuId = null
 const IMAGE_DIRECTORY = "http://81dojo.com/dojo/images/"
 var args = new Object()
 var client = null;
@@ -93,7 +94,7 @@ $(function(){
   xhr.addEventListener("load", function(){
     xhr.responseText.split("\n").forEach(function(line){
       let tokens = line.split("\t")
-      countries[tokens[0]] = new Country(parseInt(tokens[0]), tokens[1], tokens[4], tokens[2])
+      countries[tokens[0]] = new Country(parseInt(tokens[0]), tokens[1].trim(), tokens[4].trim(), tokens[2].trim())
     })
   })
   xhr.open("get", "dat/countries.txt")
@@ -324,8 +325,12 @@ $(function(){
   snowfall = new Snowfall('snowfallCanvas')
 
   // Hide all layers other than login
-  _switchLayer(0)
-  _fadeInLoginView()
+  if (args["kid"] == null) {
+    _switchLayer(0)
+    _fadeInLoginView()
+  } else {
+    viewerKifuId = args["kid"]
+  }
 
   // Load localStorage
   if (localStorage.login) $('#usernameInput').val(localStorage.login)
@@ -435,9 +440,13 @@ $(function(){
   apiClient.setCallbackFunctions("TOURNAMENTS", _handleTournaments)
   apiClient.setCallbackFunctions("CHECK_OPPONENT", _handleCheckOpponent)
   apiClient.setCallbackFunctions("EVALUATION", _handleEvaluation)
+  apiClient.setCallbackFunctions("KIFU", _handleKifuDetail)
 
   if (testMode) {
     _testFunction(0)
+  } else if (viewerKifuId) {
+    sp.gameStartEndEnabled = false
+    apiClient.getKifuDetail(viewerKifuId)
   } else {
     _prepareForLogin()
   }
@@ -883,8 +892,11 @@ function _giveSubhostButtonClick(user){
 
 function _materialBalanceButtonClick(){
   let num = kifuGrid.row({selected: true}).index()
-  if (board.game.canCalculateMaterialBalance()) writeUserMessage(EJ("Material balance (move #", "駒割計算結果(") + num + EJ("):　", "手まで):　") + board.getMaterialBalance(num <= 40), 2, "#008800")
-	else writeUserMessage(EJ("This function is only for even games.", "平手以外では使えません"), 2, "#FF0000")
+  if (board.game.canCalculateMaterialBalance()) {
+    let str = EJ("Material balance (move #", "駒割計算結果(") + num + EJ("):　", "手まで):　") + board.getMaterialBalance(num <= 40)
+    if (viewerKifuId) alert(str)
+    else writeUserMessage(str, 2, "#008800")
+  }	else writeUserMessage(EJ("This function is only for even games.", "平手以外では使えません"), 2, "#FF0000")
 }
 
 function _KyokumenpediaClick(){
@@ -1049,6 +1061,13 @@ function forceKifuMode(val){
   }
 }
 
+function goToPosition(n){
+  if (kifuGrid.row(':last').data().branch) _restorePublicKifu()
+  kifuGrid.row(n).select()
+  scrollGridToSelected(kifuGrid)
+  board.replayMoves(kifuGrid.rows(Array.from(Array(n+1).keys())).data())
+}
+
 function _kifuSelected(index, subhost_override = false){
   // If subhost-override is enabled, subhost is allowed to select a position
   // while acting like a host and staying in listen mode
@@ -1172,6 +1191,11 @@ function setBoardConditions(){
   if (board.isPostGame) $("#kifuNoteButton, #shareKifuTwitterButton, #shareKifuFacebookButton").removeClass("submenu-button-disabled")
   else $("#kifuNoteButton, #shareKifuTwitterButton, #shareKifuFacebookButton").addClass("submenu-button-disabled")
   _allowWatcherChat = $("#receiveWatcherChatCheckBox").is(":checked")
+  if (viewerKifuId) {
+    $("input[name=kifuModeRadio]:eq(0)").prop("checked", true)
+    $("input[name=kifuModeRadio]").prop("disabled", true)
+    $("#boardMenuRight").css('display', 'none')
+  }
   _kifuModeRadioChange()
 }
 
@@ -1734,7 +1758,7 @@ function _handleGameEnd(lines, atReconnection = false){
   board.isPostGame = true
   let move = board.getFinalMove().constructNextMove()
   move.setGameEnd(gameEndType) //turn too?
-  if (move.endTypeKey == 'RESIGN' && client.resignTime) {
+  if (move.endTypeKey == 'RESIGN' && client && client.resignTime) {
     move.setTime(client.resignTime, board)
     client.resignTime = null
   }
@@ -2530,6 +2554,61 @@ function _handlePlayerDetail(data, name){
   }
 }
 
+function _handleKifuDetail(data){
+  let game_id
+  let black
+  let white
+  let kifu_id = data.id
+  let lines = data.contents.split("\n")
+  let move_strings = []
+  let since_last_move = 0
+  let positionStr = ""
+  let gameEndStr = ""
+  lines.forEach(function(line){
+    if (line.match(/^\$EVENT:(.+)$/)) {
+      game_id = RegExp.$1
+      black = new User(game_id.split("+")[2])
+    	white = new User(game_id.split("+")[3])
+    } else if (line.match(/^I([-+])(\d+),(\d+),\d+$/)) {
+      if (RegExp.$1 == "+") black.setFromList(RegExp.$2, RegExp.$3)
+      else white.setFromList(RegExp.$2, RegExp.$3)
+    } else if (line.match(/^([-+][0-9]{4}[A-Z]{2}|%TORYO)$/)) {
+      move_strings.push(RegExp.$1)
+    } else if (line.match(/^T(\d+)$/)){
+      move_strings[move_strings.length - 1] += "," + RegExp.$1
+    } else if (line.match(/^kifu_id:(.+)$/)) {
+      kifu_id = RegExp.$1
+    } else if (line.match(/^\$SINCE_LAST_MOVE:(\d+)$/)) {
+      since_last_move = parseInt(RegExp.$1)
+    } else if (line.match(/^To_Move:([\+\-])$/)){
+			positionStr += "P0" + RegExp.$1 + "\n"
+    } else if (line.match(/^P[0-9+-].*/)) {
+      positionStr += line + "\n"
+    } else if (line.match(/^#(SENTE_WIN|GOTE_WIN|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|OUTE_SENNICHITE|JISHOGI|DISCONNECT|CATCH|TRY)/)) {
+      gameEndStr += RegExp.$1 + "\n"
+    }
+  })
+  let game = new Game(0, game_id, black, white)
+  board.setGame(game)
+  board.startGame(positionStr, 2, move_strings, since_last_move)
+  if (kifu_id) board.setKifuId(kifu_id)
+  if (gameEndStr != "") {
+    _handleGameEnd(gameEndStr)
+  }
+  setBoardConditions() //TODO
+  _greetState = 2
+  $('div#boardLeftBottomHBox').detach()
+  _enforcePremium()
+  _switchLayer(2)
+  if (args["moves"]) goToPosition(parseInt(args["moves"]))
+  if (args["turn"] == "1") board.flipBoard()
+  if (args["piece"]) {
+    options.piece_type = parseInt(args["piece"])
+    options.piece_type_34 = parseInt(args["piece"])
+    board.loadPieceDesignOption()
+  }
+}
+
 /* ====================================
     General
 ===================================== */
@@ -2539,7 +2618,7 @@ function _switchLayer(n){
   $('div#layerLobby').css({'z-index': n == 1 ? 2 : 1, display: (n == 0 || n == 1) ? 'block' : 'none'})
   $('div#layerBoard').css({'z-index': n == 2 ? 2 : 1, opacity: n == 2 ? 1 : 0})
   currentLayer = n
-  if (n == 2 && me.isGuest) $('#boardChatInput').prop('disabled', !board.isPlayer())
+  if (n == 2 && me && me.isGuest) $('#boardChatInput').prop('disabled', !board.isPlayer())
 }
 
 function setGeneralTimeout(key, ms, force = false){
@@ -2662,7 +2741,7 @@ function getPremium(){
 }
 
 function _enforcePremium(){
-  _DisableOptionsByPremium()
+  _disableOptionsByPremium()
 }
 
 function _refreshLobby(first = false){

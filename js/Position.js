@@ -276,7 +276,6 @@ class Position{
         koma3 = this._squares[move.toX - 1][move.toY - 2]
       }
       if (koma3 && koma3.owner == move.owner) soundDouble = true
-      console.log(move.constructor.name)
       if (move.constructor.name == 'DobutsuMovement') sp.piece34(soundDouble, koma1.soundVolume())
       else sp.piece(soundDouble, koma1.soundVolume())
     }

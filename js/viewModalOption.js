@@ -36,7 +36,7 @@ function _setOptionsFromDialog(){
   options.arrow_color = parseInt($('input#arrow_color').spectrum('get').toHex(), 16)
 }
 
-function _DisableOptionsByPremium(){
+function _disableOptionsByPremium(){
   $('input[name=timer_sound_type]:gt(1), input[name=piece_type]:lt(9):gt(3)').prop({'disabled': getPremium() == 0, 'title': getPremium() == 0 ? i18next.t("option.for_premium") : ''})
 }
 function _loadPieceDesignToDialog(key, val, checked = false){

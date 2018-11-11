@@ -16,7 +16,7 @@ class User{
     this._waitingTurn = "*"
     this._waitingComment = ""
     this._waitingTournamentId = null
-    this._isSelf = name == client.username
+    this._isSelf = client && name == client.username
     this._isCircleMember = options.members.includes(name)
     this._isTournamentMember = options.opponents.includes(name)
     this._isFavorite = options.favorites.includes(name)

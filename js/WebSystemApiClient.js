@@ -38,6 +38,10 @@ class WebSystemApiClient {
     this._callJsonApi("PLAYER", "players/detail/" + user.name + ".json", user.name)
   }
 
+  getKifuDetail(kid){
+    this._callJsonApi("KIFU", "kifus/" + kid + ".json")
+  }
+
   getTournaments(){
     let name = me.isGuest ? "GUEST" : me.name
     this._callJsonApi("TOURNAMENTS", "tournaments.json?player_name=" + name)
@@ -59,7 +63,7 @@ class WebSystemApiClient {
   }
 
   postOption(key, val){
-    if (me.isGuest) return
+    if (!me || me.isGuest) return
     $.post(this._path + "options", {name: me.name.toLowerCase(), key: key, value: val}, function(){console.log('Option posted')})
   }
 
