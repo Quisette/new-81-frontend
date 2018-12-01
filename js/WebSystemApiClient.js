@@ -2,8 +2,7 @@
 
 class WebSystemApiClient {
   constructor(host, port){
-    this._path = "http://" + host + ":" + port + "/api/v2/"
-    //this._path = "http://192.168.220.131:3000/api/v2/"
+    this._path = "https://" + host + (port == 80 ? "" : (":" + port)) + "/api/v2/"
     this._callbackFunctions = new Object();
   }
 
@@ -42,9 +41,13 @@ class WebSystemApiClient {
     this._callJsonApi("KIFU", "kifus/" + kid + ".json")
   }
 
-  getTournaments(){
-    let name = me.isGuest ? "GUEST" : me.name
-    this._callJsonApi("TOURNAMENTS", "tournaments.json?player_name=" + name)
+  getTournaments(tournamentId = null){
+    if (tournamentId) {
+      this._callJsonApi("TOURNAMENTS", "tournaments.json?tournament_ids[]=" + tournamentId)
+    } else {
+      let name = (!me || me.isGuest) ? "GUEST" : me.name
+      this._callJsonApi("TOURNAMENTS", "tournaments.json?player_name=" + name)
+    }
   }
 
   checkTournamentOpponent(tournamentId, opponent){

@@ -1,7 +1,7 @@
 "use strict";
 var testMode = false
 var viewerKifuId = null
-const IMAGE_DIRECTORY = "http://81dojo.com/dojo/images/"
+const IMAGE_DIRECTORY = "https://81dojo.com/dojo/images/"
 var args = new Object()
 var client = null;
 var apiClient = null;
@@ -82,6 +82,7 @@ $(function(){
       args[tokens[0]] = tokens[1]
     })
   }
+  viewerKifuId = args["kid"]
 
   // Load version
   $('p#versionText').text('ver. ' + version)
@@ -135,7 +136,7 @@ $(function(){
     })
   })
   xhr2.open("get", "http://81dojo.com/dojo/infoData.html?" + version)
-  xhr2.send()
+  if (viewerKifuId == null) xhr2.send()
   // .txt file in 81dojo.com cannot have Access-Control-Allow-Origin header set for some with_reason. As it has to be .html, a symbolic link infoData.html -> infoData.txt is prepared on 81dojo.com side
 
   sp = new SoundPlayer()
@@ -325,11 +326,9 @@ $(function(){
   snowfall = new Snowfall('snowfallCanvas')
 
   // Hide all layers other than login
-  if (args["kid"] == null) {
+  if (viewerKifuId == null) {
     _switchLayer(0)
     _fadeInLoginView()
-  } else {
-    viewerKifuId = args["kid"]
   }
 
   // Load localStorage
@@ -379,6 +378,12 @@ $(function(){
   })
   $(window).unload(function(){
     if (board.isHost()) _giveHostButtonClick()
+  })
+  window.addEventListener("message", function(e){
+    let match
+    if (match = e.data.match(/^goToPosition:(\d+)$/)) {
+      goToPosition(parseInt(match[1]))
+    }
   })
   document.getElementById('layerBoard').ondragstart = function(){return false}
   $("#lobbyChatInput").on('keypress', function(e){
@@ -445,7 +450,13 @@ $(function(){
   if (testMode) {
     _testFunction(0)
   } else if (viewerKifuId) {
-    sp.gameStartEndEnabled = false
+    if (args["piece"]) {
+      options.piece_type = parseInt(args["piece"])
+      options.piece_type_34 = parseInt(args["piece"])
+    }
+    if (args["notation"]) options.notation_style = parseInt(args["notation"])
+    options.gamechat_sound_play = 0
+    _enforceOptions()
     apiClient.getKifuDetail(viewerKifuId)
   } else {
     _prepareForLogin()
@@ -2555,6 +2566,7 @@ function _handlePlayerDetail(data, name){
 }
 
 function _handleKifuDetail(data){
+  if (data.tournament_id) apiClient.getTournaments(data.tournament_id)
   let game_id
   let black
   let white
@@ -2564,12 +2576,13 @@ function _handleKifuDetail(data){
   let since_last_move = 0
   let positionStr = ""
   let gameEndStr = ""
+  let opening = "*"
   lines.forEach(function(line){
     if (line.match(/^\$EVENT:(.+)$/)) {
       game_id = RegExp.$1
       black = new User(game_id.split("+")[2])
     	white = new User(game_id.split("+")[3])
-    } else if (line.match(/^I([-+])(\d+),(\d+),\d+$/)) {
+    } else if (line.match(/^I([-+])(\d+),(\d+),.+$/)) {
       if (RegExp.$1 == "+") black.setFromList(RegExp.$2, RegExp.$3)
       else white.setFromList(RegExp.$2, RegExp.$3)
     } else if (line.match(/^([-+][0-9]{4}[A-Z]{2}|%TORYO)$/)) {
@@ -2586,9 +2599,12 @@ function _handleKifuDetail(data){
       positionStr += line + "\n"
     } else if (line.match(/^#(SENTE_WIN|GOTE_WIN|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|OUTE_SENNICHITE|JISHOGI|DISCONNECT|CATCH|TRY)/)) {
       gameEndStr += RegExp.$1 + "\n"
+    } else if (line.match(/^'summary:/)) {
+      opening = line.split(":")[5]
     }
   })
   let game = new Game(0, game_id, black, white)
+  game.opening = opening
   board.setGame(game)
   board.startGame(positionStr, 2, move_strings, since_last_move)
   if (kifu_id) board.setKifuId(kifu_id)
@@ -2602,11 +2618,6 @@ function _handleKifuDetail(data){
   _switchLayer(2)
   if (args["moves"]) goToPosition(parseInt(args["moves"]))
   if (args["turn"] == "1") board.flipBoard()
-  if (args["piece"]) {
-    options.piece_type = parseInt(args["piece"])
-    options.piece_type_34 = parseInt(args["piece"])
-    board.loadPieceDesignOption()
-  }
 }
 
 /* ====================================
@@ -2827,7 +2838,7 @@ function generateKifuNoteObject(){
     rule: HANDICAPS_JA[board.game.gameType] || "",
     startedAt: tmp.substr(0,4) + "/" + tmp.substr(4,2) + "/" + tmp.substr(6,2) + "　" + tmp.substr(8,2) + ":" + tmp.substr(10,2),
     endedAt: board.endTime.tz('Asia/Tokyo').format('YYYY/MM/DD　HH:mm'),
-    place: '81道場 ' + client.serverName + 'サーバ',
+    place: '81道場 ' + board.game.serverName + 'サーバ',
     thinkingTime: '各 ' + Math.floor(board.game.total/60) + "分 (切れたら1手" + board.game.byoyomi + "秒)",
     blackName: board.game.black.name + '&nbsp;' + board.game.black.titleName(),
     whiteName: board.game.white.name + '&nbsp;' + board.game.white.titleName(),
