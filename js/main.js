@@ -301,13 +301,15 @@ $(function(){
   $('.menuBar > ul > li').hover(function(){
     if ($(this).find('a').hasClass('button-disabled')) return
     sp.buttonHover()
-    $("ul:not(:animated)", this).css('min-width', $(this).width()).slideDown()
+    $("ul:not(:animated)", this).css('min-width', $(this).width()).slideDown('fast')
   }, function(){
-    $("ul",this).slideUp()
+    $("ul",this).slideUp('fast')
   })
-  $('.subMenu').find('a').click(function(){
-    $(this).closest('ul').slideUp('fast')
-  })
+  if (!isTouchDevice) {
+    $('.subMenu').find('a').click(function(){
+      $(this).closest('ul').slideUp('fast')
+    })
+  }
 
   // World clocks
   _generateWorldClocks()
@@ -370,9 +372,10 @@ $(function(){
     if (board.isHost()) _giveHostButtonClick()
   })
   window.addEventListener("message", function(e){
-    let match
-    if (match = e.data.match(/^goToPosition:(\d+)$/)) {
-      goToPosition(parseInt(match[1]))
+    if (e.data.match(/^goToPosition:(\d+)$/)) {
+      goToPosition(parseInt(RegExp.$1))
+    } else if (e.data.match(/^replayButtonClick:(.+)$/)) {
+      _replayButtonClick(parseInt(RegExp.$1))
     }
   })
   document.getElementById('layerBoard').ondragstart = function(){return false}
@@ -912,7 +915,7 @@ function _sharePositionButtonClick(mode){
 
 function _kifuCopyButtonClick(){
   if (!board.game.gameType.match(/^va/)) {
-    let textArea = $('<textarea></textarea>', {id: 'clip-board-area'}).text(_generateKIF()).appendTo($('body'))
+    let textArea = $('<textarea></textarea>', {id: 'clip-board-area'}).text(generateKIF()).appendTo($('body'))
     $("#clip-board-area").select()
   	document.execCommand("copy")
     $("#clip-board-area").remove()
@@ -922,7 +925,7 @@ function _kifuCopyButtonClick(){
 function _kifuDownloadButtonClick(){
   if (!board.game.gameType.match(/^va/)) {
     let date = Date.now()
-    downloadToFile(_generateKIF(), "81Dojo-" + formatDateToText(new Date()) + "-" + board.game.black.name + "-" + board.game.white.name + ".kif")
+    downloadToFile(generateKIF(), "81Dojo-" + formatDateToText(new Date()) + "-" + board.game.black.name + "-" + board.game.white.name + ".kif")
   } else writeUserMessage(EJ('This game cannot be exported.', 'この対局は出力できません'), 2, "#FF0000")
 }
 
@@ -991,6 +994,7 @@ function _closeBoard(){
   _updateHostPlayer(null)
   board.close() //board.game is null after this line!
   _switchLayer(1)
+  _resize()
   $('#boardMessageArea').empty()
   watcherGrid.clear().draw()
   kifuGrid.clear().draw()
@@ -2767,7 +2771,7 @@ function _askEvaluation(name){
   area.animate({scrollTop: area[0].scrollHeight}, 'fast')
 }
 
-function _generateKIF(){
+function generateKIF(){
   let rule = gameTypeToKIF(board.game.gameType)
   if (rule == null) return ""
   let lines = []
