@@ -917,7 +917,7 @@ function _sharePositionButtonClick(mode){
 
 function _kifuCopyButtonClick(){
   if (!board.game.gameType.match(/^va/)) {
-    let textArea = $('<textarea></textarea>', {id: 'clip-board-area'}).text(generateKIF()).appendTo($('body'))
+    let textArea = $('<textarea></textarea>', {id: 'clip-board-area'}).text(_generateKIF()).appendTo($('body'))
     $("#clip-board-area").select()
   	document.execCommand("copy")
     $("#clip-board-area").remove()
