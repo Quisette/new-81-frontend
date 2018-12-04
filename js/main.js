@@ -25,8 +25,8 @@ var _gameAccepted = false
 var _allowWatcherChat = false
 var _greetState = 0 //0:not-active, 1:before-game, 2:during-game, 3:after-game, 4:post-game
 var premium = 0
-var countries = new Object();
-var board;
+var countries = seedCountries()
+var board
 var hidden_prm = 0
 var _hourMileCount
 var mouseX
@@ -90,17 +90,7 @@ $(function(){
   // Generate board
   board = new Board($('#boardBox'))
 
-  // Load data
-  let xhr = new XMLHttpRequest()
-  xhr.addEventListener("load", function(){
-    xhr.responseText.split("\n").forEach(function(line){
-      let tokens = line.split("\t")
-      countries[tokens[0]] = new Country(parseInt(tokens[0]), tokens[1].trim(), tokens[4].trim(), tokens[2].trim())
-    })
-  })
-  xhr.open("get", "dat/countries.txt")
-  xhr.send()
-
+  // Load infoData
   infoFetcher = {
     initialMessageEn: [],
     initialMessageJa: [],
