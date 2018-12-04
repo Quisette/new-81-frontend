@@ -376,6 +376,8 @@ $(function(){
       goToPosition(parseInt(RegExp.$1))
     } else if (e.data.match(/^replayButtonClick:(.+)$/)) {
       _replayButtonClick(parseInt(RegExp.$1))
+    } else if (e.data == "getKIF") {
+      e.source.postMessage(_generateKIF(), e.origin)
     }
   })
   document.getElementById('layerBoard').ondragstart = function(){return false}
@@ -925,7 +927,7 @@ function _kifuCopyButtonClick(){
 function _kifuDownloadButtonClick(){
   if (!board.game.gameType.match(/^va/)) {
     let date = Date.now()
-    downloadToFile(generateKIF(), "81Dojo-" + formatDateToText(new Date()) + "-" + board.game.black.name + "-" + board.game.white.name + ".kif")
+    downloadToFile(_generateKIF(), "81Dojo-" + formatDateToText(new Date()) + "-" + board.game.black.name + "-" + board.game.white.name + ".kif")
   } else writeUserMessage(EJ('This game cannot be exported.', 'この対局は出力できません'), 2, "#FF0000")
 }
 
@@ -2771,7 +2773,7 @@ function _askEvaluation(name){
   area.animate({scrollTop: area[0].scrollHeight}, 'fast')
 }
 
-function generateKIF(){
+function _generateKIF(){
   let rule = gameTypeToKIF(board.game.gameType)
   if (rule == null) return ""
   let lines = []
