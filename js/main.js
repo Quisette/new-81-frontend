@@ -443,6 +443,7 @@ $(function(){
   apiClient.setCallbackFunctions("KIFU", _handleKifuDetail)
 
   if (testMode) {
+    $('div#loader').detach()
     _testFunction(0)
   } else if (viewerKifuId) {
     if (args["piece"]) {
@@ -454,6 +455,7 @@ $(function(){
     _enforceOptions()
     apiClient.getKifuDetail(viewerKifuId)
   } else {
+    $('div#loader').detach()
     _prepareForLogin()
   }
 });
@@ -1981,6 +1983,7 @@ function _handleReconnect(str){
   if (gameEndStr != "") {
     client.status = 0
     _handleGameEnd(gameEndStr, true)
+    if (since_last_move > 0) board.endTime.add((-1)*since_last_move, 'seconds')
   }
 }
 
@@ -2569,7 +2572,7 @@ function _handleKifuDetail(data){
   let kifu_id = data.id
   let lines = data.contents.split("\n")
   let move_strings = []
-  let since_last_move = 0
+  let endTime
   let positionStr = ""
   let gameEndStr = ""
   let opening = "*"
@@ -2587,8 +2590,8 @@ function _handleKifuDetail(data){
       move_strings[move_strings.length - 1] += "," + RegExp.$1
     } else if (line.match(/^kifu_id:(.+)$/)) {
       kifu_id = RegExp.$1
-    } else if (line.match(/^\$SINCE_LAST_MOVE:(\d+)$/)) {
-      since_last_move = parseInt(RegExp.$1)
+    } else if (line.match(/^'\$END_TIME:(.+)$/)) {
+      endTime = moment(RegExp.$1.replace(/\//g,"-"))
     } else if (line.match(/^To_Move:([\+\-])$/)){
 			positionStr += "P0" + RegExp.$1 + "\n"
     } else if (line.match(/^P[0-9+-].*/)) {
@@ -2602,17 +2605,21 @@ function _handleKifuDetail(data){
   let game = new Game(0, game_id, black, white)
   game.opening = opening
   board.setGame(game)
-  board.startGame(positionStr, 2, move_strings, since_last_move)
+  board.startGame(positionStr, 2, move_strings)
   if (kifu_id) board.setKifuId(kifu_id)
   if (gameEndStr != "") {
     _handleGameEnd(gameEndStr)
+    board.endTime = endTime
   }
-  setBoardConditions() //TODO
+  setBoardConditions()
   _greetState = 2
   $('div#boardLeftBottomHBox').detach()
   _enforcePremium()
+  $('div#loader').detach()
   _switchLayer(2)
+  _resize()
   if (args["moves"]) goToPosition(parseInt(args["moves"]))
+  else goToPosition(0)
   if (args["turn"] == "1") board.flipBoard()
 }
 
