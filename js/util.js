@@ -388,15 +388,23 @@ function sharePosition(mode) {
 
 function downloadToFile(content, filename){
   var blob = new Blob([content], {type: "text/plain"})
+  var a = document.createElement("a")
+  a.target = '_blank'
+  a.download = filename
   if(window.navigator.msSaveBlob){ // InternetExplorer
     window.navigator.msSaveBlob(blob, filename)
-  } else { // For other browser, create a tag and fire an event
-    var a = document.createElement("a")
-    a.href = URL.createObjectURL(blob)
-    a.target = '_blank'
-    a.download = filename
+  } else if (window.URL && window.URL.createObjectURL) { // Firefox
+    a.href = window.URL.createObjectURL(blob)
+    document.body.appendChild(a)
     a.click()
-    URL.revokeObjectURL(a.href)
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(a.href)
+  } else if (window.webkitURL && window.webkitURL.createObjectURL) { // Chrome
+    a.href = window.webkitURL.createObjectURL(blob)
+    a.click()
+    window.webkitURL.revokeObjectURL(a.href)
+  } else { // Safari
+    window.open('data:text/plain;base64,' + window.Base64.encode(content), '_blank')
   }
 }
 
