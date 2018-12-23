@@ -211,11 +211,11 @@ class User{
 
   avatarURL(){
     if (this._countryCode == 1 || this._countryCode == 2) {
-      return "http://81dojo.com/dojo/images/avatars/" + (this._countryCode == 1 ? "study_black" : "study_white") + ".jpg"
+      return "https://81dojo.com/dojo/images/avatars/" + (this._countryCode == 1 ? "study_black" : "study_white") + ".jpg"
     } else {
       let titleAvatar = infoFetcher.titleAvatars[this.name.toLowerCase()]
-      if (titleAvatar && titleAvatar != "*") return "http://81dojo.com/dojo/images/avatars/" + titleAvatar + ".jpg"
-      else return "http://system.81dojo.com/players/" + this.name + "/avatar"
+      if (titleAvatar && titleAvatar != "*") return "https://81dojo.com/dojo/images/avatars/" + titleAvatar + ".jpg"
+      else return "https://system.81dojo.com/players/" + this.name + "/avatar"
     }
   }
 

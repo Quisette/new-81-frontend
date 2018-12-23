@@ -929,7 +929,7 @@ function _kifuCopyButtonClick(){
 function _kifuDownloadButtonClick(){
   if (!board.game.gameType.match(/^va/)) {
     let date = Date.now()
-    downloadToFile(_generateKIF(), "81Dojo-" + formatDateToText(new Date()) + "-" + board.game.black.name + "-" + board.game.white.name + ".kif")
+    downloadToFile(_generateKIF(), "81Dojo-" + board.game.gameId.split("+")[4].substr(2,10) + "-" + board.game.black.name + "-" + board.game.white.name + ".kif")
   } else writeUserMessage(EJ('This game cannot be exported.', 'この対局は出力できません'), 2, "#FF0000")
 }
 
@@ -1067,6 +1067,8 @@ function forceKifuMode(val){
     sp.buttonClick("NORMAL")
     $("input[name=kifuModeRadio]:eq(" + val + ")").prop('checked', true)
     _kifuModeRadioChange()
+  } else if (val == 0) {
+    board.clearArrows(false)
   }
 }
 
@@ -2792,7 +2794,7 @@ function _generateKIF(){
   lines.push("手合割：" + rule)
   lines.push("先手：" + board.game.black.name)
   lines.push("後手：" + board.game.white.name)
-  lines.push("手数----指手---------消費時間")
+  lines.push("手数----指手---------消費時間--")
   board.moves.forEach(function(move){
     let kif = move.toKIF()
     if (kif != null) lines.push(kif)
