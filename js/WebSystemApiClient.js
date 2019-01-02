@@ -41,6 +41,10 @@ class WebSystemApiClient {
     this._callJsonApi("KIFU", "kifus/" + kid + ".json")
   }
 
+  getTitles(){
+    this._callJsonApi("TITLES", "titles.json")
+  }
+
   getTournaments(tournamentId = null){
     if (tournamentId) {
       this._callJsonApi("TOURNAMENTS", "tournaments.json?tournament_ids[]=" + tournamentId)

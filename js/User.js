@@ -213,23 +213,27 @@ class User{
     if (this._countryCode == 1 || this._countryCode == 2) {
       return "https://81dojo.com/dojo/images/avatars/" + (this._countryCode == 1 ? "study_black" : "study_white") + ".jpg"
     } else {
-      let titleAvatar = infoFetcher.titleAvatars[this.name.toLowerCase()]
-      if (titleAvatar && titleAvatar != "*") return "https://81dojo.com/dojo/images/avatars/" + titleAvatar + ".jpg"
-      else return "https://system.81dojo.com/players/" + this.name + "/avatar"
+      if (infoFetcher.titles[this.name.toLowerCase()]) {
+        let avatar = infoFetcher.titles[this.name.toLowerCase()].avatar
+        let priority = infoFetcher.titles[this.name.toLowerCase()].priority
+        if (avatar == "*") return "https://system.81dojo.com/players/" + this.name + "/avatar"
+        else if (parseInt(avatar) > 0 && priority  > 0) return "https://system.81dojo.com/titles/" + avatar + "/avatar.jpg"
+        else return "https://81dojo.com/dojo/images/avatars/" + avatar + ".jpg"
+      } else return "https://system.81dojo.com/players/" + this.name + "/avatar"
     }
   }
 
   titleTag(){
-    if (infoFetcher.titleNames[this.name.toLowerCase()]) {
-      return '<span title="' + infoFetcher.titleNameTips[this.name.toLowerCase()] + '">' + infoFetcher.titleNames[this.name.toLowerCase()] + '</span>'
+    if (infoFetcher.titles[this.name.toLowerCase()]) {
+      return '<span title="' + infoFetcher.titles[this.name.toLowerCase()].tooltip + '">' + infoFetcher.titles[this.name.toLowerCase()].name + '</span>'
     } else {
       return ''
     }
   }
 
   titleName(){
-    if (infoFetcher.titleNames[this.name.toLowerCase()]) {
-      return infoFetcher.titleNames[this.name.toLowerCase()]
+    if (infoFetcher.titles[this.name.toLowerCase()]) {
+      return infoFetcher.titles[this.name.toLowerCase()].name
     } else {
       return ''
     }

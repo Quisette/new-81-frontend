@@ -94,16 +94,14 @@ $(function(){
   infoFetcher = {
     initialMessageEn: [],
     initialMessageJa: [],
-    titleNames: new Object(),
-    titleNameTips: new Object(),
-    titleAvatars: new Object(),
+    titles: new Object(),
     banned: []
   }
   let xhr2 = new XMLHttpRequest()
   xhr2.addEventListener("load", function(){
     let header = ""
     xhr2.responseText.split("\n").forEach(function(line){
-      if (line.match(/^###(.+)$/)) {
+      if (line.trim().match(/^###(.+)$/)) {
         header = RegExp.$1
       } else {
         switch (header) {
@@ -115,9 +113,7 @@ $(function(){
             break
           case "TITLE_HOLDERS":
             let tokens = line.split("\t")
-            infoFetcher.titleNames[tokens[0]] = tokens[1]
-            infoFetcher.titleNameTips[tokens[0]] = tokens[2]
-            infoFetcher.titleAvatars[tokens[0]] = tokens[3]
+            infoFetcher.titles[tokens[0]] = {name: tokens[1], tooltip: tokens[2], avatar: tokens[3].trim(), priority: 1}
             break
           case "BANNED":
             infoFetcher.banned.push(line.trim())
@@ -125,6 +121,7 @@ $(function(){
       }
     })
   })
+  //xhr2.open("get", "./infoData.txt?" + version)
   xhr2.open("get", "http://81dojo.com/dojo/infoData.html?" + version)
   if (viewerKifuId == null) xhr2.send()
   // .txt file in 81dojo.com cannot have Access-Control-Allow-Origin header set for some with_reason. As it has to be .html, a symbolic link infoData.html -> infoData.txt is prepared on 81dojo.com side
@@ -437,6 +434,7 @@ $(function(){
   apiClient.setCallbackFunctions("SERVERS", _handleServers)
   apiClient.setCallbackFunctions("OPTIONS", _handleOptions)
   apiClient.setCallbackFunctions("PLAYER", _handlePlayerDetail)
+  apiClient.setCallbackFunctions("TITLES", _handleTitles)
   apiClient.setCallbackFunctions("TOURNAMENTS", _handleTournaments)
   apiClient.setCallbackFunctions("CHECK_OPPONENT", _handleCheckOpponent)
   apiClient.setCallbackFunctions("EVALUATION", _handleEvaluation)
@@ -957,7 +955,7 @@ function _uploadKifuButtonClick(){
       reader.onload = function(evt){
         let csa_lines = []
         if (file.name.match(/\.bod$/)) csa_lines = CSALinesFromBOD(evt.target.result)
-        else if (file.name.match(/\.kif$/)) csa_lines = CSALinesFromKIF(evt.target.result)
+        else if (file.name.match(/\.kifu?$/)) csa_lines = CSALinesFromKIF(evt.target.result)
         if (csa_lines.length > 0) client.resetStudyPosition(csa_lines.join("/"))
       }
       reader.readAsText(file)
@@ -1481,6 +1479,7 @@ function _handleLoggedIn(str){
   localStorage.dat2 = caesar(caesar(_loginHistory.join(","), 3), 81)
   apiClient.getOptions()
   apiClient.getTournaments()
+  apiClient.getTitles()
   _updateLobbyHeader()
   _writeWelcomeMessage()
   _hourMileCount = 0
@@ -2526,6 +2525,16 @@ function _handleOptions(data){
   options = Object.assign(options, data)
   _enforceOptions()
   _loadOptionsToDialog()
+}
+
+function _handleTitles(data){
+  data.forEach(function(dat){
+    if (dat.avatar == null) dat.avatar = "*"
+    let userName = dat.player.toLowerCase()
+    if (!infoFetcher.titles[userName] || infoFetcher.titles[userName] && dat.priority >= infoFetcher.titles[userName].priority) {
+      infoFetcher.titles[userName] = {name: dat.name_ja, tooltip: dat.name_en, avatar: dat.avatar, priority: dat.priority}
+    }
+  })
 }
 
 function _handleTournaments(data){
