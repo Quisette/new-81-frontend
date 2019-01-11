@@ -217,7 +217,7 @@ class User{
         let avatar = infoFetcher.titles[this.name.toLowerCase()].avatar
         let priority = infoFetcher.titles[this.name.toLowerCase()].priority
         if (avatar == "*") return "https://system.81dojo.com/players/" + this.name + "/avatar"
-        else if (parseInt(avatar) > 0 && priority  > 0) return "https://system.81dojo.com/titles/" + avatar + "/avatar.jpg"
+        else if (parseInt(avatar) > 0 && priority  >= 0) return "https://system.81dojo.com/titles/" + avatar + "/avatar.jpg"
         else return "https://81dojo.com/dojo/images/avatars/" + avatar + ".jpg"
       } else return "https://system.81dojo.com/players/" + this.name + "/avatar"
     }
