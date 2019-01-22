@@ -64,7 +64,7 @@ function _testFunction(phase){
     _handleServers([
       //{id:1, name:'MERCURY', description_en: 'test', description_ja: 'テスト', enabled: true, population: 0, host: 'shogihub.com', port: 4084}
       //{id:1, name:'EARTH', description_en: 'main', description_ja: 'メイン', enabled: true, population: 0, host: 'shogihub.com', port: 4081}
-      {id:1, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.220.131', port: 4081}
+      {id:1, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.56.101', port: 4081}
     ])
   } else if (phase == 1) { // After servers are loaded
     //_loginButtonClick()
@@ -430,6 +430,7 @@ $(function(){
   _loadDefaultOptions()
 
   //apiClient = new WebSystemApiClient("192.168.220.131", 3000)
+  //apiClient = new WebSystemApiClient("192.168.56.101", 3000)
   apiClient = new WebSystemApiClient("system.81dojo.com", 80)
   apiClient.setCallbackFunctions("SERVERS", _handleServers)
   apiClient.setCallbackFunctions("OPTIONS", _handleOptions)
@@ -2353,7 +2354,12 @@ function _handleExp(str) {
 
 function _handleClosed(){
   _stopAllTimeouts()
-  $('#loginAlert').text(i18next.t("login.closed"))
+  if ($('input#reloginButton').css('display') == 'none') {
+    $('#loginAlert').text(i18next.t("code.L005"))
+    $('input#reloginButton').css('display', 'initial')
+  } else {
+    $('#loginAlert').text(i18next.t("login.closed"))
+  }
   $('#userEvaluationDialog').remove()
   if (currentLayer != 0) showAlertDialog("disconnect", _backToEntrance)
 }
