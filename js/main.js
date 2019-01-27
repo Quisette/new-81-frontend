@@ -2645,6 +2645,14 @@ function _handleKifuDetail(data){
 ===================================== */
 
 function _switchLayer(n){
+  if (n == 1) {
+    playerGrid.draw()
+    waiterGrid.draw()
+    gameGrid.draw()
+  } else if (n == 2) {
+    watcherGrid.draw()
+    kifuGrid.draw()
+  }
   $('div#layerLogin').css({'z-index': n == 0 ? 2 : 1, opacity: n == 0 ? 1 : 0})
   $('div#layerLobby').css({'z-index': n == 1 ? 2 : 1, display: (n == 0 || n == 1) ? 'block' : 'none'})
   $('div#layerBoard').css({'z-index': n == 2 ? 2 : 1, opacity: n == 2 ? 1 : 0})
