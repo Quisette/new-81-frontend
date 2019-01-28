@@ -511,7 +511,7 @@ function _prepareForLogin(){
   sp.startOpening()
   $('input[name=loginType], input#usernameInput, input#passwordInput, input#loginSave, input#loginButton').prop('disabled', true)
   serverGrid.clear().draw()
-  $('p#loginAlert').text('')
+  _setLoginAlert("")
   apiClient.getServers()
 }
 
@@ -531,7 +531,6 @@ function _updateLanguage(){
   watcherGrid.settings()[0].oLanguage.sEmptyTable = i18next.t("board.no_watchers")
   watcherGrid.draw()
   $('span#languageFlag').html(countries[$('#languageSelector option:selected').data('code')].flagImgTag16())
-  $('p#loginAlert').text('')
   $("[data-i18n]").each(function(){
     $(this).text(i18next.t($(this).attr('data-i18n')))
   })
@@ -575,7 +574,7 @@ function _loginButtonClick(){
   if (_bannedLoginInHistory()) return
   $('#loginButton, #passwordInput, #usernameInput').attr('disabled', true)
   if (client != null) client.close();
-  $('#loginAlert').text(i18next.t("login.connecting"))
+  _setLoginAlert("login.connecting")
   let isGuest = $('input[name=loginType]:checked').val() == 1
   client = new WebSocketClient(server.name, server.host, server.port, isGuest ? 'guest' : $('#usernameInput').val(), isGuest ? 'dojo_guest' : $('#hiddenPass').val())
   client.setCallbackFunctions("LOGGED_IN", _handleLoggedIn)
@@ -622,6 +621,10 @@ function _bannedLoginInHistory(){
     if (infoFetcher.banned.includes(_loginHistory[i])) return true
   }
   return false
+}
+
+function _setLoginAlert(i18nCode){
+  $('#loginAlert').text(i18next.t(i18nCode)).attr('data-i18n', i18nCode)
 }
 
 /* ====================================
@@ -1451,7 +1454,7 @@ function _handleGeneralResponse(tokens){
 function _handleLoggedIn(str){
   snowfall.stop()
   sp.stopOpening()
-  $('#loginAlert').text(i18next.t("login.successfull"))
+  _setLoginAlert("login.successfull")
   if ($('input[name=loginType]:checked').val() == 0 && $('#loginSave').prop('checked')) {
     localStorage.login = $('#usernameInput').val()
     localStorage.dat = caesar(caesar($('#hiddenPass').val(), 3), 81)
@@ -1506,7 +1509,7 @@ function _updateLobbyHeader(){
 }
 
 function _handleLoginFailed(code){
-  $('#loginAlert').text(i18next.t("code." + code))
+  _setLoginAlert("code." + code)
   $('#loginButton, #passwordInput, #usernameInput').attr('disabled', false)
 }
 
@@ -2354,11 +2357,14 @@ function _handleExp(str) {
 
 function _handleClosed(){
   _stopAllTimeouts()
+  // Visibility of reloginButton can be used for judging whether the disconnection was intended (=logout) or not (=interupted)
   if ($('input#reloginButton').css('display') == 'none') {
-    $('#loginAlert').text(i18next.t("code.L005"))
+    // If reloginButton is invisible, it is either the logging in phase, or unintended interuption before _backToEntrance is called
+    _setLoginAlert("code.L005")
     $('input#reloginButton').css('display', 'initial')
   } else {
-    $('#loginAlert').text(i18next.t("login.closed"))
+    // If reloginButton is visible, it is after _backToEntrance is called (= logout button was pushed by the user)
+    _setLoginAlert("login.closed")
   }
   $('#userEvaluationDialog').remove()
   if (currentLayer != 0) showAlertDialog("disconnect", _backToEntrance)
@@ -2525,6 +2531,7 @@ function _handleServers(data){
   $('input[name=loginType], input#usernameInput, input#passwordInput, input#loginSave, input#loginButton').prop('disabled', false)
   _loginTypeChange()
   if (testMode) _testFunction(1)
+  _setLoginAlert("login.ready")
 }
 
 function _handleOptions(data){
