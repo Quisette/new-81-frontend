@@ -511,7 +511,7 @@ function _prepareForLogin(){
   sp.startOpening()
   $('input[name=loginType], input#usernameInput, input#passwordInput, input#loginSave, input#loginButton').prop('disabled', true)
   serverGrid.clear().draw()
-  _setLoginAlert("")
+  _setLoginAlert("login.starting")
   apiClient.getServers()
 }
 
