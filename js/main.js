@@ -97,6 +97,11 @@ $(function(){
     titles: new Object(),
     banned: []
   }
+  let xhr1 = new XMLHttpRequest()
+  xhr1.addEventListener("load", function(){
+    xhr2.open("get", "http://81dojo.com/dojo/infoData.txt?" + xhr1.responseText)
+    xhr2.send()
+  })
   let xhr2 = new XMLHttpRequest()
   xhr2.addEventListener("load", function(){
     let header = ""
@@ -121,10 +126,9 @@ $(function(){
       }
     })
   })
-  //xhr2.open("get", "./infoData.txt?" + version)
-  xhr2.open("get", "http://81dojo.com/dojo/infoData.html?" + version)
-  if (viewerKifuId == null) xhr2.send()
-  // .txt file in 81dojo.com cannot have Access-Control-Allow-Origin header set for some with_reason. As it has to be .html, a symbolic link infoData.html -> infoData.txt is prepared on 81dojo.com side
+  xhr1.open("get", "http://81dojo.com/dojo/infoCode.txt?" + Date.now())
+  if (viewerKifuId == null) xhr1.send()
+  // .txt file in 81dojo.com cannot have Access-Control-Allow-Origin header set for some reason. As it has to be .html, a symbolic link infoData.html -> infoData.txt is prepared on 81dojo.com side
 
   sp = new SoundPlayer()
 
