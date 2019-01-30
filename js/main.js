@@ -1401,7 +1401,7 @@ function _playerChallengeClick(user){
   } else if (!me.listAsWaiter()) {
 		writeUserMessage(EJ("The opponent is not waiting with own game rule. You can invite him if you wait with your own game rule.", "相手は対局待をしていません。自分が対局待にすることで招待メッセージを送ることが可能です。"), 1, "#008800")
 	} else if (user.idle) {
-		writeUserMessage(user.name + EJ(" is not accepting challenge or invitations right now.", "さんは現在 挑戦・招待を受け付けていません。"), 1, "#008800", true)
+		writeUserMessage(user.name + i18next.t("code.C010"), 1, "#008800", true)
 	} else if (user.inGameRoom()) {
 		writeUserMessage(user.name + EJ(" is in another game right now.", "さんは対局中です。"), 1, "#008800", true)
 	} else {
@@ -2320,6 +2320,7 @@ function _handlePrivateChat(sender, message){
 }
 
 function _handleInvitation(name){
+  if (options.reject_invitation == 1) { client.privateChat(name, "[##REJECT]C010"); return; }
   let inviter = users[name]
   if (!inviter) { client.privateChat(name, "[##REJECT]"); return; }
   if (board.isPlayer()) { client.privateChat(name, "[##REJECT]C011"); return; }
