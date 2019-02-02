@@ -637,7 +637,9 @@ function _setLoginAlert(i18nCode){
 
 function _logoutButtonClick(){
   $('img#entrance-img').prop('src', 'img/81Dojo_bye.jpg')
+  _stopAllTimeouts()
   _backToEntrance()
+  _setLoginAlert("login.closed")
   client.close()
 }
 
@@ -1514,7 +1516,7 @@ function _updateLobbyHeader(){
 
 function _handleLoginFailed(code){
   _setLoginAlert("code." + code)
-  $('#loginButton, #passwordInput, #usernameInput').attr('disabled', false)
+  $('#reloginButton').css('display', 'initial')
 }
 
 function _handleWho(str){
@@ -2362,17 +2364,9 @@ function _handleExp(str) {
 
 function _handleClosed(){
   _stopAllTimeouts()
-  // Visibility of reloginButton can be used for judging whether the disconnection was intended (=logout) or not (=interupted)
-  if ($('input#reloginButton').css('display') == 'none') {
-    // If reloginButton is invisible, it is either the logging in phase, or unintended interuption before _backToEntrance is called
-    _setLoginAlert("code.L005")
-    $('input#reloginButton').css('display', 'initial')
-  } else {
-    // If reloginButton is visible, it is after _backToEntrance is called (= logout button was pushed by the user)
-    _setLoginAlert("login.closed")
-  }
-  $('#userEvaluationDialog').remove()
-  if (currentLayer != 0) showAlertDialog("disconnect", _backToEntrance)
+  _setLoginAlert("code.L005")
+  if (currentLayer == 0) $('input#reloginButton').css('display', 'initial')
+  else showAlertDialog("disconnect", _backToEntrance)
 }
 
 function _backToEntrance(){

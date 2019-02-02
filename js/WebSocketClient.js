@@ -323,6 +323,7 @@ class WebSocketClient {
   }
 
   close(){
+    this._callbackFunctions["CLOSED"] = function(){}
     this._socket.close();
   }
 
