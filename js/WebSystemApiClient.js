@@ -74,4 +74,8 @@ class WebSystemApiClient {
     $.post(this._path + "options", {name: me.name.toLowerCase(), key: key, value: val}, function(){console.log('Option posted')})
   }
 
+  incrementMedal(key){
+    $.post(this._path + "players/increment_medal", {name: me.name.toLowerCase(), key: key}, function(){console.log('Medal incremented')})
+  }
+
 }
