@@ -309,7 +309,7 @@ function playingStyleName(i) {
   }
 }
 
-function showAlertDialog(i18nextCode, handler = function(){}){
+function showAlertDialog(i18nextCode, handler = function(){}, withCancel = false){
   //string, string, function
   let alertWindow = $('<div></div>', {class: 'alert-dialog'}).html('<div style="padding:10px">'+ i18next.t("alert." + i18nextCode) + '</div>').appendTo($('body'))
   alertWindow.dialog({
@@ -317,7 +317,10 @@ function showAlertDialog(i18nextCode, handler = function(){}){
     dialogClass: 'no-close',
     close: function(e){$(this).dialog('destroy').remove()},
     title: i18next.t("alert." + i18nextCode + "_title"),
-    buttons: [{text: "OK", click: function(){$(this).dialog("close");handler()}}]
+    buttons: [
+      {text: "OK", click: function(){$(this).dialog("close");handler()}},
+      {text: i18next.t("cancel"), click: function(){$(this).dialog("close")}, class: withCancel ? '' : 'hidden'}
+    ]
   })
 }
 
