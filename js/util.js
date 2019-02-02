@@ -360,7 +360,7 @@ function shareKifu(mode){
 		url = "http://twitter.com/share?text=" + encodeURIComponent(str) + "&url=" + encodeURIComponent(board.toKifuURL(true))
 	}
   window.open(url, "_blank")
-	//TODO _handleSNSClick(mode)
+  if (me) apiClient.incrementMedal("use.kifu_share")
 }
 
 function sharePosition(mode) {
