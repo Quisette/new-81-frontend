@@ -998,10 +998,12 @@ function _allowWatcherChatClick(){
   else _sendAutoChat("#G100")
 }
 
-function _closeBoard(){
+function _closeBoard(roomToRoom = false){
+  // roomToRoom: This is set to true when the user stays in the game room and just switches games
+  // (1. Rematch by player, 2. Watcher is challenged and accepted it)
   if (board.isHost()) _giveHostButtonClick()
-  if (board.isPlayer()) {
-    client.closeGame() //TODO remove this when rematch is agreed as CLOSE has been already sent
+  if (board.isPlayer() && !roomToRoom) { // Exclude rematch
+    client.closeGame() // This can be omitted with rematch, as CLOSE has been already sent
     _writeAfterCloseBoardMessage()
   }
   else if (board.isWatcher()) client.monitor(board.game.gameId, false)
@@ -1720,7 +1722,7 @@ function _handleGameSummary(str){
   _challengeUser = null
 //	  _waiting = false;
 //	  _rematching = false;
-  if (board.game) _closeBoard()
+  if (board.game) _closeBoard(true)
   let game = new Game(0, gameId, black, white)
   _prepareCorrectBoard(game.gameType)
   board.setGame(game)
