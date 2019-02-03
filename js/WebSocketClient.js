@@ -164,7 +164,7 @@ class WebSocketClient {
     $('#loginAlert').text(i18next.t("login.logging"))
     let str = "LOGIN  " + this.username + " " + this._password + " x2 " + clientPass
     if (encrypt) {
-      this.send(this._encrypt(str))
+      this.send(this._rsaEncrypt(str))
     } else {
       this.send(str)
     }
@@ -336,5 +336,11 @@ class WebSocketClient {
       out += str.charCodeAt(i).toString(16)
     }
     return "EL81" + out
+  }
+
+  _rsaEncrypt(str){
+    let enc = new JSEncrypt()
+    enc.setPublicKey(secureLoginPublicKey)
+    return "SECURE " + enc.encrypt(str)
   }
 }

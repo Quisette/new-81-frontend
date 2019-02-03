@@ -46,6 +46,9 @@ div.layer#layerLogin
         p
           input id="loginButton" data-i18n-value="login.login" type="button" onclick="_loginButtonClick()" data-click="normal"
           input id="reloginButton" data-i18n-value="login.relogin" type="button" onclick="_reloginButtonClick()" data-click="normal"
+          br
+          span.secure data-i18n="login.secure"
+
         p#loginAlert
       div style="padding-top:10px"
         table.stripe.hover#serverGrid
@@ -71,8 +74,8 @@ div.layer#layerLogin
           a href="http://www.otosozai.com/" target="_blank" otosozai.com
         li
           a href="http://nflagrsign.xrea.jp/" target="_blank" National flag & Road sign Mt.
-          
-javascript:          
+
+javascript:
   function passChange(){
     let inD  = document.getElementById("passwordInput");
     let inP  = document.getElementById("hiddenPass");
@@ -102,12 +105,12 @@ javascript:
       maskPass()
     }
   }
-  
+
   function passKey(event){
     if((event.keyCode >= 33)&&(event.keyCode <= 40)) maskPass();
     else if (event.keyCode==13) _loginButtonClick();
   }
-  
+
   function maskPass(){
     var inD = document.getElementById("passwordInput");
     if(inD.value.match(/[^☗]$/)){

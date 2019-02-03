@@ -48,6 +48,7 @@ var _declinedList = new Object() // _declinedList[name] = false: declined, = tru
 var snowfall = null
 var _longTapRow = null
 var isTouchDevice = navigator.userAgent.match(/(iPhone|iPad|Android)/) ? true : false
+var secureLoginPublicKey = null
 
 /* ====================================
     On document.ready
@@ -86,6 +87,9 @@ $(function(){
 
   // Load version
   $('p#versionText').text('ver. ' + version)
+
+  // Load secure login public key
+  $.get("dat/secure_login.pub", function(data){secureLoginPublicKey = data})
 
   // Generate board
   board = new Board($('#boardBox'))
