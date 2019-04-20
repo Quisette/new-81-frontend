@@ -49,6 +49,7 @@ var snowfall = null
 var _longTapRow = null
 var isTouchDevice = navigator.userAgent.match(/(iPhone|iPad|Android)/) ? true : false
 var secureLoginPublicKey = null
+var _ignoreList = []
 
 /* ====================================
     On document.ready
@@ -1278,13 +1279,13 @@ function _handleRejectChallenge(challenger, declineCode = null){
     $('#ignoreChallenge').remove()
     $('#lobbyMessageArea').append('<p id="ignoreChallenge">&nbsp;<a href="#" onclick="_ignoreChallenge(\'' + challenger.name + '\')">[' + i18next.t("msg.ask_auto_reject") + ']</a></p>')
   } else {
-    _declinedList[challenger.name] = false
+    _declinedList[challenger.name] = false // Manually declined so far
   }
 }
 
 function _ignoreChallenge(name){
   $('#ignoreChallenge').remove()
-  _declinedList[name] = true
+  _declinedList[name] = true // Decline automatically from now on
   writeUserMessage(i18next.t("msg.auto_reject"), 1, "#FF0000")
 }
 
@@ -1331,11 +1332,12 @@ function _openPlayerInfo(user, doOpen = true){
         if (element.find("#privateMessageArea").html() == "") element.dialog('destroy').remove()
       },
       buttons: [
-        {text: "", class: "fa fa-graduation-cap font-fa buttons-for-host connected-button-left", title: i18next.t("board.give_host"), click: function(){_giveHostButtonClick(user)}},
-        {text: "", class: "fa fa-user-plus font-fa buttons-for-host connected-button-right", title: i18next.t("board.give_subhost"), click: function(){_giveSubhostButtonClick(user)}},
-        {text: i18next.t("player_info.challenge"), click: function(){_playerChallengeClick(user); $(this).dialog('close')}},
-        {text: "", class: "fa fa-info-circle font-fa", title: i18next.t("player_info.detail"), click: function(){_playerDetailClick(user)}},
-        {text: "", class: "fa fa-comment font-fa", title: 'PM', click: function(){_playerPMClick(this)}}
+        {text: "", class: "fa fa-graduation-cap font-fa buttons-for-host connected-button-left", title: i18next.t("board.give_host"), click: function(){_giveHostButtonClick(user)}, disabled: user == me},
+        {text: "", class: "fa fa-user-plus font-fa buttons-for-host connected-button-right", title: i18next.t("board.give_subhost"), click: function(){_giveSubhostButtonClick(user)}, disabled: user == me},
+        {text: "", class: "fa fa-ban font-fa connected-button-left", title: i18next.t("player_info.ignore"), click: function(){_playerIgnoreClick(user)}, disabled: user == me},
+        {text: "", class: "fa fa-comment font-fa connected-button-right connected-button-left", title: 'PM', click: function(){_playerPMClick(this)}, disabled: user == me},
+        {text: "", class: "fa fa-info-circle font-fa connected-button-right", title: i18next.t("player_info.detail"), click: function(){_playerDetailClick(user)}},
+        {text: i18next.t("player_info.challenge"), click: function(){_playerChallengeClick(user); $(this).dialog('close')}, disabled: user == me}
       ]
     })
     element.siblings('.ui-dialog-buttonpane').find('button').click(function(){sp.buttonClick("NORMAL")})
@@ -1429,6 +1431,16 @@ function _cancelChallenge(canceler){
 	}
 }
 
+function _playerIgnoreClick(user){
+  showAlertDialog("confirm_block", function(){
+    if (_ignoreList.indexOf(user.name) < 0) {
+      _ignoreList.push(user.name)
+      _declinedList[user.name] = true
+      writeUserMessage(i18next.t("msg.add_block"), currentLayer == 2 ? 2 : 1, "#FF0000")
+    }
+  }, true)
+}
+
 function _playerDetailClick(user){
   if (user.isGuest) return
   window.open("http://system.81dojo.com/" + EJ('en', 'ja') + "/players/show/" + user.name)
@@ -1490,6 +1502,7 @@ function _handleLoggedIn(str){
   premium = makePremiumNum(parseInt(tokens[13]),tokens[14])
   hidden_prm = premium
   _enforcePremium()
+  _ignoreList = []
   if (_loginHistory.indexOf(client.username) >= 0) _loginHistory.splice(_loginHistory.indexOf(client.username), 1)
   _loginHistory.push(client.username)
   localStorage.dat2 = caesar(caesar(_loginHistory.join(","), 3), 81)
@@ -2166,6 +2179,8 @@ function _handleChat(sender, message){
     writeUserMessage(_name2link(sender) + EJ(" is promoted to " + makeRank34FromExp(parseInt(RegExp.$2)) + " class in " + expModeName + "!", "さん、" + expModeName + "で " + makeRank34FromExp(parseInt(RegExp.$2)) + " に昇格!!"), 1, "#008800", true)
 	} else if (message.match(/^\[##.+\]/)) {
     return
+	} else if (_ignoreList.indexOf(sender) >= 0) {
+    return
   } else if (_isFavorite(sender)) {
 		writeUserMessage("[" + _name2link(sender) + "] " + message, 1, "#DD7700");
 	} else if (_isColleague(sender)) {
@@ -2201,7 +2216,7 @@ function _handleGameChat(sender, message){
 	} else if (message.match(/^\[##ARROW\]CLEAR$/)) {
 		if (sender != me.name) board.clearArrows(true, sender)
 	} else if (message.match(/^\[##ARROW\](.+),(.+),(.+),(.+),(.+),(.+)$/)) {
-		//if (_ignore_list.indexOf(sender.toLowerCase()) >= 0) return;
+		if (_ignoreList.indexOf(sender) >= 0) return
 		if (!options.accept_arrow == 1 || sender == me.name) return
 		if (board.isPlaying()) return
 		if (sender == me.name) sender = ""
@@ -2260,7 +2275,7 @@ function _handleGameChat(sender, message){
 			}
 		}
     */
-//		if (_ignore_list.indexOf(sender.toLowerCase()) >= 0) return;
+		if (_ignoreList.indexOf(sender) >= 0) return
 		if (sender == board.game.black.name) {
       _stopTypingIndicator(0)
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#000000")
@@ -2310,7 +2325,7 @@ function _handlePrivateChat(sender, message){
 		if (message.match(/^\[auto\-PM\]\s#([A-Z]\d{3})/)) _interpretCommunicationCode(sender, RegExp.$1, 2, false, true)
 		return
 	}
-//	if (_ignore_list.indexOf(name.toLowerCase()) >= 0) return;
+	if (_ignoreList.indexOf(sender) >= 0) return
   if (me.isGuest) return
   let playerWindow = $("div#player-info-window-" + sender)
   if (!playerWindow[0] && users[sender]) playerWindow = _openPlayerInfo(users[sender], options.pm_auto_open)
