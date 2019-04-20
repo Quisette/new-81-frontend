@@ -104,6 +104,8 @@ class Board{
 
     this._partSize()
     this._partLayout()
+
+    this._preloadPieceImages(this._theme)
   }
 
   _partSize(){
@@ -245,11 +247,21 @@ class Board{
   }
 
   loadPieceDesignOption(){
+    let newTheme
     let v = options.piece_type || 0
-    if (v <= 8) this._theme = ['ichiji', 'ninju', 'hidetchi', 'ichiji_ryoko', 'dobutsu', 'kinki', 'ryoko', 'kiyoyasu', 'shogicz'][v]
-    else if (v >= 100) this._theme = ['blind_middle', 'blind_hard', 'blind_extreme'][v - 100]
+    if (v <= 8) newTheme = ['ichiji', 'ninju', 'hidetchi', 'ichiji_ryoko', 'dobutsu', 'kinki', 'ryoko', 'kiyoyasu', 'shogicz'][v]
+    else if (v >= 100) newTheme = ['blind_middle', 'blind_hard', 'blind_extreme'][v - 100]
+    if (this._theme != newTheme) this._preloadPieceImages(newTheme)
+    this._theme = newTheme
     this._imagePath()
     this._refreshPosition()
+  }
+
+  _preloadPieceImages(theme){
+    ['ou', 'gyoku', 'ryu', 'hi', 'uma', 'kaku', 'kin', 'ngin', 'gin', 'nkei', 'kei', 'nkyo', 'kyo', 'to', 'fu'].forEach(function(p){
+      $('<img>').attr('src', 'img/themes/' + theme + '/S' + p + '.png')
+      $('<img>').attr('src', 'img/themes/' + theme + '/G' + p + '.png')
+    })
   }
 
   setScale(scale){
