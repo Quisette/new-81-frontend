@@ -32,6 +32,8 @@ class DobutsuBoard extends Board{
 
     this._partSize()
     this._partLayout()
+
+    this._preloadPieceImages(this._theme)
   }
 
   _imagePath(){
@@ -85,9 +87,18 @@ class DobutsuBoard extends Board{
 
   loadPieceDesignOption(){
     let v = options.piece_type_34 || 1
-    this._theme = ['3x4_pieco', '3x4_pieco', '3x4_hidetchi'][v]
+    let newTheme = ['3x4_pieco', '3x4_pieco', '3x4_hidetchi'][v]
+    if (this._theme != newTheme) this._preloadPieceImages(newTheme)
+    this._theme = newTheme
     this._imagePath()
     this._refreshPosition()
+  }
+
+  _preloadPieceImages(theme){
+    ['hi', 'ki', 'ni', 'ra', 'zo'].forEach(function(p){
+      $('<img>').attr('src', 'img/themes/' + theme + '/S' + p + '.png')
+      $('<img>').attr('src', 'img/themes/' + theme + '/G' + p + '.png')
+    })
   }
 
   _layoutHandPieceClosureFunc(i){
