@@ -370,7 +370,7 @@ $(function(){
   }
   $(window).on("beforeunload",function(e){
     if (board.isPlaying()) {
-      writeUserMessage("You are player.", 2, "#FF0000")
+      writeUserMessage(i18next.t("msg.leave_during_game"), 2, "#FF0000")
       return "You are player. Exit the room before closing the browser."
     }
   })
@@ -571,6 +571,10 @@ function _openingMusicCheckBoxClick(){
 
 function _loginTypeChange(){
   $('#usernameInput, #passwordInput').attr('disabled', $('input[name=loginType]:checked').val() == 1)
+}
+
+function _secureLoginHelpClick(){
+  showAlertDialog("secure_login")
 }
 
 function _loginButtonClick(){
