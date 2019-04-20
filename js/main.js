@@ -1331,7 +1331,7 @@ function _openPlayerInfo(user, doOpen = true){
       autoOpen: false,
       width: 'auto',
       resizable: false,
-      position: {at:'left+'+mouseX+' top+'+mouseY},
+      position: {at:'left+'+(mouseX-80)+' top+'+(mouseY-30)},
       close: function(e){
         if (element.find("#privateMessageArea").html() == "") element.dialog('destroy').remove()
       },
