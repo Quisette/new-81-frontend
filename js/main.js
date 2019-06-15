@@ -900,10 +900,8 @@ function _giveHostButtonClick(user = null){
         user = board.game.black
       }
     }
-    // TODO give host to one of the watchers if there is no player or a rematch is agreed
   }
-  if (user) {
-    // TODO Need to check here again whether the user is present in the game room
+  if (user && _isUserPresent(user.name)) {
 		client.gameChat("[##GIVEHOST]" + user.name)
     board.studyHostType = 1
     setBoardConditions()
@@ -1785,6 +1783,7 @@ function _handleMove(csa, time){
       move.setTime(time, board)
       board.handleReceivedMove(move)
       board.updateTurnHighlight()
+      board.playerNameClassChange(owner, 'name-mouse-out', false)
     }
     board.runningTimer.run()
   }
@@ -2076,11 +2075,6 @@ function _handleLeave(name) {
     drawGridMaintainScroll(watcherGrid)
 		//_watcherTitle = LanguageSelector.lan.watchers + " (" + _watcher_list.length +")";
   }
-  /*
-	if (_losersCloseButtonTimer.running && (e.message == board.playerInfos[0].name || e.message == board.playerInfos[1].name)) {
-		_losersCloseButtonTimer.stop();
-		closeButton.enabled = true;
-	}*/
 }
 
 function _handleDisconnect(name) {
@@ -2098,6 +2092,7 @@ function _handleDisconnect(name) {
       _startDisconnectTimer()
   	}
 	}
+  if (hostPlayerName == name) _takeHostStatusIfEligible()
 }
 
 function _startDisconnectTimer(){
@@ -2271,23 +2266,17 @@ function _handleGameChat(sender, message){
 	} else if (message.match(/^\[auto\-chat\]\s#([A-Z]\d{3})$/)) {
 		_interpretCommunicationCode(sender, RegExp.$1, 2, false, true)
 	} else {
-    /*
-		if (_losersCloseButtonTimer.running && sender != login_name) {
-			if (sender == board.playerInfos[0].name || sender == board.playerInfos[1].name) {
-				_losersCloseButtonTimer.stop();
-				closeButton.enabled = true;
-			}
-		}
-    */
 		if (_ignoreList.indexOf(sender) >= 0) return
 		if (sender == board.game.black.name) {
       _stopTypingIndicator(0)
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#000000")
       if (_loserLeaveDisabled && sender != me.name) _allowLoserLeave()
+      board.playerNameClassChange(0, 'name-mouse-out', false)
 		} else if (sender == board.game.white.name) {
       _stopTypingIndicator(1)
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#666666")
       if (_loserLeaveDisabled && sender != me.name) _allowLoserLeave()
+      board.playerNameClassChange(1, 'name-mouse-out', false)
 		} else if (sender == me.name) {
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#0033DD")
 		} else if (board.isPlaying() && !_allowWatcherChat) {
@@ -2506,6 +2495,29 @@ function _sendStudyExecute(){
   client.gameChat("[##STUDY]" + _sendStudyBuffer)
   _sendStudyBuffer = null
   setGeneralTimeout("SEND_STUDY", 700)
+}
+
+function _isUserPresent(name){
+  if (!board.game) return false
+  if (!board.game.isStudy()) {
+    if (name == board.game.black.name && board.isPlayerPresent(0)) return true
+    if (name == board.game.white.name && board.isPlayerPresent(1)) return true
+  }
+  if (watcherGrid.row('#' + name).data()) return true
+  return false
+}
+
+function _takeHostStatusIfEligible(){
+  let eligible = false
+  if (!board.isPostGame) return
+  if (board.isPlayer()) {
+    if (board.myRoleType == 1) eligible = true
+    else if (!board.isPlayerPresent(1)) eligible = true
+  } else if (board.game.isStudy() || (!board.isPlayerPresent(0) && !board.isPlayerPresent(1))) {
+    if (watcherGrid.row().data().name == me.name) eligible = true
+  }
+  if (eligible) client.gameChat("[##GIVEHOST]" + me.name)
+  console.log(eligible)
 }
 
 function _sendAutoChat(str) {

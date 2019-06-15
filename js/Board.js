@@ -691,11 +691,6 @@ class Board{
     else this.playerInfos[turn].find("#player-info-name").removeClass(className)
   }
 
-  isPlayerPresent(turn){
-    //int
-    return !this.playerInfos[turn].find("#player-info-name").hasClass("name-left")
-  }
-
   pauseAllTimers(){
     this._timers[0].stop(true)
     this._timers[1].stop(true)
