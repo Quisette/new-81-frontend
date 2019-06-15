@@ -694,7 +694,6 @@ function _enterGame(game){
   if (board.game) return
   _prepareCorrectBoard(game.gameType)
   board.setGame(game)
-  //TODO watching or reconnecting ?
 	if (!game.gameId.match(/^STUDY/) && board.getPlayerRoleFromName(me.name) != null) { // Reconnect
 		if (me.status == 1) {
       writeUserMessage(i18next.t("msg.reconnect_while_game"), 1, "#008800", true)
@@ -1265,12 +1264,6 @@ function _handleAcceptChallenge(){
   sp.buttonClick("NORMAL")
 	client.accept()
 	_gameAccepted = true
-//	_acceptedCancelTimer.reset();
-//	_acceptedCancelTimer.start();
-//	if (_mileForFix > 0) {
-//		_client.mileage( -_mileForFix);
-//		_mileForFix = 0;
-//	}
 }
 
 function _handleRejectChallenge(challenger, declineCode = null){
@@ -1607,24 +1600,20 @@ function _handleLobbyIn(line){
 	let tokens = line.split(",");
   let rank = ""
   let name = tokens[0]
+	if (name == me.name) return;
+	if (!users[name]) {
+		users[name] = new User(name);
+    $('#findUser').autocomplete('option', 'source', Object.keys(users))
+	}
 	if (tokens[2] == "true" && parseInt(tokens[1]) < RANK_THRESHOLDS[0]) {
 		rank = EJ("A new player", "新鋭棋士");
 	} else {
 		rank = EJ("A ", "") + makeRankFromRating(parseInt(tokens[1]));
 	}
-  // TODO If title holder, change rank
-	// TODO var isOpponent:Boolean = _tournament_opponent_list.indexOf(tokens[0]) >= 0;
-	let mobile = tokens[12] != null && tokens[12].match(/81AR/);
-	if (_isFavorite(name) || _isColleague(name) || parseInt(tokens[1]) >= RANK_THRESHOLDS[3] || parseInt(tokens[6]) >= 7 || (users.length < 40 && name != me.name)) {
-		writeUserMessage("  -  " + _name2link(name) + EJ(" logged in" + (mobile ? " via mobile" : "") + ". " + rank + " from " + countries[parseInt(tokens[3])].name_en + "." + (parseInt(tokens[6]) >= 3 ? "　Now on " + tokens[6] + "-win streak!" : ""), " さんが" + (mobile ? "モバイルから" : "") + "ログインしました。 (" + countries[parseInt(tokens[3])].name_ja + ", " + rank + ")" + (parseInt(tokens[6]) >= 3 ? "　現在" + tokens[6] + "連勝中!" : "")), 1, "#008800", _isFavorite(name) || _isColleague(name));
-		// TODO if (mainViewStack.selectedIndex == 1 && _chat_sound1_play) {
-	}
-	if (name == me.name) return;
-	if (!users[name]) {
-		users[name] = new User(name);
-    $('#findUser').autocomplete('option', 'source', Object.keys(users))
-	} else {
-		// TODO users[name].initialize();
+  let importantUser = _isImportantUser(name)
+	if (importantUser || users[name].titleName() != '') {
+		writeUserMessage("  -  " + _name2link(name) + EJ(" logged in. " + rank + " from " + countries[parseInt(tokens[3])].name_en + "." + (parseInt(tokens[6]) >= 3 ? "　Now on " + tokens[6] + "-win streak." : ""), " さんがログインしました。 (" + countries[parseInt(tokens[3])].name_ja + ", " + rank + ")" + (parseInt(tokens[6]) >= 3 ? "　現在" + tokens[6] + "連勝中。" : "")), 1, "#008800", importantUser)
+    if (currentLayer == 1 && importantUser) sp.door(true)
 	}
 	users[name].setFromLobbyIn(parseInt(tokens[1]), tokens[2], parseInt(tokens[3]), tokens[12])
   playerGrid.row.add(users[name])
@@ -1633,16 +1622,15 @@ function _handleLobbyIn(line){
 
 function _handleLobbyOut(name){
 	if (currentLayer == 1) {
-		if (_isFavorite(name) || _isColleague(name)) {
+		if (_isImportantUser(name)) {
 			writeUserMessage("  -  " + name + i18next.t("code.G031"), 1, "#008800")
-			// TODO if (isFavorite && _chat_sound1_play) _sound_door_close.play();
+      sp.door(false)
 		}
 	}
   playerGrid.row("#" + name).remove()
   waiterGrid.row("#" + name).remove()
   drawGridMaintainScroll(playerGrid)
   drawGridMaintainScroll(waiterGrid)
-	// TODO serverLabel.text = serverName + LanguageSelector.EJ(" : ", "サーバ : ") + LanguageSelector.lan.lobby + LanguageSelector.EJ(" (", " (ログイン数 ") + _user_list.length + LanguageSelector.EJ(" players)", "名)");
 	delete users[name];
 }
 
@@ -1689,14 +1677,11 @@ function _handleAccept(str){
   $('#challengeCanceler').remove()
   clearGeneralTimeout("CHALLENGE")
 	_gameAccepted = true
-	//_acceptedCancelTimer.reset();
-	//_acceptedCancelTimer.start();
 	_interpretCommunicationCode("", "C005", 1, true, false)
 	if (_challengeUser) client.seek(_challengeUser)
 }
 
 function _handleDecline(str){
-//	_acceptedCancelTimer.stop();
   $('#challengeCanceler').remove()
   clearGeneralTimeout("CHALLENGE")
 	if (str.match(/^([A-Z]\d{3})/)) {
@@ -1711,7 +1696,6 @@ function _handleDecline(str){
 
 function _handleGameSummary(str){
   _gameAccepted = false
-//  _acceptedCancelTimer.stop();
   let black
   let white
   let myTurn
@@ -1735,8 +1719,6 @@ function _handleGameSummary(str){
     }
   })
   _challengeUser = null
-//	  _waiting = false;
-//	  _rematching = false;
   if (board.game) _closeBoard(true)
   let game = new Game(0, gameId, black, white)
   _prepareCorrectBoard(game.gameType)
@@ -1750,7 +1732,6 @@ function _handleGameSummary(str){
   sp.gameStart()
   _greetState = 1
   _writeGameStartMessage()
-  //_nOpponentDisconnect = 0;
   //_study_notified = false;
   _resetDeclinedList()
 }
@@ -1812,7 +1793,6 @@ function _handleGameEnd(lines, atReconnection = false){
   if (gameEndType == "TIME_UP" && board.isPlayer() && !atReconnection) sp.sayTimeUp()
   let illegal = gameEndType == "ILLEGAL_MOVE"
   writeUserMessage(move.toGameEndMessage(), 2, "#DD0088")
-	//if (GameTimer.soundType >= 2) Byoyomi.sayTimeUp();
   switch (result) {
     case "LOSE":
       board.setResult(1 - board.myRoleType)
@@ -1830,7 +1810,7 @@ function _handleGameEnd(lines, atReconnection = false){
       break
     case "WIN":
     	board.setResult(board.myRoleType)
-      board.studyHostType = 1
+      board.studyHostType = gameEndType == 'DISCONNECT' ? 2 : 1
       writeUserMessage(EJ("### You Win ###\n", "### あなたの勝ちです ###\n"), 2, "#DD0088", true)
       sp.gameEnd(true)
     	openResult(1)
@@ -2030,15 +2010,14 @@ function _handleEnter(name){
     sp.door(true)
 		if (board.isHost()) client.gameChat("[##SUBHOST_ON]" + name)
   } else {
-    let importantUser = false
+    let importantUser = _isImportantUser(name)
 		if (watcherGrid.rows().count() < 15 || importantUser) {
 			writeUserMessage(_name2link(name) + i18next.t("code.G030"), 2, "#008800", importantUser)
-      //TODO if importantUser && isPostGame then doorOpen-sound
+      if (importantUser && board.isPostGame) sp.door(true)
 		}
 		if (users[name]) {
       watcherGrid.row.add(users[name])
       drawGridMaintainScroll(watcherGrid)
-  		//_watcherTitle = LanguageSelector.lan.watchers + " (" + _watcher_list.length +")";
     }
   }
   if (board.isHost()) client.privateChat(name, "[##STUDY]" + _generateStudyText(kifuGrid.row({selected: true}).data().num))
@@ -2052,8 +2031,6 @@ function _handleEnter(name){
     */
 		if (board.game.gameType != "r" && !_allowWatcherChat) client.privateChat(name, "[auto-PM] #G102")
 	}
-	//if (_users[e.message]) _users[e.message].clearTags();
-	//_updateStatusMarks(e.message);
 }
 
 function _handleLeave(name) {
@@ -2066,14 +2043,13 @@ function _handleLeave(name) {
     board.clearRematch()
     if (board.isPlayer() && board.isPostGame) $('#rematchButton').removeClass('button-disabled')
   } else {
-		let importantUser = false
+		let importantUser = _isImportantUser(name)
 		if (watcherGrid.rows().count() < 10 || importantUser) {
 			writeUserMessage(name + i18next.t("code.G031"), 2, "#008800", importantUser)
-      //TODO if importantUser && isPostGame then doorClose-sound
+      if (importantUser && board.isPostGame) sp.door(false)
 		}
     watcherGrid.row("#" + name).remove()
     drawGridMaintainScroll(watcherGrid)
-		//_watcherTitle = LanguageSelector.lan.watchers + " (" + _watcher_list.length +")";
   }
 }
 
@@ -2106,7 +2082,7 @@ function _startDisconnectTimer(){
   _disconnectTimer = setInterval(function(){
     count++
     $("span#disconnectCount").text(count)
-    if (count == minimumWaitSeconds) { //TODO count has to be 1 if disconnected twice
+    if (count == minimumWaitSeconds) {
       $('<input id="disconnectDeclareButton" type="button" value="' + i18next.t("declare") + '" style="height:20px;margin-left:5px">').appendTo(p)
       $("#disconnectDeclareButton").click(function(){
         _handleDisconnectDeclare()
@@ -2165,7 +2141,6 @@ function _handleStart(game_id){
 }
 
 function _handleChat(sender, message){
-  // TODO: if in ignore list
 	if (message.match(/^\[##INFONEW\]/)) {
 		return
 	} else if (message.match(/^\[##BROADCAST\](.+)$/)) {
@@ -2221,6 +2196,7 @@ function _handleGameChat(sender, message){
 		if (sender == me.name) sender = ""
 		board.addArrow(parseInt(RegExp.$1), Number(RegExp.$2), Number(RegExp.$3), Number(RegExp.$4), Number(RegExp.$5), parseInt(RegExp.$6, 16), true, sender)
 	} else if (message.match(/^\[##M_(IN|OUT)\](\d+),(\d+)$/)) {
+    if (sender == me.name) return
     let isOut = RegExp.$1 == "OUT"
     let turn = board.getPlayerRoleFromName(sender)
     if (turn != null) board.playerNameClassChange(turn, 'name-mouse-out', isOut)
@@ -2281,12 +2257,10 @@ function _handleGameChat(sender, message){
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#0033DD")
 		} else if (board.isPlaying() && !_allowWatcherChat) {
       return
-      /*
-		} else if (_favorite_list.indexOf(sender) >= 0) {
-			_writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#DD7700")
-		} else if (_colleague_list.indexOf(sender) >= 0) {
-			_writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#550066")
-      */
+		} else if (_isFavorite(sender)) {
+			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#DD7700")
+		} else if (_isColleague(sender)) {
+			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#550066")
 		} else {
 			writeUserMessage("[" + _name2link(sender) + "] " + message, 2, "#660000")
 		}
@@ -2810,11 +2784,15 @@ function _game2link(text, gameId){
 }
 
 function _isFavorite(name){
-  return false
+  return users[name]._isFavorite
 }
 
 function _isColleague(name){
-  return false
+  return users[name]._isColleague
+}
+
+function _isImportantUser(name){
+  return _isFavorite(name) || _isColleague(name) || users[name]._isTournamentMember
 }
 
 function getPremium(){
