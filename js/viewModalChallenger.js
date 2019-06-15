@@ -9,6 +9,9 @@ function _initModalChallenger(user){
     _handleAcceptChallenge()
     $('#modalChallenger').dialog('close')
   })
+  $('#challengerAcceptButton').keypress(function(e){
+    e.preventDefault()
+  })
   $('#challengerRejectButton').unbind().click(function(){
     clearInterval(timer)
     _handleRejectChallenge(user, "C004")

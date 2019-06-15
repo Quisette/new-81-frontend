@@ -81,10 +81,10 @@ table.dataTable thead .sorting_desc {
   background-position: bottom;
 }
 table.dataTable thead .sorting_asc_disabled {
-  background-image: url("../img/datatables/sort_asc_disabled.png");
+#  background-image: url("../img/datatables/sort_asc_disabled.png");
 }
 table.dataTable thead .sorting_desc_disabled {
-  background-image: url("../img/datatables/sort_desc_disabled.png");
+#  background-image: url("../img/datatables/sort_desc_disabled.png");
 }
 table.dataTable thead .sorting_disabled {
   background-image: none;

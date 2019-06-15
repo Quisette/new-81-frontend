@@ -83,12 +83,22 @@ class Game{
     return coloredSpan(EJ('End', '終局'), 'green')
   }
 
+  movesSortFunc(){
+    if (this.status == "") return -1
+    if (this.status == "game" || this.status == "suspend") return parseInt(this.moves)
+    return 1000
+  }
+
   watchersStr(){
     if (this.watchers == 0) return ""
     let str = '<span data-gameid="' + this.shortId + '" onmouseover="popupWatchers(this)" onmouseout="$(this).tooltip(\'close\')" style="padding:0 7px'
     if (this.watchers >= 10) str += ';color:red'
 		else if (this.watchers >= 5) str += ';color:#e80'
 		return str + '">' + this.watchers + '</span>'
+  }
+
+  watchersSortFunc(){
+    return this.watchers
   }
 
   openingStr(){

@@ -160,16 +160,6 @@ $(function(){
   })
 
   // Prepare Datatables
-  $.fn.dataTableExt.oSort['rate-str-asc'] = function(a, b) {
-    a = User.rateStrToRate(a)
-    b = User.rateStrToRate(b)
-    return ((a < b) ? -1 : ((a > b) ?  1 : 0))
-  }
-  $.fn.dataTableExt.oSort['rate-str-desc'] = function(a, b) {
-    a = User.rateStrToRate(a)
-    b = User.rateStrToRate(b)
-    return ((a < b) ? 1 : ((a > b) ?  -1 : 0))
-  }
   serverGrid = $('#serverGrid').DataTable({
     data: [],
     columns: [
@@ -190,12 +180,12 @@ $(function(){
   playerGrid = $('#playerGrid').DataTable({
     data: [],
     columns: [
-      {data: "statStr", width: "10%"},
-      {data: "titleTag", width: "14%"},
+      {data: "statStr", width: "10%", orderSequence: ['desc']},
+      {data: "titleTag", width: "14%", orderSequence: ['desc']},
       {data: "rankStr", width: "14%", bSortable: false},
       {data: "nameStr", width: "40%", className: "dt-body-left"},
       {data: "countryStr", width: "12%", className: "dt-body-left"},
-      {data: "rateStr", width: "10%", className: "dt-body-right", type: "rate-str"}
+      {data: {"_": "rateStr", "sort": "rateSortFunc"}, width: "10%", className: "dt-body-right", type: "numeric", orderSequence: ['desc', 'asc']}
     ],
     rowId: "name",
     searching: false, paging: false, info: false,
@@ -219,7 +209,7 @@ $(function(){
     data: [],
     columns: [
       {data: "waiterStr", width: "50%", className: "dt-body-left"},
-      {data: "rateStr", width: "10%", className: "dt-body-right", type: "rate-str"},
+      {data: {"_": "rateStr", "sort": "rateSortFunc"}, width: "10%", className: "dt-body-right", type: "numeric", orderSequence: ['desc', 'asc']},
       {data: "ruleStr", width: "27%"},
       {data: "timeStr", width: "13%"}
     ],
@@ -246,10 +236,10 @@ $(function(){
     columns: [
       {data: "senteStr", width: "31%", className: "dt-body-left", bSortable: false},
       {data: "goteStr", width: "31%", className: "dt-body-right", bSortable: false},
-      {data: "ruleShort", width: "13%", bSortable: false},
-      {data: "movesStr", width: "7%", bSortable: false},
-      {data: "watchersStr", width: "7%", bSortable: false},
-      {data: "openingStr", width: "11%", bSortable: false},
+      {data: "ruleShort", width: "13%", orderSequence: ['desc', 'asc']},
+      {data: {"_": "movesStr", "sort": "movesSortFunc"}, type: "numeric", width: "7%"},
+      {data: {"_": "watchersStr", "sort": "watchersSortFunc"}, type: "numeric", width: "7%", orderSequence: ['desc']},
+      {data: "openingStr", width: "11%", orderSequence: ['desc']},
       {data: "maxRate", width: "0%", visible: false}
     ],
     rowId: "gameId",
@@ -268,7 +258,7 @@ $(function(){
     columns: [
       {name: "name_column", data: "watcherStr", width: "55%", className: "dt-body-left"},
       {data: "countryStr", width: "25%", className: "dt-body-left"},
-      {data: "rateStr", width: "20%", className: "dt-body-right", type: "rate-str"}
+      {data: {"_": "rateStr", "sort": "rateSortFunc"}, width: "20%", className: "dt-body-right", type: "numeric", orderSequence: ['desc', 'asc']}
     ],
     rowId: "name",
     searching: false, paging: false, info: false,
@@ -1583,6 +1573,7 @@ function _handleList(str){
     games.push(game)
   })
   gameGrid.rows.add(games)
+  gameGrid.order([6, 'desc'])
   gameGrid.draw()
   if (autoReconnectedGame) _enterGame(autoReconnectedGame)
 }

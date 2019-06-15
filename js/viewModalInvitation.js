@@ -14,6 +14,9 @@ function _initModalInvitation(user){
     _handleAcceptInvitation(user)
     $('#modalInvitation').dialog('close')
   })
+  $('#invitationAcceptButton').keypress(function(e){
+    e.preventDefault()
+  })
   $('#invitationDeclineButton').unbind().click(function(){
     clearInterval(timer)
     _handleDeclineInvitation(user, "C014")

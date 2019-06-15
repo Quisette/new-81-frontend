@@ -162,6 +162,10 @@ class User{
     return str
   }
 
+  rateSortFunc(){
+    return this.rate
+  }
+
   watcherStr(){
     let nameLimited = '<span style="display:inline-block;width:100px;">' + this.name + '</span>'
     let hostStr = this.name == hostPlayerName ? coloredSpan('<i class="fa fa-graduation-cap"></i>', '#008', 15, i18next.t("board.attr_host")) : ''
