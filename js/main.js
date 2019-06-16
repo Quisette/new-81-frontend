@@ -1755,7 +1755,7 @@ function _handleMove(csa, time){
       move.setTime(time, board)
       board.handleReceivedMove(move)
       board.updateTurnHighlight()
-      board.playerNameClassChange(owner, 'name-mouse-out', false)
+      board.playerNameClassChange(owner ? 0 : 1, 'name-mouse-out', false)
     }
     board.runningTimer.run()
   }
