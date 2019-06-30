@@ -147,7 +147,7 @@ class User{
   }
 
   nameStr(){
-    let nameLimited = '<span style="display:inline-block;width:100px;">' + this.name + '</span>'
+    let nameLimited = '<span style="display:inline-block;max-width:70px;">' + this.name + '</span>'
     return this.generateMark() + (this.idle ? coloredSpan(nameLimited, '#00f') : nameLimited)
   }
 
@@ -177,13 +177,13 @@ class User{
   }
 
   watcherStr(){
-    let nameLimited = '<span style="display:inline-block;width:100px;">' + this.name + '</span>'
+    let nameLimited = '<span style="display:inline-block;max-width:70px;">' + this.name + '</span>'
     let hostStr = this.name == hostPlayerName ? coloredSpan('<i class="fa fa-graduation-cap"></i>', '#008', 15, i18next.t("board.attr_host")) : ''
     return hostStr + this.generateMark() + nameLimited
   }
 
   waiterStr(){
-    let nameLimited = '<span style="display:inline-block;width:100px;">' + this.name + '</span>'
+    let nameLimited = '<span style="display:inline-block;max-width:70px;">' + this.name + '</span>'
     return this.country.flagImgTag27() + ' ' + coloredSpan('■', makeColorFromRating(this.rate)) + ' ' + (this.idle ? coloredSpan(nameLimited, '#00f') : nameLimited)
   }
 
