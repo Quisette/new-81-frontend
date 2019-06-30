@@ -183,7 +183,7 @@ $(function(){
       {data: "statStr", width: "10%", orderSequence: ['desc']},
       {data: "titleTag", width: "14%", orderSequence: ['desc']},
       {data: "rankStr", width: "14%", bSortable: false},
-      {data: "nameStr", width: "40%", className: "dt-body-left"},
+      {data: {"_": "nameStr", "sort": "nameSortFunc"}, width: "40%", className: "dt-body-left"},
       {data: "countryStr", width: "12%", className: "dt-body-left"},
       {data: {"_": "rateStr", "sort": "rateSortFunc"}, width: "10%", className: "dt-body-right", type: "numeric", orderSequence: ['desc', 'asc']}
     ],
@@ -256,7 +256,7 @@ $(function(){
   watcherGrid = $('#watcherGrid').DataTable({
     data: [],
     columns: [
-      {name: "name_column", data: "watcherStr", width: "55%", className: "dt-body-left"},
+      {name: "name_column", data: {"_": "watcherStr", "sort": "nameSortFunc"}, width: "55%", className: "dt-body-left"},
       {data: "countryStr", width: "25%", className: "dt-body-left"},
       {data: {"_": "rateStr", "sort": "rateSortFunc"}, width: "20%", className: "dt-body-right", type: "numeric", orderSequence: ['desc', 'asc']}
     ],
@@ -2479,10 +2479,11 @@ function _takeHostStatusIfEligible(){
     if (board.myRoleType == 1) eligible = true
     else if (!board.isPlayerPresent(1)) eligible = true
   } else if (board.game.isStudy() || (!board.isPlayerPresent(0) && !board.isPlayerPresent(1))) {
+    watcherGrid.order([2, 'desc']) // Sort the watcher list and pick up the top
+    watcherGrid.draw()
     if (watcherGrid.row().data().name == me.name) eligible = true
   }
   if (eligible) client.gameChat("[##GIVEHOST]" + me.name)
-  console.log(eligible)
 }
 
 function _sendAutoChat(str) {

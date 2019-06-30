@@ -151,6 +151,16 @@ class User{
     return this.generateMark() + (this.idle ? coloredSpan(nameLimited, '#00f') : nameLimited)
   }
 
+  nameSortFunc(){
+    if (this.isGuest) return "|" + this.name
+    if (this._isSelf) return "!!!!!!!!" + this.name
+    let sortHeader = ""
+    if (this._isFavorite) sortHeader = "!!!!" + sortHeader
+    if (this._isCircleMember) sortHeader = "!!" + sortHeader
+    if (this._isTournamentMember) sortHeader = "!" + sortHeader
+    return sortHeader + this.name
+  }
+
   countryStr(){
     return this.country.flagImgTag16() + ' ' + this.country.name3Tag()
   }
