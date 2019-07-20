@@ -105,7 +105,7 @@ function isBeforeDowngrade(rate) {
 
 const HANDICAPS_JA = {
 	r: "平手(レート)",
-	nr: "平手(非レート)",
+	nr: "平手(練習)",
 	hcfixed: "定先",
 	hclance: "香落ち",
 	hcbishop: "角落ち",
@@ -142,8 +142,8 @@ const HANDICAPS_JA = {
 	va33: "９マス将棋"
 	}
 const HANDICAPS_EN = {
-	r: "Even (R)",
-	nr: "Even (NR)",
+	r: "Even (Rated)",
+	nr: "Even (Practice)",
 	hcfixed: "Fixed-black",
 	hclance: "Lance Down",
 	hcbishop: "Bishop Down",
