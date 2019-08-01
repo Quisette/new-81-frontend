@@ -1,67 +1,109 @@
-div#modalNewGame data-i18n-title="new_game.title"
-  p
-    label
-      input type="radio" name="newGameType" value="1"
-      |15<span data-i18n="min"></span> - 60<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.21)
-  p
-    label
-      input type="radio" name="newGameType" value="2" checked="true"
-      |10<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.11)
-  p
-    label
-      input type="radio" name="newGameType" value="3"
-      |&ensp;5<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.00)
-  p
-    label
-      input type="radio" name="newGameType" value="4"
-      |&ensp;0<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x0.85)
-  p
-    label
-      input type="radio" name="newGameType" value="5"
-      span data-i18n="new_game.nonrated"
-  p style="margin-left:25px"
-    select#newGameRuleSelect disabled="true"
-  p style="margin-left:25px"
-    select#newGameTotalSelect disabled="true"
-      option 0
-      option 5
-      option 10
-      option selected="true" 15
-      option 20
-      option 30
-      option 40
-      option 60
-    span data-i18n="min"
-    select#newGameByoyomiSelect disabled="true"
-      option 10
-      option 20
-      option selected="true" 30
-      option 60
-    span data-i18n="sec"
-  p
-    label
-      input type="radio" name="newGameType" value="6"
-      span data-i18n="new_game.tournament"
-  p style="margin-left:25px"
-    select#newGameTournamentSelect style="max-width: 250px" disabled="true"
-  p
-    label
-      input type="radio" name="newGameType" value="7"
-      span data-i18n="new_game.study_room"
-  p style="margin-left:25px"
-    select#newGameStudyRuleSelect disabled="true"
-  p style="margin-left:25px"
-    |☗
-    input type="text" size="7" id="newGameStudyBlack" value="Black" disabled="true"
-    |&nbsp;☖
-    input type="text" size="7" id="newGameStudyWhite" value="White" disabled="true"  
-  p
-    label
-      input type="radio" name="newGameType" value="8"
-      span data-i18n="new_game.stop"
-  div#privateRoomPass
-    span data-i18n="new_game.private_room" style="padding-right:4px" data-i18n-title="new_game.enter_pass_tip"
-    input#newGamePasswordInput type="text" size="7" data-i18n-title="new_game.enter_pass_tip"
+div#modalNewGame data-i18n-title="lobby.wait"
+  div#newGameTabs
+    ul
+      li
+        a#tabManual href="#tabs-1" data-i18n="new_game.manual" data-click="normal"
+      li#liTabAuto
+        a#tabAuto href="#tabs-2" data-i18n="new_game.auto" data-click="normal"
+
+    div#tabs-1 style="padding:0.5em 0.8em"
+      p
+        label
+          input type="radio" name="newGameType" value="1"
+          |15<span data-i18n="min"></span> - 60<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.21)
+      p
+        label
+          input type="radio" name="newGameType" value="2" checked="true"
+          |10<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.11)
+      p
+        label
+          input type="radio" name="newGameType" value="3"
+          |&ensp;5<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.00)
+      p
+        label
+          input type="radio" name="newGameType" value="4"
+          |&ensp;0<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x0.85)
+      p
+        label
+          input type="radio" name="newGameType" value="5"
+          span data-i18n="new_game.nonrated"
+      p style="margin-left:25px"
+        select#newGameRuleSelect disabled="true"
+      p style="margin-left:25px"
+        select#newGameTotalSelect disabled="true"
+          option 0
+          option 5
+          option 10
+          option selected="true" 15
+          option 20
+          option 30
+          option 40
+          option 60
+        span data-i18n="min"
+        select#newGameByoyomiSelect disabled="true"
+          option 10
+          option 20
+          option selected="true" 30
+          option 60
+        span data-i18n="sec"
+      p
+        label
+          input type="radio" name="newGameType" value="6"
+          span data-i18n="new_game.tournament"
+      p style="margin-left:25px"
+        select#newGameTournamentSelect style="max-width: 250px" disabled="true"
+      p
+        label
+          input type="radio" name="newGameType" value="7"
+          span data-i18n="new_game.study_room"
+      p style="margin-left:25px"
+        select#newGameStudyRuleSelect disabled="true"
+      p style="margin-left:25px"
+        |☗
+        input type="text" size="7" id="newGameStudyBlack" value="Black" disabled="true"
+        |&nbsp;☖
+        input type="text" size="7" id="newGameStudyWhite" value="White" disabled="true"  
+      p
+        label
+          input type="radio" name="newGameType" value="8"
+          span data-i18n="new_game.stop"
+      div#privateRoomPass
+        span data-i18n="new_game.private_room" style="padding-right:4px" data-i18n-title="new_game.enter_pass_tip"
+        input#newGamePasswordInput type="text" size="7" data-i18n-title="new_game.enter_pass_tip"
+    div#tabs-2 style="padding:0.5em 1.2em"
+      h3 data-i18n="new_game.accepted_rules"
+      p
+        label
+          input type="checkbox" name="auto_time_rule_checkbox" value="900-60" checked="true"
+          |15<span data-i18n="min"></span> - 60<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.21)
+      p
+        label
+          input type="checkbox" name="auto_time_rule_checkbox" value="600-30" checked="true"
+          |10<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.11)
+      p
+        label
+          input type="checkbox" name="auto_time_rule_checkbox" value="300-30" checked="true"
+          |&ensp;5<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x1.00)
+      p
+        label
+          input type="checkbox" name="auto_time_rule_checkbox" value="0-30" checked="true"
+          |&ensp;0<span data-i18n="min"></span> - 30<span data-i18n="sec"></span>, <span data-i18n="new_game.rated"></span> (x0.85)
+      h3 data-i18n="new_game.rate_diff"
+      p
+        i.fa.fa-arrow-up.fa-fw
+        span data-i18n="new_game.diff_upper"
+        input#autoMatchDeltaHigh style="width:50px;margin:0 5px" type="number" value="300" min="200"
+        span data-i18n="new_game.diff_min"
+      p
+        i.fa.fa-arrow-down.fa-fw
+        span data-i18n="new_game.diff_lower"
+        input#autoMatchDeltaLow style="width:50px;margin:0 5px" type="number" value="300" min="200"
+        span data-i18n="new_game.diff_min"
+      h3 data-i18n="option.for_premium"
+      p
+        label
+          input#autoMatchAvoidProvisionalCheckbox type="checkbox"
+          span data-i18n="new_game.avoid_provisional"
 
 javascript:
   _jsInclude("js/viewModalNewGame.js")

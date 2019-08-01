@@ -72,6 +72,9 @@ class WebSocketClient {
     			  } else if (line.match(/^##\[CHALLENGE\]\[(.+)\]$/)) {
     				  thisInstance._callbackFunctions["CHALLENGE"](RegExp.$1)
               return
+            } else if (line.match(/^##\[CONFIRM_AUTOMATCH\]$/)) {
+              thisInstance._callbackFunctions["CONFIRM_AUTOMATCH"]()
+              return
     			  } else if (line.match(/^##\[ACCEPT\](.*)$/)) {
     				  thisInstance._callbackFunctions["ACCEPT"](RegExp.$1)
               return
@@ -249,6 +252,18 @@ class WebSocketClient {
   			this.send("%%SEEK " + user.waitingGameName + " *");
   		}
 	  }
+  }
+
+  automatchOn(diffHigh, diffLow, rules, avoidProvisional){
+    this.send("%%AUTO" + (avoidProvisional ? "2" : "") + " " + diffHigh + " " + diffLow + " " + rules.join(","))
+  }
+
+  confirmAutomatch(isOK){
+    this.send("%%CONFIRM " + (isOK ? "OK" : "NG"))
+  }
+
+  automatchOff(){
+    this.send("%%AUTO")
   }
 
 	rematch(game, turn){

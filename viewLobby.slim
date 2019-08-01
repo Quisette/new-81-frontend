@@ -79,6 +79,13 @@ div.layer#layerLobby
           span#header-mile
           span#header-premium
         img src="img/favicon.gif"
+    div.automatchBanner#lobbyAutomatchBanner
+      i.fa.fa-codepen.fa-spin
+      |&emsp;
+      span data-i18n="automatch.banner"
+      input.automatchCancelButton data-i18n-value="automatch.cancel" type="button" onclick="_automatchCancelButtonClick()" data-click="cancel"
+      |&emsp;
+      i.fa.fa-codepen.fa-spin
     div.hbox#lobbyHBox style="flex:1;padding-top:7px"
       div.vbox#playerListBox
         div.grid-wrapper#playerGridWrapper style="flex: 7 7 1px"

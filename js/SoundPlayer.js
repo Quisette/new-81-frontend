@@ -29,6 +29,9 @@ class SoundPlayer{
     this._loadChannel("CLICK_NORMAL", "click_normal")
     this._loadChannel("CLICK_CANCEL", "click_cancel")
     this._loadChannel("CLICK_EXEC", "click_exec")
+    this._loadChannel("AUTOMATCH_CONFIRM", "automatch_confirm")
+    this._channels["AUTOMATCH_CONFIRM"].loop = true
+    this._loadChannel("AUTOMATCH_START", "automatch_start")
   }
 
   static get CONST(){
@@ -124,6 +127,15 @@ class SoundPlayer{
 
   muteOpening(toggle){
     this._channels["OPENING"].muted = toggle
+  }
+
+  startAutomatchConfirm(){
+    this.play("AUTOMATCH_CONFIRM")
+  }
+
+  stopAutomatchConfirm(){
+    this._channels["AUTOMATCH_CONFIRM"].pause()
+    this._channels["AUTOMATCH_CONFIRM"].currentTime = 0
   }
 
   _setVolume(key, volume){

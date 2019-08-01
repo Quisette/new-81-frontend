@@ -1,3 +1,5 @@
+$('div#newGameTabs').tabs()
+
 $('#modalNewGame').find('[name="newGameType"]').change(function(){
   $('#privateRoomPass').css('display', 'none')
   if ($('#modalNewGame').find('[name="newGameType"]:checked').val() == 5) {
@@ -27,11 +29,16 @@ function _disableNewGameOptions(isGuest){
     $('#newGameRuleSelect').val('nr')
     $('#newGameTotalSelect').val('15')
     $('#newGameByoyomiSelect').val('30')
+    $('#newGameTabs').tabs('option', 'disabled', [1])
+    $('#newGameTabs').tabs('option', 'active', 0)
   } else {
     $('#modalNewGame').find('[name=newGameType]').prop({'disabled': false})
     $('#newGamePasswordInput').prop({'disabled': false})
+    $('#newGameTabs').tabs('option', 'disabled', [])
   }
   $('#modalNewGame').find('[name=newGameType]').change()
+  if (getPremium() < 2) $('#autoMatchAvoidProvisionalCheckbox').prop({'disabled': true, 'checked': false})
+  else $('#autoMatchAvoidProvisionalCheckbox').prop({'disabled': false})
 }
 
 $('#modalNewGame').dialog({

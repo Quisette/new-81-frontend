@@ -155,6 +155,24 @@ input[type=text], input[type=password], select
   &:focus
     outline-color: orange
 
+div.automatchBanner
+  animation: AutomatchAnimation 3s ease infinite
+  overflow-y: hidden
+  font-size: 1.25em
+  height: 2.5em
+  line-height: 2.5em
+  display: none
+  color: white
+  input[type=button]
+    height: 2em
+    margin-left: 1em
+    min-width: 150px
+
+@keyframes AutomatchAnimation
+  0% {background: #c72}
+  50% {background: #a52}
+  100% {background: #c72}
+
 //--------------------------------
 // jQuery-UI override
 // -------------------------------
@@ -555,6 +573,21 @@ div.my-modal
     padding: 12px 20px 12px 12px
 .no-close .ui-dialog-titlebar-close
   display: none
+
+div#modalNewGame
+  h3
+    font-size: 13px
+    margin: 7px 0 0 0
+  #tabManual::before
+    font-size: 1.3em
+    font-family: FontAwesome
+    content: '\f1de'
+    margin-right: 5px
+  #tabAuto::before
+    font-size: 1.3em
+    font-family: FontAwesome
+    content: '\f0e7'
+    margin-right: 5px
 
 div#player-info-layer-1
   transition: opacity 0.3s

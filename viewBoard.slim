@@ -77,6 +77,13 @@ div.layer#layerBoard
           a.button#closeGameButton href="#" onclick="_closeBoard()" data-click="cancel"
             i.fa.fa-sign-out.fa-2x
             span data-i18n="board.close_game"
+    div.automatchBanner#lobbyAutomatchBanner
+      i.fa.fa-codepen.fa-spin
+      |&emsp;
+      span data-i18n="automatch.banner"
+      input.automatchCancelButton data-i18n-value="automatch.cancel" type="button" onclick="_automatchCancelButtonClick()" data-click="cancel"
+      |&emsp;
+      i.fa.fa-codepen.fa-spin
     div#boardContents.hbox style="flex:1"
       div#boardLeftVBox.vbox
         div#boardBox

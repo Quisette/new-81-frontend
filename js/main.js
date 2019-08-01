@@ -50,6 +50,7 @@ var _longTapRow = null
 var isTouchDevice = navigator.userAgent.match(/(iPhone|iPad|Android)/) ? true : false
 var secureLoginPublicKey = null
 var _ignoreList = []
+var _automatchStartTime
 
 /* ====================================
     On document.ready
@@ -66,13 +67,13 @@ function _testFunction(phase){
     _handleServers([
       //{id:1, name:'MERCURY', description_en: 'test', description_ja: 'テスト', enabled: true, population: 0, host: 'shogihub.com', port: 4084}
       //{id:1, name:'EARTH', description_en: 'main', description_ja: 'メイン', enabled: true, population: 0, host: 'shogihub.com', port: 4081}
-      {id:1, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.56.101', port: 4081}
+      {id:1, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.220.131', port: 4081}
     ])
   } else if (phase == 1) { // After servers are loaded
-    //_loginButtonClick()
+    _loginButtonClick()
   } else if (phase == 2) { // After logged in
     //client.send("%%GAME hc2pd_test1-900-30 -")
-    //_optionButtonClick()
+    //_waitButtonClick()
   }
 }
 
@@ -366,6 +367,7 @@ $(function(){
   })
   $(window).unload(function(){
     if (board.isHost()) _giveHostButtonClick()
+    if ($('#modalAutomatch').dialog('isOpen')) _handleConfirmAutomatch(false)
   })
   window.addEventListener("message", function(e){
     if (e.data.match(/^goToPosition:(\d+)$/)) {
@@ -545,7 +547,7 @@ function _updateLanguage(){
     if (key == "r" || key == "vazoo2") return true
     $('#newGameRuleSelect, #newGameStudyRuleSelect').append($("<option />").val(key).text(handicaps[key]))
   })
-  $('#modalNewGame, #modalChallenger, #modalInvitation, #modalImpasse, #modalOption, #modalChatTemplate').each(function(){
+  $('#modalNewGame, #modalChallenger, #modalInvitation, #modalImpasse, #modalOption, #modalChatTemplate, #modalAutomatch').each(function(){
     $(this).dialog('option', 'title', i18next.t($(this).attr('data-i18n-title')))
     $(this).prop('title', '')
   })
@@ -596,6 +598,7 @@ function _loginButtonClick(){
   client.setCallbackFunctions("WATCHERS", _handleWatchers)
   client.setCallbackFunctions("GAME", _handleGame)
   client.setCallbackFunctions("CHALLENGE", _handleChallenger)
+  client.setCallbackFunctions("CONFIRM_AUTOMATCH", _handleAutomatch)
   client.setCallbackFunctions("ACCEPT", _handleAccept)
   client.setCallbackFunctions("DECLINE", _handleDecline)
   client.setCallbackFunctions("GAME_SUMMARY", _handleGameSummary)
@@ -685,7 +688,7 @@ function _enterGame(game){
   _prepareCorrectBoard(game.gameType)
   board.setGame(game)
 	if (!game.gameId.match(/^STUDY/) && board.getPlayerRoleFromName(me.name) != null) { // Reconnect
-		if (me.status == 1) {
+		if (me.status == 1 || $('.automatchBanner').css('display') == 'block') {
       writeUserMessage(i18next.t("msg.reconnect_while_game"), 1, "#008800", true)
       board.close()
     } else {
@@ -1221,31 +1224,49 @@ function setBoardConditions(){
 ===================================== */
 
 function _handleNewGame(){
-  let val = $('input[name="newGameType"]:checked').val()
-  let comment = ""
-  let password = $('#privateRoomPass').css('display') == 'block' ? $('#newGamePasswordInput').val() : ""
-  if (val == 1) {
-    client.wait("r", 900, 60)
-  } else if (val == 2) {
-    client.wait("r", 600, 30)
-  } else if (val == 3) {
-    client.wait("r", 300, 30)
-  } else if (val == 4) {
-    client.wait("r", 0, 30)
-  } else if (val == 5) {
-    let ruleType = $("#newGameRuleSelect option:selected").val()
-    client.wait(ruleType, 60 * $("#newGameTotalSelect option:selected").val(), $("#newGameByoyomiSelect option:selected").val(), ruleType.match(/^hc/) ? -1 : 0, "", comment, password)
-  } else if (val == 6) {
-    let tournamentId = $("#newGameTournamentSelect option:selected").val()
-    if (tournaments[tournamentId]) tournaments[tournamentId].wait()
-  } else if (val == 7) {
-    client.stopWaiting()
-    let ruleType = $("#newGameStudyRuleSelect option:selected").val()
-    let blackName = $("#newGameStudyBlack").val()
-    let whiteName = $("#newGameStudyWhite").val()
-    client.study(ruleType, blackName, whiteName, password)
-  } else if (val == 8) {
-    client.stopWaiting()
+  if ($('#newGameTabs .ui-tabs-panel:visible').attr('id') == 'tabs-1') { // Manual rule setting tab
+    let val = $('input[name="newGameType"]:checked').val()
+    let comment = ""
+    let password = $('#privateRoomPass').css('display') == 'block' ? $('#newGamePasswordInput').val() : ""
+    if (val == 1) {
+      client.wait("r", 900, 60)
+    } else if (val == 2) {
+      client.wait("r", 600, 30)
+    } else if (val == 3) {
+      client.wait("r", 300, 30)
+    } else if (val == 4) {
+      client.wait("r", 0, 30)
+    } else if (val == 5) {
+      let ruleType = $("#newGameRuleSelect option:selected").val()
+      client.wait(ruleType, 60 * $("#newGameTotalSelect option:selected").val(), $("#newGameByoyomiSelect option:selected").val(), ruleType.match(/^hc/) ? -1 : 0, "", comment, password)
+    } else if (val == 6) {
+      let tournamentId = $("#newGameTournamentSelect option:selected").val()
+      if (tournaments[tournamentId]) tournaments[tournamentId].wait()
+    } else if (val == 7) {
+      client.stopWaiting()
+      let ruleType = $("#newGameStudyRuleSelect option:selected").val()
+      let blackName = $("#newGameStudyBlack").val()
+      let whiteName = $("#newGameStudyWhite").val()
+      client.study(ruleType, blackName, whiteName, password)
+    } else if (val == 8) {
+      client.stopWaiting()
+    }
+  } else { // Auto-match tab
+    let rules = []
+    $('#newGameTabs').find('input[name=auto_time_rule_checkbox]').each(function(){
+      if ($(this).prop('checked')) rules.unshift($(this).val())
+    })
+    let deltaHigh = parseInt($('input#autoMatchDeltaHigh').val())
+    let deltaLow = parseInt($('input#autoMatchDeltaLow').val())
+    let avoidProvisional = $('input#autoMatchAvoidProvisionalCheckbox').prop('checked')
+    if (rules.length > 0 && deltaHigh >= 200 && deltaHigh < 10000 && deltaLow >= 200 && deltaLow < 10000) {
+      client.automatchOn(deltaHigh, deltaLow, rules, avoidProvisional)
+      setGeneralTimeout("AUTOMATCH_CANCEL", 30000, true)
+      $('.automatchCancelButton').hide()
+      $('div.automatchBanner').show()
+      _automatchStartTime = new Date()
+      writeUserMessage(i18next.t("automatch.explanation"), 1, "#008800")
+    }
   }
   $('#modalNewGame').dialog('close')
 }
@@ -1291,6 +1312,11 @@ function _handleDeclineInvitation(user, declineCode = ""){
   sp.buttonClick("CANCEL")
   client.privateChat(user.name, "[##REJECT]" + declineCode)
 	writeUserMessage(EJ("Declined the invitation from " + user.name + ".", user.name + "さんからの招待をパスしました。"), 1, "#008800", true)
+}
+
+function _automatchCancelButtonClick(){
+  $('div.automatchBanner').hide()
+  client.automatchOff()
 }
 
 function _openPlayerInfo(user, doOpen = true){
@@ -1658,6 +1684,7 @@ function _handleChallenger(name){
   	client.decline("C000")
     return
   }
+  if ($('#modalAutomatch').dialog('isOpen')) $('#modalAutomatch').dialog('close')
   sp.play("CHALLENGER")
   $('#modalChallenger').dialog('open')
   _initModalChallenger(users[name])
@@ -1685,6 +1712,23 @@ function _handleDecline(str){
   $('#modalChallenger').dialog('close')
 }
 
+function _handleAutomatch(){
+  $('.automatchBanner').hide()
+  let now = new Date()
+  if (now - _automatchStartTime > 1000 * 60 * 3) {
+    sp.startAutomatchConfirm()
+    $('#modalAutomatch').dialog('open')
+    _initModalAutomatch()
+  } else { //Auto-confirm if it is less than 3 minutes from switching on
+    client.confirmAutomatch(true)
+  }
+}
+
+function _handleConfirmAutomatch(isOK){
+  client.confirmAutomatch(isOK)
+  if (!isOK) client.mileage(-5, config.mileagePass)
+}
+
 function _handleGameSummary(str){
   _gameAccepted = false
   let black
@@ -1710,6 +1754,7 @@ function _handleGameSummary(str){
     }
   })
   _challengeUser = null
+  $('div.automatchBanner').hide()
   if (board.game) _closeBoard(true)
   let game = new Game(0, gameId, black, white)
   _prepareCorrectBoard(game.gameType)
@@ -1720,7 +1765,7 @@ function _handleGameSummary(str){
   $("#kifuGridWrapper").find(".dataTables_scrollBody").removeClass("local-kifu")
   setBoardConditions()
   _switchLayer(2)
-  sp.gameStart()
+  gameId.match(/^[^@]+@\-/) ? sp.play("AUTOMATCH_START") : sp.gameStart()
   _greetState = 1
   _writeGameStartMessage()
   //_study_notified = false;
@@ -2305,7 +2350,7 @@ function _handleInvitation(name){
   let inviter = users[name]
   if (!inviter) { client.privateChat(name, "[##REJECT]"); return; }
   if (board.isPlayer()) { client.privateChat(name, "[##REJECT]C011"); return; }
-  if ($('#modalInvitation').dialog('isOpen') || _challengeUser) { client.privateChat(name, "[##REJECT]C012"); return; }
+  if ($('#modalInvitation').dialog('isOpen') || _challengeUser || $('#modalAutomatch').dialog('isOpen')) { client.privateChat(name, "[##REJECT]C012"); return; }
 
   if (inviter.listAsWaiter()) {
     sp.play("INVITATION")
@@ -2366,6 +2411,7 @@ function _clearAllParams(){
   $('#lobbyMessageArea').empty()
   _loadDefaultOptions()
   _declinedList = new Object()
+  $('.automatchBanner').hide()
 }
 
 /* ====================================
@@ -2750,6 +2796,9 @@ function _handleGeneralTimeout(key){
       break
     case "LOSER_LEAVE":
       _allowLoserLeave()
+      break
+    case "AUTOMATCH_CANCEL":
+      $('.automatchCancelButton').show()
       break
   }
 }
