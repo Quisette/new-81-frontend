@@ -12,7 +12,6 @@ class WebSocketClient {
     this.serverName = serverName;
     this._readingGameSummary = false
     this.status = null // 0:connected, 1:challenging, 2:now-playing-my-game
-    this.resignTime = 0
     this._idle = false
   }
 
@@ -47,7 +46,7 @@ class WebSocketClient {
         } else {
           if (thisInstance.status == 2) { // when during my game
             if (line.match(/^%TORYO,T(\d+)$/)) {
-              thisInstance.resignTime = parseInt(RegExp.$1)
+              resignTime = parseInt(RegExp.$1)
               return
             } else if (line.match(/^([-+][0-9]{4}[A-Z]{2}),T(\d+)$/)) {
               thisInstance._callbackFunctions["MOVE"](RegExp.$1, parseInt(RegExp.$2))

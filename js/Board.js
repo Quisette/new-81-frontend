@@ -373,7 +373,10 @@ class Board{
     */
     if (move_strings.length > 0) {
       move_strings.forEach(function(move_str){
-        if (move_str.match(/^%TORYO/)) return
+        if (move_str.match(/^%TORYO/)) {
+          resignTime = parseInt(move_str.split(",")[1])
+          return
+        }
         let move = this.getFinalMove().constructNextMove()
         move.setFromCSA(move_str.split(",")[0])
         move.setTime(parseInt(move_str.split(",")[1]), this)

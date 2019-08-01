@@ -51,6 +51,7 @@ var isTouchDevice = navigator.userAgent.match(/(iPhone|iPad|Android)/) ? true : 
 var secureLoginPublicKey = null
 var _ignoreList = []
 var _automatchStartTime
+var resignTime = null
 
 /* ====================================
     On document.ready
@@ -1716,6 +1717,7 @@ function _handleAutomatch(){
   $('.automatchBanner').hide()
   let now = new Date()
   if (now - _automatchStartTime > 1000 * 60 * 3) {
+    if ($('#modalAutomatch').dialog('isOpen')) $('#modalAutomatch').dialog('close')
     sp.startAutomatchConfirm()
     $('#modalAutomatch').dialog('open')
     _initModalAutomatch()
@@ -1817,9 +1819,9 @@ function _handleGameEnd(lines, atReconnection = false){
   board.isPostGame = true
   let move = board.getFinalMove().constructNextMove()
   move.setGameEnd(gameEndType) //turn too?
-  if (move.endTypeKey == 'RESIGN' && client && client.resignTime) {
-    move.setTime(client.resignTime, board)
-    client.resignTime = null
+  if (move.endTypeKey == 'RESIGN' && resignTime) {
+    move.setTime(resignTime, board)
+    resignTime = null
   }
   board.endTime = moment()
   if (gameEndType != "SUSPEND") {
@@ -1985,7 +1987,7 @@ function _handleMonitor(str){
   } else {
     move_strings.forEach(function(move_str){
       if (move_str.match(/^%TORYO/)) {
-        client.resignTime = parseInt(move_str.split(",")[1])
+        resignTime = parseInt(move_str.split(",")[1])
         return
       }
       let move = board.getFinalMove().constructNextMove()
