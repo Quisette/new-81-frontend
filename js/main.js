@@ -785,7 +785,7 @@ function _checkLobbyButtonClick(forceDefault = false){
       $('#layerBoard').css('border-bottom', 'none')
       $('#checkLobbyButton').removeClass("button-disabled")
       $('#checkLobbyButton').html('<i class="fa fa-eye fa-2x"></i>')
-      $('#layerLobby').css('display', 'none')
+      if (currentLayer == 2) $('#layerLobby').css('display', 'none')
     })
   } else if (!forceDefault) { // Start checking lobby
     $('#checkLobbyButton').addClass("button-disabled")
