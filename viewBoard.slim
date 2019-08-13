@@ -90,8 +90,9 @@ div.layer#layerBoard
         div#boardLeftBottomHBox.hbox
           div#watcherBox.vbox
             div style="text-align:left"
-              input#receiveWatcherChatCheckBox type="checkbox" onclick="_allowWatcherChatClick()"
-              span data-i18n="board.allow_chat"
+              label
+                input#receiveWatcherChatCheckBox type="checkbox" onclick="_allowWatcherChatClick()"
+                span data-i18n="board.allow_chat"
             div.grid-wrapper#watcherGridWrapper style="flex:1 1 1px"
               table.stripe.hover#watcherGrid
                 tr

@@ -733,6 +733,7 @@ function writeUserMessage(str, layer, clr = null, bold = false, lineChange = tru
 
 function _interpretCommunicationCode(name, code, n, bold, sound) {
   //string, string, integer, boolean, boolean
+  if (code == "G101" || code == "G103") bold = true
 	writeUserMessage(name + i18next.t("code." + code), n, "#008800", bold)
   if (sound) sp.chatBoard()
 }
@@ -1185,7 +1186,7 @@ function setBoardConditions(){
       $("#resignButton").removeClass("button-disabled")
       $("#clearArrowsButton, #positionMenuButton, #kifuMenuButton, #rematchButton, #closeGameButton").addClass("button-disabled")
       if (board.game.gameType != "r") {
-        $("#receiveWatcherChatCheckBox").prop({disabled: false, checked: true})
+        $("#receiveWatcherChatCheckBox").prop({disabled: false, checked: false})
       } else {
         $("#receiveWatcherChatCheckBox").prop({disabled: true, checked: false})
       }
@@ -1778,7 +1779,6 @@ function _writeGameStartMessage(){
   writeUserMessage(i18next.t("msg.game_start") + "\n", 2, "#444444")
   if (board.myRoleType == 0) writeUserMessage(EJ("You are Black " + (board.game.isHandicap() ? "(Handicap taker)." : "(Sente)."), "あなた" + (board.game.isHandicap() ? "は下手(したて)" : "が先手") + "です。"), 2, "#008800", true)
   else writeUserMessage(EJ("You are White " + (board.game.isHandicap() ? "(Handicap giver)." : "(Gote).\n"), "あなた" + (board.game.isHandicap() ? "が上手(うわて)" : "は後手") + "です。"), 2, "#008800", true)
-  if (board.game.gameType != "r") writeUserMessage(i18next.t("msg.mute_chat"), 2, "#008800")
   let opponent = board.getOpponent()
   if (board.game.gameType == "r" && !me.provisional) {
 	  if (isBeforeUpgrade(me.rate) && !opponent.provisional && opponent.rate > me.rate - 200) _sendAutoChat("#G020")
@@ -1977,9 +1977,6 @@ function _handleMonitor(str){
     board.setKifuId(kifu_id)
     setBoardConditions()
     _switchLayer(2)
-    if (!board.game.isStudy()) {
-  		writeUserMessage(board.game.gameType == "r" ? i18next.t("msg.rated") : i18next.t("msg.nonrated"), 2, "#008800")
-    }
     let tournament = board.game.getTournament()
     if (tournament) {
       writeUserMessage(EJ('This game belongs to: "', 'イベント対局: 「') + tournament.name() + EJ('" ', '」 ') + tournament.url(), 2, "#FF3388", true)
@@ -2067,7 +2064,7 @@ function _handleEnter(name){
 			else if (board.piece_type == 102) _client.privateChat(e.message, "[auto-PM] #G016");
 		}
     */
-		if (board.game.gameType != "r" && !_allowWatcherChat) client.privateChat(name, "[auto-PM] #G102")
+		if (board.game.gameType != "r" && _allowWatcherChat) client.privateChat(name, "[auto-PM] #G103")
 	}
 }
 
