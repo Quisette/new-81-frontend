@@ -148,7 +148,7 @@ $(function(){
   i18next.language = localStorage.locale || args["locale"] || "ja"
   i18next.use(i18nextXHRBackend).init({
     lng: localStorage.locale || args["locale"] || 'ja',
-    fallbackLng: args["locale"] || 'ja',
+    fallbackLng: (args["locale"] == null || args["locale"] == 'ja') ? 'ja' : 'en',
     debug: true,
     backend: {
       loadPath: "locales/{{lng}}.json?" + version
