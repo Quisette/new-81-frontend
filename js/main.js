@@ -952,8 +952,10 @@ function _kifuNoteButtonClick(){
 }
 
 function _shareKifuButtonClick(mode){
-  if (board.toKifuURL() != "") shareKifu(mode)
-  else writeUserMessage(EJ('This board does not have a kifu URL.', 'この盤面には棋譜URLの設定がありません'), 2, "#FF0000")
+  if (board.toKifuURL() != "") {
+    shareKifu(mode)
+    client.mileage(1, config.mileagePass)
+  } else writeUserMessage(EJ('This board does not have a kifu URL.', 'この盤面には棋譜URLの設定がありません'), 2, "#FF0000")
 }
 
 function _uploadKifuButtonClick(){
