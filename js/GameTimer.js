@@ -3,6 +3,10 @@
 class GameTimer {
 	constructor(div){
     this._div = div
+		div.css('cursor', 'default')
+		div.click(function(e){
+			if ($(e.target).css('cursor') == 'help') window.open('https://81dojo.com/documents/' + EJ('Clock_Delay', '遅延表示'), '_blank')
+		})
 		this._label
     this._subLabel
 
@@ -62,6 +66,7 @@ class GameTimer {
 		  if (!pauseInByoyomi) this._timeLeft = this._byoyomi
 		}
 		this._disconnected = false
+		this._div.css('cursor', 'default')
     this._display()
 	}
 
@@ -127,6 +132,7 @@ class GameTimer {
 		let sec = this._timeLeft % 60
 		if (this._timeLeft <= -3) {
       this._label.text(EJ("Delay", "遅延"))
+			this._div.css('cursor', 'help')
 		} else if (this._timeLeft < 0) {
       this._label.text("0:00")
 		} else {
