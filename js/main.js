@@ -2675,6 +2675,7 @@ function _handleKifuDetail(data){
   })
   let game = new Game(0, game_id, black, white)
   game.opening = opening
+  _prepareCorrectBoard(game.gameType)
   board.setGame(game)
   board.startGame(positionStr, 2, move_strings)
   if (kifu_id) board.setKifuId(kifu_id)
