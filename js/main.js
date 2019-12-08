@@ -1554,6 +1554,7 @@ function _handleLoginFailed(code){
 }
 
 function _handleWho(str){
+  $(".ui-tooltip-content").parents('div').remove()
   let lines = str.trim().split("\n")
   lines.forEach(function(line){
     let tokens = line.split(",")
