@@ -220,6 +220,22 @@ class Board{
     }
     if ($("#modalImpasse").dialog('isOpen')) this.calcImpasse()
     $(".name-popup").remove()
+    this.highlightIfIllegal()
+  }
+
+  highlightIfIllegal(){
+    let arrows = this.onListen ? this._arrowsPublic : this._arrowsSelf
+    if (arrows.length > 0) return
+    let obj = this.position.checkIllegal()
+    if (obj){
+      let name = EJ('ILLEGAL', '反則')
+      if (obj.cause == 'NIFU'){
+        this.addArrow(-1, obj.x1, obj.y1, obj.x1, obj.y1, 0xff0000, this.onListen, name)
+        this.addArrow(-1, obj.x2, obj.y2, obj.x2, obj.y2, 0xff0000, this.onListen, name)
+      } else if(obj.cause == 'SUICIDE'){
+        this.addArrow(-1, obj.x1, obj.y1, obj.x2, obj.y2, 0xff0000, this.onListen, name)
+      }
+    }
   }
 
   _layoutHandPieceClosureFunc(i){
@@ -358,6 +374,8 @@ class Board{
     if (myRoleType == 2) this.setDirection(true)
     else this.setDirection(myRoleType == 0)
     this.loadNewPosition(positionStr)
+    this.clearArrows(true)
+    this.clearArrows(false)
     this.isPostGame = false
     if (this.studyHostType == null) this.studyHostType = 0 // Keep the same host level as before even if startGame() is newly called
     this.onListen = true
@@ -583,7 +601,6 @@ class Board{
       this.runningTimer.stop()
     }
     move = this._position.makeMove(move)
-    this._refreshPosition()
     if (this.isPlaying()) {
       sendMoveAsPlayer(move)
       this._publicPosition.deepCopy(this._position)
@@ -594,6 +611,7 @@ class Board{
       if (this.onListen && this.studyHostType >= 1) sendStudy()
       else forceKifuMode(0)
     }
+    this._refreshPosition()
   }
 
   handleReceivedMove(move){

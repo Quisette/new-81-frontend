@@ -1061,6 +1061,7 @@ function _kifuModeRadioChange(){
       $("#kifuGridWrapper").find(".dataTables_scrollBody").addClass("local-kifu")
       if (board.isSubHost()) _sendAutoChat("#G000")
       board.clearCanvas()
+      board.highlightIfIllegal()
     }
   } else {
     if (!board.onListen) {
@@ -1107,12 +1108,14 @@ function _kifuSelected(index, subhost_override = false){
     _restorePublicKifu()
     if (actAsHost) _sendAutoChat("#G003")
   }
-  board.replayMoves(kifuGrid.rows(Array.from(Array(index+1).keys())).data())
   if (actAsHost) {
     sendStudy(index)
+    board.clearArrows(true)
   } else {
     forceKifuMode(0)
+    board.clearCanvas()
   }
+  board.replayMoves(kifuGrid.rows(Array.from(Array(index+1).keys())).data())
 }
 
 function _replayButtonClick(v){
@@ -1799,7 +1802,6 @@ function _writeGameStartMessage(){
 
 function _handleMove(csa, time){
   //string, integer
-  board.clearArrows(true)
   if (board.isPlaying()){
     let owner = csa.substr(0, 1) == "+"
     board.getPlayersTimer(owner).useTime(time)
@@ -2228,8 +2230,8 @@ function _handleGameChat(sender, message){
 	} else if (message.match(/\[\#\#STUDY\](\d+)\/(.+)$/)) {
     let branchDelta = _updateStudyState(sender, parseInt(RegExp.$1), RegExp.$2)
     if (hostPlayerName == null) _updateHostPlayer(sender)
-  	board.clearArrows(true)
   	if (board.isHost() && sender == me.name) return
+  	board.clearArrows(true)
 		if (!(board.isPostGame && board.onListen)) return
     if (sender != me.name || (branchDelta < 0 && !board.isHost())) _handleStudy(branchDelta == 1)
 	} else if (message.match(/^\[##ARROW\]CLEAR$/)) {
@@ -2316,6 +2318,7 @@ function _handleGameChat(sender, message){
 function _handlePrivateChat(sender, message){
 	if (message.match(/^\[\#\#STUDY\](\d+)\/(.+)$/)) {
     _updateStudyState(sender, parseInt(RegExp.$1), RegExp.$2)
+  	board.clearArrows(true)
 		if (!(board.isPostGame && board.onListen)) return
     if (sender != me.name) _handleStudy()
     _updateHostPlayer(sender)

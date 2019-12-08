@@ -58,6 +58,10 @@ class Piece{
     return false
   }
 
+  isPawn(){
+    return false
+  }
+
   isPromotable(){
     return true
   }
@@ -289,6 +293,9 @@ class PieceFU extends Piece{
   }
   promotedMoves(){
     return [[0, +1], [+1, +1], [-1, +1], [+1, +0], [-1, +0], [0, -1]]
+  }
+  isPawn(){
+    return !this._promoted
   }
   soundVolume(){
     return this._promoted ? 0.4 : 0.35

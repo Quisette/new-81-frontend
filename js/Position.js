@@ -298,6 +298,43 @@ class Position{
     }
   }
 
+  checkIllegal(){
+    let kingCoord = this._getKingCoordinates(!this.turn)
+    if (kingCoord) {
+  		for (let y = 0; y < 9; y++) {
+  			for (let x = 0; x < 9; x++) {
+  				if (this._squares[x][y] && this._squares[x][y].owner == this.turn) {
+            if (this._getMovableGrids(x + 1, y + 1).map(v => v.toString()).includes(kingCoord.x + ',' + kingCoord.y)) return {cause: 'SUICIDE', x1: x + 1, y1: y + 1, x2: kingCoord.x, y2: kingCoord.y}
+          }
+        }
+      }
+    }
+    for (let x = 0; x < 9; x++){
+      let pawnCoord = null
+      for (let y = 0;y < 9; y++){
+        if (this._squares[x][y] && this._squares[x][y].isPawn() && this._squares[x][y].owner == !this.turn) {
+          if (pawnCoord == null) {
+            pawnCoord = {x: x + 1, y: y + 1}
+          } else {
+            return {cause: 'NIFU', x1: pawnCoord.x, y1: pawnCoord.y, x2: x + 1, y2: y + 1}
+          }
+        }
+      }
+    }
+    return null
+  }
+
+  _getKingCoordinates(turn){
+		for (let y = 0; y < 9; y++) {
+			for (let x = 0; x < 9; x++) {
+				if (this._squares[x][y]) {
+          if (this._squares[x][y].isKing() && this._squares[x][y].owner == turn) return {x: x+1, y: y+1} // Human coordinates
+        }
+      }
+    }
+    return null
+  }
+
   handCoordinateHash(i){
     // i: sente/gote (integer)
     let hash = {
