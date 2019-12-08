@@ -929,9 +929,16 @@ function _sharePositionButtonClick(mode){
 function _kifuCopyButtonClick(){
   if (!board.game.gameType.match(/^va/)) {
     let textArea = $('<textarea></textarea>', {id: 'clip-board-area'}).text(_generateKIF()).appendTo($('body'))
-    $("#clip-board-area").select()
+    if (navigator.userAgent.match(/ipad|ipod|iphone/i)) {
+      textArea.readOnly = false
+      let range = document.createRange()
+      range.selectNode(textArea)
+      window.getSelection().addRange(range)
+    } else {
+      textArea.select()
+    }
   	document.execCommand("copy")
-    $("#clip-board-area").remove()
+    textArea.remove()
   } else writeUserMessage(EJ('This game cannot be exported.', 'この対局は出力できません'), 2, "#FF0000")
 }
 
