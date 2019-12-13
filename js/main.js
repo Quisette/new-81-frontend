@@ -2703,6 +2703,7 @@ function _handleKifuDetail(data){
   $('div#loader').detach()
   _switchLayer(2)
   _resize()
+  board.clearArrows(false)
   if (args["moves"]) goToPosition(parseInt(args["moves"]))
   else goToPosition(0)
   if (args["turn"] == "1") board.flipBoard()

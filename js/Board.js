@@ -777,7 +777,7 @@ class Board{
     arrows.push(arrow)
     if (this.onListen == isPublic) {
       arrow.draw(this._scale)
-      if (sender && sender != me.name) this.popupName(toX, toY, sender, color)
+      if (sender && me && sender != me.name) this.popupName(toX, toY, sender, color)
     }
   }
 
