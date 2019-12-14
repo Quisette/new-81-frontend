@@ -106,6 +106,7 @@ class Movement{
 
   setGameEnd(endTypeKey){
     this.endTypeKey = endTypeKey
+    if (endTypeKey == 'RESIGN') this.owner = !this.previousMove.owner
   }
 
   toCSA(){
