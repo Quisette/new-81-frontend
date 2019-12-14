@@ -114,4 +114,7 @@ class DobutsuBoard extends Board{
     }
   }
 
+  highlightIfIllegal(){
+    // Do nothing
+  }
 }
