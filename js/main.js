@@ -2665,7 +2665,7 @@ function _handleKifuDetail(data){
       game_id = RegExp.$1
       black = new User(game_id.split("+")[2])
     	white = new User(game_id.split("+")[3])
-    } else if (line.match(/^I([-+])(\d+),(\d+),.+$/)) {
+    } else if (line.match(/^I([-+])(\*?\d+),(\d+),.+$/)) {
       if (RegExp.$1 == "+") black.setFromList(RegExp.$2, RegExp.$3)
       else white.setFromList(RegExp.$2, RegExp.$3)
     } else if (line.match(/^([-+][0-9]{4}[A-Z]{2}|%TORYO)$/)) {
