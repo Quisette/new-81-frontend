@@ -63,6 +63,7 @@ _loadPieceDesignToDialog("dobutsu", 4)
 _loadPieceDesignToDialog("blind_middle", 100)
 _loadPieceDesignToDialog("blind_hard", 101)
 _loadPieceDesignToDialog("blind_extreme", 102)
+$("#pieceDesignSelector").append('<div style="color:blue;background:#ddd"><label><input type="checkbox" id="notifyBlindCheckbox" class="no-save" onchange="this.disabled=true"><span data-i18n="option.blind_notify"></span></input></label></div>')
 if (isTouchDevice) $('input#hold_piece').prop('disabled', true).parent().css('text-decoration','line-through')
 
 $('div#optionTabs').tabs()

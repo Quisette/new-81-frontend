@@ -992,6 +992,7 @@ function _handleOptionClose(){
   $('#modalOption').dialog('close')
   _setOptionsFromDialog()
   _enforceOptions()
+  if ($("#notifyBlindCheckbox").prop('checked')) _notifyBlindPieceUsage()
 }
 
 function _playerNameDblClick(name){
@@ -1047,11 +1048,6 @@ function _writeAfterCloseBoardMessage(){
 function sendMoveAsPlayer(move){
   client.move(move)
   board.moves.push(move)
-  /*
-  _myMoveSent = true;
-  _myMoveSentTimer.reset();
-  _myMoveSentTimer.start();
-  */
 }
 
 function _kifuModeRadioChange(){
@@ -1231,6 +1227,15 @@ function setBoardConditions(){
     $("#boardMenuRight").css('display', 'none')
   }
   _kifuModeRadioChange()
+}
+
+function _notifyBlindPieceUsage(name){
+  if (board.isPlaying()) {
+    if (options.piece_type == 102) _sendAutoChat("#G013", name)
+    else if (options.piece_type == 101) _sendAutoChat("#G012", name)
+    else if (options.piece_type == 100) _sendAutoChat("#G011", name)
+    else _sendAutoChat("#G010", name)
+  }
 }
 
 /* ====================================
@@ -1798,6 +1803,7 @@ function _writeGameStartMessage(){
 	  else if (isBeforeDowngrade(me.rate) & !opponent.provisional && opponent.rate < me.rate + 200) _sendAutoChat("#G021")
   }
   client.privateChat(board.getOpponent().name, "[##FITNESS]" + options.postgame_study_level + "," + options.english_level)
+  if ($("#notifyBlindCheckbox").prop('checked')) _notifyBlindPieceUsage()
 }
 
 function _handleMove(csa, time){
@@ -2069,13 +2075,7 @@ function _handleEnter(name){
   }
   if (board.isHost()) client.privateChat(name, "[##STUDY]" + _generateStudyText(kifuGrid.row({selected: true}).data().num))
 	if (board.isPlaying()) {
-    /*
-		if (_notify_blind) {
-			if (board.piece_type == 100) _client.privateChat(e.message, "[auto-PM] #G014");
-			else if (board.piece_type == 101) _client.privateChat(e.message, "[auto-PM] #G015");
-			else if (board.piece_type == 102) _client.privateChat(e.message, "[auto-PM] #G016");
-		}
-    */
+    if ($("#notifyBlindCheckbox").prop('checked')) _notifyBlindPieceUsage(name)
 		if (board.game.gameType != "r" && _allowWatcherChat) client.privateChat(name, "[auto-PM] #G103")
 	}
 }
@@ -2544,8 +2544,10 @@ function _takeHostStatusIfEligible(){
   if (eligible) client.gameChat("[##GIVEHOST]" + me.name)
 }
 
-function _sendAutoChat(str) {
-  if (board.game) {
+function _sendAutoChat(str, recipient) {
+  if (recipient) {
+    client.privateChat(recipient, "[auto-PM] " + str)
+  } else if (board.game) {
     client.gameChat("[auto-chat] " + str)
   } else {
     client.chat("[auto-chat] " + str)
