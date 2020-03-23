@@ -119,8 +119,8 @@ class Board{
     let dir = ['dobutsu', 'blind_extreme'].includes(this._theme) ? this._theme : 'default'
     this._ban.css('background-image', 'url(img/themes/' + dir + '/ban.jpg)')
     this._coord.css('background-image', 'url(img/themes/' + dir + (this._direction ? '/Scoord.png)' : '/Gcoord.png)'))
-    this._komadais[0].css('background-image', 'url(img/themes/' + dir + '/Shand.jpg)')
-    this._komadais[1].css('background-image', 'url(img/themes/' + dir + '/Ghand.jpg)')
+    this._komadais[this._direction ? 0 : 1].css('background-image', 'url(img/themes/' + dir + '/Shand.jpg)')
+    this._komadais[this._direction ? 1 : 0].css('background-image', 'url(img/themes/' + dir + '/Ghand.jpg)')
   }
 
   _partLayout(){
