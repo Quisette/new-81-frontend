@@ -631,6 +631,10 @@ function _bannedLoginInHistory(){
 }
 
 function _setLoginAlert(i18nCode){
+  if (i18nCode == "code.L005") {
+    // Skip connection-closed(L005) message when an error code is already displayed
+    if ($('#loginAlert').attr('data-i18n').match(/^code\.L\d{3}$/)) return
+  }
   $('#loginAlert').text(i18next.t(i18nCode)).attr('data-i18n', i18nCode)
 }
 
