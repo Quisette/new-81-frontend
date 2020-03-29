@@ -1648,6 +1648,8 @@ function _handleLobbyIn(line){
 	}
 	if (tokens[2] == "true" && parseInt(tokens[1]) < RANK_THRESHOLDS[0]) {
 		rank = EJ("A new player", "新鋭棋士");
+  } else if (users[name].titleName() != '') {
+    rank = users[name].titleName()
 	} else {
 		rank = EJ("A ", "") + makeRankFromRating(parseInt(tokens[1]));
 	}
@@ -2156,11 +2158,14 @@ function _handleStart(game_id){
   let game
   let str
 	if (tokens[0] == "STUDY") {
-		let str = game_info[2].split(".")[0] + EJ(" CREATED [", "さんが[")
-    str += _game2link(EJ("STUDY ROOM", "検討室"), game_id)
-		str += EJ("].", "]を作成しました。")
-		writeUserMessage(str, 1, "#008800")
-    sp.chatLobby()
+    let ownerName = game_info[2].split(".")[0]
+    if (_isImportantUser(ownerName)) {
+  		let str = ownerName + EJ(" CREATED [", "さんが[")
+      str += _game2link(EJ("STUDY ROOM", "検討室"), game_id)
+  		str += EJ("].", "]を作成しました。")
+  		writeUserMessage(str, 1, "#008800")
+      sp.chatLobby()
+    }
 		let black = new User(tokens[2])
 		black.setFromStudy(true)
 		var white = new User(tokens[3])
@@ -2171,9 +2176,6 @@ function _handleStart(game_id){
       _enterGame(game)
     }
 	} else {
-		str = "[" + _game2link(EJ("GAME STARTED", "新規対局"), game_id) + "] "
-    str += "☗" + tokens[2] + EJ(" vs ", " 対 ") + "☖" + tokens[3] + " / " + EJ(HANDICAPS_EN[game_info[1]], HANDICAPS_JA[game_info[1]])
-		writeUserMessage(str, 1, "#008800")
 		if (users[tokens[2]]) {
       users[tokens[2]].setFromStart(tokens[1], "+")
       playerGrid.row("#" + tokens[2]).invalidate()
@@ -2186,6 +2188,13 @@ function _handleStart(game_id){
     }
     drawGridMaintainScroll(waiterGrid)
 		game = new Game(0, game_id, users[tokens[2]], users[tokens[3]])
+    if (game.isTournament() || _isImportantUser(tokens[2]) || _isImportantUser(tokens[3])) {
+  		str = "[" + _game2link(EJ("GAME STARTED", "新規対局"), game_id) + "] "
+      if (game.isTournament() && game.getTournament()) str += game.getTournament().name() + " "
+      str += "☗" + tokens[2] + EJ(" vs ", " 対 ") + "☖" + tokens[3] + " / " + EJ(HANDICAPS_EN[game_info[1]], HANDICAPS_JA[game_info[1]])
+  		writeUserMessage(str, 1, "#008800")
+      sp.chatLobby()
+    }
 	}
   gameGrid.row.add(game)
   drawGridMaintainScroll(gameGrid)
