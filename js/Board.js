@@ -167,7 +167,7 @@ class Board{
       thisInstance._handleSquareMouseDown($(this))
     })
     $('.square').not('.square-wall').on("mouseup", function(e){
-      thisInstance._handleSquareMouseUp($(this), e.ctrlKey && getPremium() >= 1)
+      thisInstance._handleSquareMouseUp($(this), e.ctrlKey)
     })
   }
 
