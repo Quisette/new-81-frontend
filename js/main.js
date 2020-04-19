@@ -1355,7 +1355,7 @@ function _openPlayerInfo(user, doOpen = true){
   if (!element[0]) {
     element = $("<div></div>",{
       id: 'player-info-window-' + user.name,
-      title: user.name + '  ' + user.titleName(),
+      title: user.name,
       html: '<div id="player-info-layer-1" class="hbox" style="pointer-events:none">\
         <div class="avatar-wrapper"><img class="avatar"/></div>\
         <div style="flex:1;margin-left:10px"><p id="p1"></p><p id="p2"></p><p id="p3"></p><p id="p4"></p><p id="p5"></p></div>\
@@ -1370,6 +1370,9 @@ function _openPlayerInfo(user, doOpen = true){
       width: 'auto',
       resizable: false,
       position: {at:'left+'+(mouseX-80)+' top+'+(mouseY-30)},
+      open: function(e){
+        if (user.titleName() != "") element.siblings('.ui-dialog-titlebar').find('.ui-dialog-title').append('<span style="background:crimson;margin-left:0.5em;padding:0.15em 0.3em;font-size:1.08em">' + user.titleName() + '</span>')
+      },
       close: function(e){
         if (element.find("#privateMessageArea").html() == "") element.dialog('destroy').remove()
       },
