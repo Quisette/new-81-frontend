@@ -195,7 +195,15 @@ function coloredSpan(text, color = null, width = null, title = null){
 }
 
 function scrollGridToSelected(grid){
-  if (grid.row('.selected').node()) {
+  let selectedNode = grid.row('.selected').node()
+  if (selectedNode) {
+    if (grid.page.info().length > 0) {  // If the grid is using pagination
+      let i = grid.rows({order:'applied'}).nodes().indexOf(selectedNode)
+      if (i >= 0) {
+        let page = Math.floor( i / grid.page.info().length )
+        grid.page(page).draw(false)
+      }
+    }
     let scrollBody = $(grid.table().container()).find('.dataTables_scrollBody')
     scrollBody.scrollTop(grid.row('.selected').node().offsetTop - scrollBody.height() * 0.5)
   }
@@ -204,7 +212,7 @@ function scrollGridToSelected(grid){
 function drawGridMaintainScroll(grid){
   let scrollBody = $(grid.table().container()).find('.dataTables_scrollBody')
   let scrollPos = scrollBody.scrollTop()
-  grid.draw()
+  grid.draw(false)
   scrollBody.scrollTop(scrollPos)
 }
 

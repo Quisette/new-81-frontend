@@ -190,10 +190,18 @@ $(function(){
       {data: {"_": "rateStr", "sort": "rateSortFunc"}, width: "10%", className: "dt-body-right", type: "numeric", orderSequence: ['desc', 'asc']}
     ],
     rowId: "name",
-    searching: false, paging: false, info: false,
+    searching: false, info: false, lengthChange: false,
     select: "single",
     order: [[5, 'desc']],
-    scrollY: true
+    scrollY: true,
+    paging: true,
+    pageLength: 200,
+    paginType: "simple_numbers",
+    dom: "pt",
+    oLanguage: {oPaginate: {
+      sPrevious: "<i class='fa fa-chevron-left'></i>",
+      sNext: "<i class='fa fa-chevron-right'></i>"
+    }}
   })
   playerGrid.clear()
   $('#playerGrid tbody').on('dblclick', 'tr', function () {
@@ -495,7 +503,7 @@ function _resize(){
     $("#boardChatBox").insertAfter($("#watcherBox"))
 	}
   $("#playerGridWrapper, #waiterGridWrapper, #gameGridWrapper, #watcherGridWrapper, #kifuGridWrapper").each(function(){
-    $(this).find('.dataTables_scrollBody').css('height', $(this).height() - $(this).find($("thead")).height())
+    $(this).find('.dataTables_scrollBody').css('height', $(this).height() - $(this).find($(".dataTables_scrollHead")).height() - $(this).find($(".dataTables_paginate")).height())
   })
   snowfall.resize(window.innerWidth, window.innerHeight)
 }
@@ -2733,6 +2741,7 @@ function _switchLayer(n){
     playerGrid.draw()
     waiterGrid.draw()
     gameGrid.draw()
+    _resize()
   } else if (n == 2) {
     watcherGrid.draw()
     kifuGrid.draw()
