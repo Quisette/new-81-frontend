@@ -376,10 +376,10 @@ function sharePosition(mode) {
   let row = kifuGrid.row({selected: true})
   let black = board.game.black.name
   let white = board.game.white.name
-	let url = "http://sfenreader.appspot.com/twiimg?sfen=" + board.position.toSFEN(true) + "%20" + row.index()
+	let url = "https://sfenreader2.appspot.com/twiimg?sfen=" + board.position.toSFEN(true) + "%20" + row.index()
 	url += "&lm=" + (row.data().toX == null ?  "" : (row.data().toX.toString() + row.data().toY.toString()))
 	url += "&sname=" + black + "&gname=" + white
-	url += EJ("&title=from_81Dojo", "&title=81道場・局面図")
+	url += "&title=81Dojo"
 
   let str
 	if (mode == "FB") {
