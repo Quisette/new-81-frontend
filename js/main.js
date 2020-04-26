@@ -1440,6 +1440,10 @@ function _playerChallengeClick(user){
     } else if (me.isGuest && user.waitingGameName.match(/^r_/)) {
 			writeUserMessage(i18next.t("msg.no_guest_rating"), 1, "#ff0000")
 	  } else {
+      if (user.waitingPassword()) {
+        let ret = prompt(i18next.t("lobby.require_pass"))
+        if (!user.waitingPasswordMatch(ret)) return
+      }
 		  _challengeUser = user
 		  client.challenge(_challengeUser)
 		  writeUserMessage(EJ("Challenging " + _challengeUser.name + "..... ", _challengeUser.name + "さんに挑戦中..... "), 1, "#008800", true, false)

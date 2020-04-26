@@ -98,6 +98,16 @@ class User{
     return this.status == 4 || this.status == 5
   }
 
+  waitingPassword(){
+    let game_info = this._waitingGameName.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/)
+		if (game_info[2].match(/\.([0-9a-z]{6})/)) return RegExp.$1
+    else return null
+  }
+
+  waitingPasswordMatch(str){
+    return CybozuLabs.MD5.calc(config.privateRoomSalt + str).substr(0,6) == this.waitingPassword()
+  }
+
   _setTournamentId(){
     this._waitingTournamentId = null
     if (this._waitingGameName.length <= 1) return
@@ -199,6 +209,7 @@ class User{
           str = coloredSpan(EJ('Tournament', '大会'), 'crimson')
         }
       }
+  		if (game_info[2].match(/\.([0-9a-z]{6})/)) str = '<i class="fa fa-lock fa-fw"></i>' + str
 		}
     return str
   }
