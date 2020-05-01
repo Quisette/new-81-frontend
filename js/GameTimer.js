@@ -108,7 +108,7 @@ class GameTimer {
 				if (this._byoyomi > 10) sp.sayByoyomi()
 				if (this._disconnected) this.stop()
 			} else { //time-up
-				if (this.myPlayingTimer) sendTimeout()
+				if (this.myPlayingTimer && this._timeLeft <= -1) sendTimeout() //Allow 1 second even after time-out
 			}
 		} else if (this._isByoyomi) {
 			if (this._timeLeft == 30 || this._timeLeft == 20 || this._timeLeft == 10) sp.sayNumber(this._byoyomi - this._timeLeft)
