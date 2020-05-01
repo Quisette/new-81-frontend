@@ -1259,6 +1259,7 @@ function _notifyBlindPieceUsage(name){
 ===================================== */
 
 function _handleNewGame(){
+  if (_checkGuestGamesExpired()) return
   if ($('#newGameTabs .ui-tabs-panel:visible').attr('id') == 'tabs-1') { // Manual rule setting tab
     let val = $('input[name="newGameType"]:checked').val()
     let comment = ""
@@ -3038,7 +3039,7 @@ function _countGuestGame(){
 }
 
 function _checkGuestGamesExpired(){
-	if (client.serverName == "MOON") return false
+	//if (client.serverName == "MOON") return false
   if (!me.isGuest) return false
 	let date = new Date()
 	if (localStorage.period && localStorage.period == date.getDay() && localStorage.status >= 3) {
