@@ -44,6 +44,19 @@ class User{
     }
   }
 
+  prepareForWho3(){
+    if (this.inGameRoom()) this.status = 0
+    this._monitorGame = "*"
+  }
+
+  updateFromWho3(token){
+    if (token == "4" || token == "5") {
+      this.status = parseInt(token)
+    } else {
+      this._monitorGame = token
+    }
+  }
+
 	setFromList(rating, country_code) { // String, int
 		if (rating.match(/^\*/)) {
 			if (parseInt(rating.substr(1)) > 3500) this.rate= parseInt(rating.substr(1));
@@ -67,9 +80,8 @@ class User{
 	setFromStart(game_name, turn){
     //string, string
 		this.game_name = game_name;
-		//this.turn = turn;
 		this.status = 4
-		//this.moves = 0
+    this._monitorGame = "*"
 	}
 
   setFromLogin(tokens){

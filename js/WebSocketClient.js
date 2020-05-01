@@ -111,6 +111,12 @@ class WebSocketClient {
             thisInstance._callbackFunctions["LOBBY_IN"](RegExp.$1)
           } else if (line.match(/^##\[LOBBY_OUT\]\[(.+)\]$/)) {
             thisInstance._callbackFunctions["LOBBY_OUT"](RegExp.$1)
+          } else if (line.match(/^##\[IDLE\](.+)$/)) {
+            thisInstance._callbackFunctions["IDLE"](RegExp.$1)
+          } else if (line.match(/^##\[RATE\](.+)$/)) {
+            thisInstance._callbackFunctions["RATE"](RegExp.$1)
+          } else if (line.match(/^##\[RANKED\]\[(.+)\]$/)) {
+            thisInstance._callbackFunctions["RANKED"](RegExp.$1)
           } else if (line.match(/^##\[ENTER\]\[(.+)\]$/)) {
             thisInstance._callbackFunctions["ENTER"](RegExp.$1)
           } else if (line.match(/^##\[LEAVE\]\[(.+)\]$/)) {
@@ -118,8 +124,11 @@ class WebSocketClient {
           } else if (line.match(/^##\[DISCONNECT\]\[(.+)\]$/)) {
             thisInstance._callbackFunctions["DISCONNECT"](RegExp.$1)
           } else if (line.match(/^##\[WHO2\]\s(.+)$/)){
-            if (RegExp.$1 == "+OK") thisInstance._callbackWithBuffer("WHO")
-            else thisInstance._storeBuffer("WHO", RegExp.$1)
+            if (RegExp.$1 == "+OK") thisInstance._callbackWithBuffer("WHO2")
+            else thisInstance._storeBuffer("WHO2", RegExp.$1)
+          } else if (line.match(/^##\[WHO3\]\s(.+)$/)){
+            if (RegExp.$1 == "+OK") thisInstance._callbackWithBuffer("WHO3")
+            else thisInstance._storeBuffer("WHO3", RegExp.$1)
           } else if (line.match(/^##\[LIST\]\s(.+)$/)){
             if (RegExp.$1 == "+OK") thisInstance._callbackWithBuffer("LIST")
             else thisInstance._storeBuffer("LIST", RegExp.$1)
@@ -173,7 +182,8 @@ class WebSocketClient {
   }
 
   who(first = false){
-    this.send("%%WHO2" + (first ? "FIRST" : ""));
+    if (first) this.send("%%WHO2FIRST")
+    else this.send("%%WHO3")
   }
 
   list(){

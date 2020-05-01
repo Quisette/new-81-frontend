@@ -602,9 +602,13 @@ function _loginButtonClick(){
   client.setCallbackFunctions("GAME_END", _handleGameEnd)
   client.setCallbackFunctions("ERROR", _handleGeneralResponse)
   client.setCallbackFunctions("CLOSED", _handleClosed)
-  client.setCallbackFunctions("WHO", _handleWho)
+  client.setCallbackFunctions("WHO2", _handleWho2)
+  client.setCallbackFunctions("WHO3", _handleWho3)
   client.setCallbackFunctions("LIST", _handleList)
   client.setCallbackFunctions("WATCHERS", _handleWatchers)
+  client.setCallbackFunctions("IDLE", _handleIdleChange)
+  client.setCallbackFunctions("RATE", _handleRateChange)
+  client.setCallbackFunctions("RANKED", _handleRanked)
   client.setCallbackFunctions("GAME", _handleGame)
   client.setCallbackFunctions("CHALLENGE", _handleChallenger)
   client.setCallbackFunctions("CONFIRM_AUTOMATCH", _handleAutomatch)
@@ -1587,7 +1591,7 @@ function _handleLoginFailed(code){
   $('#reloginButton').css('display', 'initial')
 }
 
-function _handleWho(str){
+function _handleWho2(str){
   $(".ui-tooltip-content").parents('div').remove()
   let lines = str.trim().split("\n")
   lines.forEach(function(line){
@@ -1608,6 +1612,24 @@ function _handleWho(str){
   drawGridMaintainScroll(waiterGrid)
   _playerSelected(playerGrid, playerGrid.row({selected: true}).index())
   $('#findUser').autocomplete('option', 'source', Object.keys(users))
+}
+
+function _handleWho3(str){
+  $(".ui-tooltip-content").parents('div').remove()
+  for (let name in users){
+    users[name].prepareForWho3()
+  }
+  let lines = str.trim().split("\n")
+  lines.forEach(function(line){
+    let tokens = line.split(",")
+    let name = tokens[0]
+    if (users[name]) users[name].updateFromWho3(tokens[1])
+  })
+//  playerGrid.row('#' + me.name).select()
+  playerGrid.rows().invalidate()
+  drawGridMaintainScroll(playerGrid)
+  drawGridMaintainScroll(waiterGrid)
+//  _playerSelected(playerGrid, playerGrid.row({selected: true}).index())
 }
 
 function _handleList(str){
@@ -1718,6 +1740,23 @@ function _handleGame(line) {
     drawGridMaintainScroll(waiterGrid)
 	}
   playerGrid.row('#' + name).invalidate()
+}
+
+function _handleRateChange(line){
+  let tokens = line.split(",")
+  if (users[tokens[0]]) users[tokens[0]].rate = parseInt(tokens[1])
+  if (users[tokens[2]]) users[tokens[2]].rate = parseInt(tokens[3])
+  //playerGrid.rows(['#'+tokens[0], '#'+tokens[2]]).invalidate()
+}
+
+function _handleRanked(name){
+  if (users[name]) users[name].provisional = false
+}
+
+function _handleIdleChange(line){
+  let tokens = line.split(",")
+  if (users[tokens[0]]) users[tokens[0]].idle = parseInt(tokens[1]) == 1
+  playerGrid.row('#' + tokens[0]).invalidate()
 }
 
 function _handleChallenger(name){
