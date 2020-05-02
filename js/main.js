@@ -1437,6 +1437,8 @@ function _playerChallengeClick(user){
   	  writeUserMessage(EJ("It is outside the tournament period right now.", "現在、大会開催期間外です。"), 1, "#ff0000")
     } else if (user.rate >= RANK_THRESHOLDS[2] && me.provisional && user.waitingGameName.match(/^r_/)) {
   	  writeUserMessage(i18next.t("msg.no_challenge_6dan"), 1, "#008800")
+    } else if (me.rate >= RANK_THRESHOLDS[2] && user.provisional && user.waitingGameName.match(/^r_/)) {
+  	  writeUserMessage(i18next.t("msg.no_challenge_6dan"), 1, "#008800")
     } else if (_checkGuestGamesExpired()) {
     } else if (user.waitingGameName.match(/_automatch\-/)) {
 		  client.seek(user)
