@@ -505,6 +505,8 @@ function _resize(){
   $("#playerGridWrapper, #waiterGridWrapper, #gameGridWrapper, #watcherGridWrapper, #kifuGridWrapper").each(function(){
     $(this).find('.dataTables_scrollBody').css('height', $(this).height() - $(this).find($(".dataTables_scrollHead")).height() - $(this).find($(".dataTables_paginate")).height())
   })
+  $("#lobbyMessageArea").scrollTop($("#lobbyMessageArea")[0].scrollHeight)
+  $("#boardMessageArea").scrollTop($("#boardMessageArea")[0].scrollHeight)
   snowfall.resize(window.innerWidth, window.innerHeight)
 }
 
