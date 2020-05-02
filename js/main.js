@@ -1909,7 +1909,14 @@ function _handleGameEnd(lines, atReconnection = false){
   board.endTime = moment()
   if (gameEndType != "SUSPEND") {
     board.moves.push(move) //refresh list too
-    if (!kifuGrid.row(':last').data().branch) board.addMoveToKifuGrid(move)
+    if (!kifuGrid.row(':last').data().branch) {
+      if (board.onListen) {
+        board.addMoveToKifuGrid(move)
+      } else {
+        kifuGrid.row.add(move)
+        drawGridMaintainScroll(kifuGrid)
+      }
+    }
   }
   if (gameEndType == "TIME_UP" && board.isPlayer() && !atReconnection) sp.sayTimeUp()
   let illegal = gameEndType == "ILLEGAL_MOVE"
