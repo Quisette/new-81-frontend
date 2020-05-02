@@ -808,8 +808,8 @@ function _checkLobbyButtonClick(forceDefault = false){
   } else if (!forceDefault) { // Start checking lobby
     $('#checkLobbyButton').addClass("button-disabled")
     $('#boardContents').css('pointer-events', 'none').animate({'opacity': 0}, 1200)
-    playerGrid.clear().draw()
-    waiterGrid.clear().draw()
+    playerGrid.draw(false)
+    waiterGrid.draw()
     gameGrid.clear().draw()
     $('#layerLobby').css('display', 'block')
     $('#layerBoard').css('border-bottom', '5px ridge orange').animate({'height': '40px'}, 1200, function(){
@@ -2789,10 +2789,9 @@ function _handleKifuDetail(data){
 
 function _switchLayer(n){
   if (n == 1) {
-    playerGrid.draw()
+    playerGrid.draw(false)
     waiterGrid.draw()
     gameGrid.draw()
-    _resize()
   } else if (n == 2) {
     watcherGrid.draw()
     kifuGrid.draw()
@@ -2802,6 +2801,7 @@ function _switchLayer(n){
   $('div#layerBoard').css({'z-index': n == 2 ? 2 : 1, opacity: n == 2 ? 1 : 0})
   currentLayer = n
   if (n == 2 && me && me.isGuest) $('#boardChatInput').prop('disabled', !board.isPlayer())
+  if (n == 1) _resize()
 }
 
 function setGeneralTimeout(key, ms, force = false){
