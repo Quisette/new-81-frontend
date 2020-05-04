@@ -76,7 +76,7 @@ class SoundPlayer{
   sayNumber(sec){
     //integer
     if (this.byoyomiType == 1) {
-      if (sec < 10 && sec >= 5 || sec == 3 || sec == 1) this.play("CHIME")
+      if (sec < 10 && sec >= 5 || sec == 3 || sec == 1 || sec == 10 || sec == 30 || sec == 40) this.play("CHIME")
     } else {
       this.play((100 + sec).toString().substr(1,2))
     }
