@@ -214,6 +214,7 @@ class User{
 		if (this.listAsWaiter()) {
       let game_info = this._waitingGameName.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/)
       str = getHandicapShort(game_info[1])
+      if (str == undefined) str = EJ('SPECIAL', '特殊手合')
 			if (this._waitingTournamentId) {
         if (tournaments[this._waitingTournamentId]){
           str = coloredSpan(tournaments[this._waitingTournamentId].nameShort(), 'crimson', null, tournaments[this._waitingTournamentId].name())
@@ -289,6 +290,11 @@ class User{
 
   isFromJapan(){
     return this._countryCode == 392
+  }
+
+  isWaitingUnsupportedRule(){
+    let game_info = this._waitingGameName.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/)
+    return game_info && (getHandicapShort(game_info[1]) == undefined)
   }
 
   static rateStrToRate(v){ // Restore rate as integer back from rateStr

@@ -602,7 +602,7 @@ function _loginButtonClick(){
   client.setCallbackFunctions("PRIVATECHAT", _handlePrivateChat)
   client.setCallbackFunctions("MOVE", _handleMove)
   client.setCallbackFunctions("GAME_END", _handleGameEnd)
-  client.setCallbackFunctions("ERROR", _handleGeneralResponse)
+  client.setCallbackFunctions("ERROR", _handleError)
   client.setCallbackFunctions("CLOSED", _handleClosed)
   client.setCallbackFunctions("WHO2", _handleWho2)
   client.setCallbackFunctions("WHO3", _handleWho3)
@@ -695,6 +695,10 @@ function _playerSelected(grid, index){
 }
 
 function _enterGame(game){
+  if (game.isUnsupportedRule()) {
+    writeUserMessage(i18next.t("msg.unsupported_rule"), 1, "#FF0000")
+    return
+  }
   if (game.lockedOut()) {
     let ret = prompt(i18next.t("lobby.require_pass"))
     if (ret != null && ret != "") {
@@ -1444,8 +1448,8 @@ function _playerChallengeClick(user){
     } else if (_checkGuestGamesExpired()) {
     } else if (user.waitingGameName.match(/_automatch\-/)) {
 		  client.seek(user)
-    } else if (user.waitingGameName.match(/^vazoo2/)) {
-  	  writeUserMessage(EJ("Dobutsu-shogi is not supported yet.", "HTML版はどうぶつしょうぎ未対応です。"), 1, "#ff0000")
+    } else if (user.isWaitingUnsupportedRule()) {
+  	  writeUserMessage(i18next.t("msg.unsupported_rule"), 1, "#ff0000")
     } else if (me.isGuest && user.waitingGameName.match(/^r_/)) {
 			writeUserMessage(i18next.t("msg.no_guest_rating"), 1, "#ff0000")
 	  } else {
@@ -1529,8 +1533,8 @@ function sendGrab(x, y){
     Server message handlers
 ===================================== */
 
-function _handleGeneralResponse(tokens){
-  console.log('Event received: ' + tokens)
+function _handleError(str){
+  if (str.match(/^E019/)) writeUserMessage(i18next.t("code.E019"), 1, "#ff0000")
 }
 
 function _handleLoggedIn(str){

@@ -62,6 +62,8 @@ class Game{
       str = "R: "
     } else if (this.gameType.match(/^hc/)) {
       str = "HC: "
+    } else if (this.gameType.match(/^va/)) {
+      str = "SP: "
     } else {
       str = "NR: "
     }
@@ -129,6 +131,10 @@ class Game{
 
   hasNoOpeningTypes(){
     return this.gameType.match(/^(hc|va)/) && this.gameType != "hcfixed"
+  }
+
+  isUnsupportedRule(){
+    return getHandicapShort(this.gameType) == undefined
   }
 
   maxRate(){

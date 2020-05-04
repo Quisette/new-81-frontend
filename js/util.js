@@ -113,18 +113,22 @@ const HANDICAPS_JA = {
 	hcrooklance: "飛香落ち",
 	hcrooksilver: "飛銀落ち",
 	hc2p: "二枚落ち",
+	hc3p: "三枚落ち",
 	hc4p: "四枚落ち",
+	hcl5p: "左五枚落ち",
+	hcr5p: "右五枚落ち",
 	hc6p: "六枚落ち",
+	hcl7p: "左七枚落ち",
+	hcr7p: "右七枚落ち",
 	hc8p: "八枚落ち",
+	hcl9p: "左九枚落ち",
+	hcr9p: "右九枚落ち",
+	hc10p: "十枚落ち",
 	hctombonl: "トンボ＋桂香",
 	hctombol: "トンボ＋香",
 	hctombo: "トンボ",
-	hc10p: "十枚落ち",
 	hcfu3: "歩三兵",
 	hcnaked: "裸玉",
-	hcpawnrd: "右端歩得",
-	hcpawnld: "左端歩得",
-	hcpawn2d: "両端歩得",
 	hclanced: "香得",
 	hcbishopd: "角得",
 	hcrookd: "飛車得",
@@ -151,18 +155,22 @@ const HANDICAPS_EN = {
 	hcrooklance: "1.5p Down",
 	hcrooksilver: "1.75p Down",
 	hc2p: "2p Down",
+  hc3p: "3p Down",
 	hc4p: "4p Down",
+	hcl5p: "Left-5p Down",
+	hcr5p: "Right-5p Down",
 	hc6p: "6p Down",
+	hcl7p: "Left-7p Down",
+	hcr7p: "Right-7p Down",
 	hc8p: "8p Down",
+	hcl9p: "Left-9p Down",
+	hcr9p: "Right-9p Down",
+	hc10p: "10p Down",
 	hctombonl: "Dragonfly+NL",
 	hctombol: "Dragonfly+L",
 	hctombo: "Dragonfly",
-	hc10p: "10p Down",
 	hcfu3: "Three Pawns",
 	hcnaked: "Naked King",
-	hcpawnrd: "R-Pawn Gained",
-	hcpawnld: "L-Pawn Gained",
-	hcpawn2d: "2-Pawns Gained",
 	hclanced: "Lance Gained",
 	hcbishopd: "Bishop Gained",
 	hcrookd: "Rook Gained",
@@ -256,16 +264,13 @@ function openingTypeObject(key, forceJapanese = false){
   			short = "トンボ桂"; break;
   		case "hctombol":
   			short = "トンボ香"; break;
-  		case "va5656":
-  			short = "ゴロゴロ"; break;
   		case "vajudkins":
   			short = "六々将棋"; break;
-  		case "vazoo":
-  			short = "どうぶつ"; break;
   		case "va33":
   			short = "９マス"; break;
       default:
         short = HANDICAPS_JA[key]
+        if (short.length > 4) short = short.slice(0, 4)
     }
     tip = (forceJapanese || i18next.language == "ja") ? HANDICAPS_JA[key] : HANDICAPS_EN[key]
   } else if (key.match(/opposition_(black|white)(\d)/)) {  // key is opening type, and it is swinging rook
@@ -283,6 +288,7 @@ function openingTypeObject(key, forceJapanese = false){
       tip = OPENING_NAME_EN[key]
     }
 	}
+  if (short == undefined) short = EJ('SPECIAL', '特殊手合')
   return {short: short, tip: tip}
 }
 
