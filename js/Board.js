@@ -305,6 +305,10 @@ class Board{
       if (!this.game.isBlackIn && this.game.black.name != me.name) this.playerNameClassChange(0, "name-left", true)
       if (!this.game.isWhiteIn && this.game.white.name != me.name) this.playerNameClassChange(1, "name-left", true)
     }
+    for (let i = 0; i < 2; i++){
+      this._flags[i].css('opacity', this.game.isStudy() ? 0 : 1)
+      this._timers[i].setOpacity(this.game.isStudy() ? 0 : 1)
+    }
   }
 
   setDirection(direction){

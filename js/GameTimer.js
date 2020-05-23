@@ -141,4 +141,7 @@ class GameTimer {
     this._subLabel.text(this._isByoyomi ? "" : this._byoyomi.toString())
 	}
 
+	setOpacity(v){
+		this._div.css('opacity', v)
+	}
 }
