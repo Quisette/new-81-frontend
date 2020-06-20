@@ -96,7 +96,7 @@ $('input#arrow_color').spectrum({
 $('#modalOption').dialog({
   modal: true,
   autoOpen: false,
-  position: {my: 'center bottom'},
+  position: {my: 'center top', at:'center top+100'},
   width: 410,
   open: function(e, ui){
     $('.ui-widget-overlay').hide().fadeIn()
