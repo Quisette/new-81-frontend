@@ -10,6 +10,7 @@ function _loadOptionsToDialog(){
   $('input[name=piece_type_34]').val([options.piece_type_34])
   $('input[name=board_size]').val([options.board_size])
   $('input[name=notation_style]').val([options.notation_style])
+  $('input[name=skin]').val([options.skin])
   //Selectboxes
   $('div#optionTabs').find('select').each(function(){
     $(this).val(options[$(this).prop('id')])
@@ -27,7 +28,8 @@ function _setOptionsFromDialog(){
   options.piece_type = parseInt($('input[name=piece_type]:checked').val())
   options.piece_type_34 = parseInt($('input[name=piece_type_34]:checked').val())
   options.board_size = parseInt($('input[name=board_size]:checked').val())
-  options.notation_style= parseInt($('input[name=notation_style]:checked').val())
+  options.notation_style = parseInt($('input[name=notation_style]:checked').val())
+  options.skin = parseInt($('input[name=skin]:checked').val())
   //Selectboxes
   $('div#optionTabs').find('select').each(function(){
     options[$(this).prop('id')] = $(this).val()
@@ -38,6 +40,8 @@ function _setOptionsFromDialog(){
 
 function _disableOptionsByPremium(){
   $('input[name=timer_sound_type]:gt(1), input[name=piece_type]:lt(9):gt(3)').prop({'disabled': getPremium() == 0, 'title': getPremium() == 0 ? i18next.t("option.for_premium") : ''})
+  $('input[name=skin]:lt(4):gt(0)').prop({'disabled': getPremium() < 1, 'title': getPremium() < 1 ? i18next.t("option.for_premium") : ''})
+  $('input[name=skin]:lt(4):gt(2)').prop({'disabled': getPremium() < 2, 'title': getPremium() < 2 ? i18next.t("option.for_premium") : ''})
 }
 function _loadPieceDesignToDialog(key, val, checked = false){
   let p = $('<p></p>').css('margin-bottom', '5px')

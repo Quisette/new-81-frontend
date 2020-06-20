@@ -1,0 +1,105 @@
+$DefaultBackColor: black
+$LinkColor: #ad002d
+
+// Menubar
+$KeyColor: #7e0f09
+// Disabled menubar
+$DarkKeyColor: #7e2639
+// Grid header, active link
+$AccentColor: $KeyColor
+$AccentColor2: #f0c045
+// Grid pagination selected
+$DarkAccentColor: goldenrod
+// Title-tag in player-info window
+$TitleTagColor: #dcba00
+// dataTables selected row
+$DataTablesSelected: $AccentColor2
+// dataTables hover row
+$DataTablesHover: #f5f5d0
+
+.on-background
+  color: white
+a
+  color: $LinkColor
+  &:hover
+    color: $DarkAccentColor
+
+div.layer
+  background-color: $DefaultBackColor
+  background-image: url(../../img/background_nega.png)
+.layer-border
+  border-bottom: 4px ridge $AccentColor2
+
+div.menuBar
+  background-color: $KeyColor
+  > ul
+    > li
+      > a.button-disabled
+        background-color: $DarkKeyColor
+
+ul.subMenu
+  li
+    background-color: $KeyColor
+    a.submenu-button-disabled
+      background-color: $DarkKeyColor
+select option[selected]
+  background: $AccentColor
+
+//--------------------------------
+// jQuery-UI override
+// -------------------------------
+
+.ui-dialog
+  .ui-dialog-titlebar
+    background: $KeyColor!important
+.ui-state-active
+  background: $AccentColor!important
+  border: 1px solid $AccentColor!important
+.ui-button:active
+  background: $AccentColor!important
+  border-color: $DarkAccentColor
+
+// -------------------------------
+// DataTables override
+// -------------------------------
+
+table.dataTable thead th, table.dataTable tfoot th
+  background-color: $AccentColor
+.dataTables_scrollHead
+  background: $AccentColor
+table.dataTable thead .sorting_asc
+  border-top: $AccentColor2 4px ridge
+table.dataTable thead .sorting_desc
+  border-bottom: $AccentColor2 4px ridge
+
+table.dataTable tbody > tr.selected,
+table.dataTable tbody > tr > .selected,
+table.dataTable.stripe tbody > tr.odd.selected,
+table.dataTable.stripe tbody > tr.odd > .selected, table.dataTable.display tbody > tr.odd.selected,
+table.dataTable.display tbody > tr.odd > .selected,
+table.dataTable.hover tbody > tr.selected:hover,
+table.dataTable.hover tbody > tr > .selected:hover, table.dataTable.display tbody > tr.selected:hover,
+table.dataTable.display tbody > tr > .selected:hover
+  background-color: $DataTablesSelected
+table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover
+  background-color: $DataTablesHover
+
+// -------------------------------
+// Lobby View
+// -------------------------------
+
+div#playerGridWrapper
+  .dataTables_paginate
+    .paginate_button.current
+      background: $DarkAccentColor
+    .paginiate_button.current:hover
+      background: $DarkAccentColor
+.title-tag
+  background: $TitleTagColor
+
+// -------------------------------
+// Others
+// -------------------------------
+
+span.clock-label
+  color: $AccentColor2

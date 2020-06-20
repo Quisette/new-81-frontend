@@ -7,6 +7,8 @@ div#modalOption data-i18n-title="lobby.options"
         a href="#tabs-2" data-i18n="option.sound" data-click="normal"
       li
         a href="#tabs-3" data-i18n="option.communication" data-click="normal"
+      li
+        a href="#tabs-4" data-i18n="option.skin" data-click="normal"
 
     div#tabs-1
       p data-i18n-title="option.board_size_tip"
@@ -127,6 +129,55 @@ div#modalOption data-i18n-title="lobby.options"
         label
           input type="checkbox" id="reject_invitation"
           span data-i18n="option.reject_invitation"
+    div#tabs-4
+      label.skin
+        input type="radio" name="skin" value="0" checked="true"
+        span.skin-name
+          span IORI
+          span 庵
+        span.color-sample style="background:#7ead47"
+        span.color-sample style="background:#e2bf47"
+      label.skin
+        input type="radio" name="skin" value="1"
+        span.skin-name
+          span AIE
+          span 藍絵
+        span.color-sample style="background:#105779"
+        span.color-sample style="background:#78adc5"
+      label.skin
+        input type="radio" name="skin" value="2"
+        span.skin-name
+          span URUSHI
+          span 漆
+        span.color-sample style="background:black;flex:3"
+        span.color-sample style="background:#7e0f09;flex:3"
+        span.color-sample style="background:#f0c045"
+      label.skin
+        input type="radio" name="skin" value="3"
+        span.skin-name
+          span OEDO
+          span 大江戸
+        span.color-sample style="background:#cd8c5c"
+        span.color-sample style="background:#a687ca"
+      label.skin
+        input type="radio" name="skin" value="4" disabled="true"
+        span.skin-name
+          span ASAHI
+          span 旭
+        span.color-sample style="background:#b10000"
+        span.color-sample style="background:#f5f5f5"
+      label.skin
+        input type="radio" name="skin" value="5" disabled="true"
+        span.skin-name
+          span MIYUKI
+          span 深雪
+        span.color-sample style="background:#f5f5f5"
+      label.skin
+        input type="radio" name="skin" value="6" disabled="true"
+        span.skin-name
+          span SHINOBI
+          span 忍
+        span.color-sample style="background:black"
 
 javascript:
   _jsInclude("js/viewModalOption.js")

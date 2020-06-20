@@ -804,7 +804,7 @@ function _checkLobbyButtonClick(forceDefault = false){
     $('#checkLobbyButton').addClass("button-disabled")
     $('#boardContents').css('pointer-events', 'initial').animate({'opacity': 1}, forceDefault ? 0 : 1200)
     $('#layerBoard').animate({'height': '100%'}, forceDefault ? 0 : 1200, function(){
-      $('#layerBoard').css('border-bottom', 'none')
+      $('#layerBoard').removeClass('layer-border')
       $('#checkLobbyButton').removeClass("button-disabled")
       $('#checkLobbyButton').html('<i class="fa fa-eye fa-2x"></i>')
       if (currentLayer == 2) $('#layerLobby').css('display', 'none')
@@ -816,7 +816,7 @@ function _checkLobbyButtonClick(forceDefault = false){
     waiterGrid.draw()
     gameGrid.clear().draw()
     $('#layerLobby').css('display', 'block')
-    $('#layerBoard').css('border-bottom', '5px ridge orange').animate({'height': '40px'}, 1200, function(){
+    $('#layerBoard').addClass("layer-border").animate({'height': '40px'}, 1200, function(){
       _refreshLobby()
       $('#checkLobbyButton').removeClass("button-disabled")
       $('#checkLobbyButton').html('<i class="fa fa-eye-slash fa-2x"></i>')
@@ -2845,6 +2845,8 @@ function _enforceOptions(){
   }
   kifuGrid.rows().invalidate()
   if (client) client.idle(options.reject_invitation == 1)
+  let skins = ['iori(=null)', 'ai', 'urushi', 'edo']
+  $('#skinStyle').prop('href', options.skin == 0 ? null : ('css/skins/' + skins[options.skin] + '.min.css'))
 }
 
 function _handleGeneralTimeout(key){
@@ -3089,7 +3091,8 @@ function _loadDefaultOptions(){
     members: [],
     opponents: [],
     show_accumulated_time: 0,
-    reject_invitation: 0
+    reject_invitation: 0,
+    skin: 0
   }
   _enforceOptions()
   _loadOptionsToDialog()

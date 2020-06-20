@@ -87,6 +87,8 @@ div.layer
   text-align: center
   background-color: $DefaultBackColor
   background-image: url(../img/background.png)
+.layer-border
+  border-bottom: 4px ridge $AccentColor
 
 div.grid-wrapper
   background-color: white
@@ -456,7 +458,7 @@ span.clock-digits
   margin-top: 3px
   width: 90px
   height: 20px
-  border: 1px solid #ccc
+  border: 1px solid rgba(200, 200, 200, 0.5)
   font-size: 13px
   background-color: #ffffed
 span.clock-night
@@ -540,8 +542,6 @@ div.player-info
   background-image: url(../img/paper.jpg)
   border: solid 2px #ddd
   text-align: left
-.title-tag
-  background: $TitleTagColor
 div.player-info-has-turn
   border: solid 2px #f80
 div.avatar-wrapper
@@ -685,6 +685,8 @@ div#modalNewGame
     content: '\f0e7'
     margin-right: 5px
 
+.title-tag
+  background: $TitleTagColor
 div#player-info-layer-1
   transition: opacity 0.3s
   p
@@ -717,6 +719,25 @@ div#modalOption
     margin: 7px 0 0 0
   .no-save
     color: blue
+label.skin
+  display: flex
+  align-items: center
+  margin: 15px 50px 15px 0
+  .skin-name
+    display: inline-block
+    flex: 90px 0 0
+    span:first-child
+      font-weight: bold
+      font-style: oblique
+      margin-left: 3px
+      margin-right: 8px!important
+      font-size: 1.1em
+  .color-sample
+    flex: 1
+    display: inline-block
+    height: 30px
+    margin: 0!important
+
 
 div#privateMessageArea
   height: 103px
