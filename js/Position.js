@@ -309,6 +309,7 @@ class Position{
         }
       }
     }
+    if (this._gameType == 'vakyoto') return null
     for (let x = 0; x < 9; x++){
       let pawnCoord = null
       for (let y = 0;y < 9; y++){

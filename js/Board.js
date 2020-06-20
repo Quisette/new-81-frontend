@@ -613,8 +613,10 @@ class Board{
     } else {
       move.branch = true
       this.addMoveToKifuGrid(move)
-      if (this.onListen && this.studyHostType >= 1) sendStudy()
-      else forceKifuMode(0)
+      if (this.onListen && this.studyHostType >= 1) {
+        sendStudy()
+        this.clearArrows(true)
+      } else forceKifuMode(0)
     }
     this._refreshPosition()
   }
