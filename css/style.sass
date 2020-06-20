@@ -1,9 +1,23 @@
-$DefaultBackColor: #f2f2f2
-$KeyColor: #7c3
-$DarkKeyColor: rgb(83, 134, 0)
-$AccentColor: #fbbb44
-$DarkAccentColor: rgb(212, 152, 0)
+$DefaultBackColor: #ebf3d1
+$LinkColor: #538600
 $GreyCanvasColor: #fafafa
+
+// Menubar
+$KeyColor: #7ead47
+// Disabled menubar
+$DarkKeyColor: #597132
+// Grid header, active link
+//$AccentColor: #e0b62b
+$AccentColor: #e2bf47
+// Grid pagination selected
+$DarkAccentColor: #b78c02
+// Title-tag in player-info window
+$TitleTagColor: #deb800
+// dataTables selected row
+$DataTablesSelected: #c9e695
+// dataTables hover row
+$DataTablesHover: #f3ffd0
+
 $LobbyGap: 7px
 $boardGap: 7px
 $MenuBarHeight: 35px
@@ -31,7 +45,7 @@ body
   overflow-y: hidden
   margin: 0
 a
-  color: $DarkKeyColor
+  color: $LinkColor
   text-decoration: none
   &:hover
     color: $DarkAccentColor
@@ -72,10 +86,11 @@ div.layer
   //min-height: 520px
   text-align: center
   background-color: $DefaultBackColor
+  background-image: url(../img/background.png)
 
 div.grid-wrapper
   background-color: white
-  background-image: url(../img/grid_header.gif)
+  //background-image: url(../img/grid_header.gif)
   background-repeat: repeat-x
   border: 1px solid #ccc
   overflow: hidden
@@ -132,7 +147,7 @@ ul.subMenu
     a
       padding: 0 2px
       display: block
-      line-height: 2.5em
+      line-height: 3em
       color: white
       white-space: nowrap
       &:hover
@@ -213,6 +228,32 @@ div.automatchBanner
   border: 1px solid #ddd!important
 
 // -------------------------------
+// DataTables override
+// -------------------------------
+
+table.dataTable thead th, table.dataTable tfoot th
+  background-color: $AccentColor
+  height: 1.5em
+.dataTables_scrollHead
+  background: $AccentColor
+table.dataTable thead .sorting_asc
+  border-top: $KeyColor 4px ridge
+table.dataTable thead .sorting_desc
+  border-bottom: $KeyColor 4px ridge
+
+table.dataTable tbody > tr.selected,
+table.dataTable tbody > tr > .selected,
+table.dataTable.stripe tbody > tr.odd.selected,
+table.dataTable.stripe tbody > tr.odd > .selected, table.dataTable.display tbody > tr.odd.selected,
+table.dataTable.display tbody > tr.odd > .selected,
+table.dataTable.hover tbody > tr.selected:hover,
+table.dataTable.hover tbody > tr > .selected:hover, table.dataTable.display tbody > tr.selected:hover,
+table.dataTable.display tbody > tr > .selected:hover
+  background-color: $DataTablesSelected
+table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover
+  background-color: $DataTablesHover
+
+// -------------------------------
 // Login View
 // -------------------------------
 
@@ -235,12 +276,12 @@ p#loginAlert
   height: 20px
 span.secure
   font-size: 0.9em
-  color: $DarkKeyColor
+  color: $LinkColor
   &::before
     display: inline-block
     text-align: center
     line-height: 1.5em
-    background: $DarkKeyColor
+    background: $LinkColor
     color: #f3f3f3
     width: 1.4em
     height: 1.4em
@@ -273,7 +314,6 @@ canvas#snowfallCanvas
 
 div#layerLobby
   z-index: 2
-  background-image: url(../img/back_tile.png)
 
 div#lobbyHeader
   display: flex
@@ -304,7 +344,7 @@ table#playerGrid
   background: white
   width: 100%
 div#playerGridWrapper
-  background-image: url(../img/grid_header_offset.gif)
+  //background-image: url(../img/grid_header_offset.gif)
   .dataTables_paginate
     width: 100%
     display: flex
@@ -340,12 +380,12 @@ div#playerGridWrapper
       border-right: 1px solid #ddd
       border-radius: 0
     .paginate_button.current
-      background: goldenrod
+      background: $DarkAccentColor
       color: white!important
       border: 0
       border-right: 1px solid #ddd
     .paginiate_button.current:hover
-      background: goldenrod
+      background: $DarkAccentColor
       color: white!important
       border: 0
       border-right: 1px solid #ddd
@@ -418,10 +458,10 @@ span.clock-digits
   height: 20px
   border: 1px solid #ccc
   font-size: 13px
-  background-color: #ffc
+  background-color: #ffffed
 span.clock-night
-  color: #ffc
-  background-color: #004
+  color: #e6e7ef
+  background-color: #2f3042
 a#challengeCanceler
   display: none
   margin-left: 5px
@@ -435,7 +475,6 @@ span.canceled
 
 div#layerBoard
   z-index: 1
-  background-image: url(../img/back_tile.png)
 
 div#boardLeftBottomHBox
   flex: 1
@@ -501,6 +540,8 @@ div.player-info
   background-image: url(../img/paper.jpg)
   border: solid 2px #ddd
   text-align: left
+.title-tag
+  background: $TitleTagColor
 div.player-info-has-turn
   border: solid 2px #f80
 div.avatar-wrapper
@@ -746,7 +787,7 @@ div#modalResult
   .rank-up
     margin-left: 4px
     font-weight: bold
-    color: $KeyColor
+    color: #7c3
   .rank-down
     margin-left: 4px
     font-weight: bold

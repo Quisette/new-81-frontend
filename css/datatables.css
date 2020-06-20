@@ -72,12 +72,12 @@ table.dataTable thead .sorting {
 }
 table.dataTable thead .sorting_asc {
   background-repeat: repeat-x;
-  background-image: url("../img/datatables/sort_bar.png");
+#  background-image: url("../img/datatables/sort_bar.png");
   background-position:i top;
 }
 table.dataTable thead .sorting_desc {
   background-repeat: repeat-x;
-  background-image: url("../img/datatables/sort_bar.png");
+#  background-image: url("../img/datatables/sort_bar.png");
   background-position: bottom;
 }
 table.dataTable thead .sorting_asc_disabled {

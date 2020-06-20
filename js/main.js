@@ -1382,7 +1382,7 @@ function _openPlayerInfo(user, doOpen = true){
       resizable: false,
       position: {at:'left+'+(mouseX-80)+' top+'+(mouseY-30)},
       open: function(e){
-        if (user.titleName() != "" && element.siblings('.ui-dialog-titlebar').find('span.title-tag').length == 0) element.siblings('.ui-dialog-titlebar').find('.ui-dialog-title').append('<span class="title-tag" style="background:crimson;margin-left:0.5em;padding:0.15em 0.3em;font-size:1.08em">' + user.titleName() + '</span>')
+        if (user.titleName() != "" && element.siblings('.ui-dialog-titlebar').find('span.title-tag').length == 0) element.siblings('.ui-dialog-titlebar').find('.ui-dialog-title').append('<span class="title-tag" style="margin-left:0.5em;padding:0.15em 0.3em;font-size:1.08em">' + user.titleName() + '</span>')
       },
       close: function(e){
         if (element.find("#privateMessageArea").html() == "") element.dialog('destroy').remove()
