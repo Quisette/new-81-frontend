@@ -2845,8 +2845,7 @@ function _enforceOptions(){
   }
   kifuGrid.rows().invalidate()
   if (client) client.idle(options.reject_invitation == 1)
-  let skins = ['iori(=null)', 'aie', 'urushi', 'edo']
-  $('#skinStyle').prop('href', options.skin == 0 ? null : ('css/skins/' + skins[options.skin] + '.min.css'))
+  $('#skinStyle').prop('href', options.skin == 0 ? null : ('css/skins/' + skinNames[options.skin] + '.min.css'))
 }
 
 function _handleGeneralTimeout(key){
