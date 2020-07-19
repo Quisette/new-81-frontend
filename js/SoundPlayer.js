@@ -7,6 +7,7 @@ class SoundPlayer{
     this.buttonEnabled = true
     this.gameStartEndEnabled = true
     this.byoyomiType = 1
+    this._masterVolume = 1
 
     this._channels = new Object()
     this._loadChannel("OPENING", "opening")
@@ -115,7 +116,7 @@ class SoundPlayer{
   startOpening(){
     this._setVolume("OPENING", 0)
     this.play("OPENING")
-    $(this._channels["OPENING"]).animate({volume: 0.8}, 3000)
+    $(this._channels["OPENING"]).animate({volume: 0.8 * this._masterVolume}, 3000)
   }
 
   stopOpening(){
@@ -139,7 +140,14 @@ class SoundPlayer{
   }
 
   _setVolume(key, volume){
-    this._channels[key].volume = volume
+    this._channels[key].volume = volume * this._masterVolume
+  }
+
+  setMasterVolume(volume){
+    this._masterVolume = volume
+    for (let key in this._channels) {
+      this._channels[key].volume = this._masterVolume
+    }
   }
 
   play(key){

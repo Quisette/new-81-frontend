@@ -37,6 +37,7 @@ function _setOptionsFromDialog(){
   })
   //Others
   options.arrow_color = parseInt($('input#arrow_color').spectrum('get').toHex(), 16)
+  options.master_volume = $('input#volumeRange').val()
 }
 
 function _disableOptionsByPremium(){
@@ -101,6 +102,7 @@ $('#modalOption').dialog({
   width: 410,
   open: function(e, ui){
     $('.ui-widget-overlay').hide().fadeIn()
+    $('input#volumeRange').val(options.master_volume)
   },
   show: 'fade',
   buttons: [

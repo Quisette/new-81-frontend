@@ -786,13 +786,11 @@ function popupWatchers(elem){
 function _prepareCorrectBoard(gameType){
   if (gameType == "vazoo") {
     if (board.constructor.name != "DobutsuBoard") {
-      console.log('Changed to dobutsu')
       board = null
       board = new DobutsuBoard($('#boardBox'))
     }
   } else {
     if (board.constructor.name != "Board") {
-      console.log('Changed to normal')
       board = null
       board = new Board($('#boardBox'))
     }
@@ -2837,6 +2835,7 @@ function _enforceOptions(){
   sp.chatLobbyEnabled = options.lobbychat_sound_play == 1
   sp.chatBoardEnabled = options.gamechat_sound_play == 1
   sp.buttonEnabled = options.button_sound_play == 1
+  sp.setMasterVolume(options.master_volume)
   board.loadPieceDesignOption()
   let scale = [1, 1.5, 2][options.board_size]
   if (board.setScale(scale)) {
@@ -3067,6 +3066,9 @@ function _checkGuestGamesExpired(){
 }
 
 function _loadDefaultOptions(){
+  // Options to keep even after logging out
+  let master_volume = options.master_volume
+  // Reset all options
   options = {
     timer_sound_type: 2,
     piece_type: 0,
@@ -3091,7 +3093,8 @@ function _loadDefaultOptions(){
     opponents: [],
     show_accumulated_time: 0,
     reject_invitation: 0,
-    skin: 0
+    skin: 0,
+    master_volume: master_volume || 1
   }
   _enforceOptions()
   _loadOptionsToDialog()
