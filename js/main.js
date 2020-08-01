@@ -2668,6 +2668,9 @@ function _stopTypingIndicator(turn, fade = false){
 function _handleServers(data){
   data[0].population = restoreIdleConnections(data[0].population)
   serverGrid.rows.add(data)
+  if (window.location.search.indexOf('JUPITER=true') >= 0) {
+    serverGrid.rows.add([{id:100, name:'JUPITER', description_en: 'Exclusive', description_ja: '占有利用', enabled: true, population: 0, host: '160.16.55.179', port: 4087}])
+  }
   serverGrid.draw()
   serverGrid.row(0).select()
   if (localStorage.server) serverGrid.row('#' + localStorage.server).select()
