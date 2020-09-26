@@ -195,7 +195,7 @@ class Board{
 //    $(".square-last").removeClass("square-last")
     for (let i = 0; i < 2; i++){
       let _layoutHandPiece = this._layoutHandPieceClosureFunc(i)
-      this._position.komadais[i].sort(function(a,b){return a.type - b.type})
+      this._position.komadais[i].sort(function(a,b){return - a.type + b.type})
       this._position.komadais[i].forEach(function(piece){
         if (piece.CSA == 'OU' && this.game.gameType != 'vazoo') return
         let sq = $('<div></div>', {id: 'sq' + (piece.owner ? 0 : -1) + '_' + piece.getType(), class: 'square'}).data({x: piece.owner ? 0 : -1, y: piece.getType()})
