@@ -390,7 +390,7 @@ $(function(){
   document.getElementById('layerBoard').ondragstart = function(){return false}
   $("#lobbyChatInput").on('keypress', function(e){
     if (e.keyCode == 13){
-      if ($(this).val().length > 0) {
+      if ($(this).val().length > 0 && $(this).val().length <= 512) {
         client.chat($(this).val())
         $(this).val('')
       }
@@ -398,7 +398,7 @@ $(function(){
   })
   $("#boardChatInput").on('keypress', function(e){
     if (e.keyCode == 13){
-      if ($(this).val().length > 0) {
+      if ($(this).val().length > 0 && $(this).val().length <= 512) {
         clearGeneralTimeout("SEND_TYPE")
         client.gameChat($(this).val())
         $(this).val('')
@@ -2928,11 +2928,11 @@ function _game2link(text, gameId){
 }
 
 function _isFavorite(name){
-  return users[name]._isFavorite
+  return users[name] && users[name]._isFavorite
 }
 
 function _isColleague(name){
-  return users[name]._isColleague
+  return users[name] && users[name]._isColleague
 }
 
 function _isImportantUser(name){
