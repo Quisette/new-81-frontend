@@ -12,7 +12,9 @@ class Tournament{
   }
 
   nameShort(){
-    return EJ(this._data.name_en_short, this._data.name_ja_short)
+    let name_en = this._data.name_en_short != "" ? this._data.name_en_short : null
+    let name_ja = this._data.name_ja_short != "" ? this._data.name_ja_short : null
+    return EJ(name_en || name_ja, name_ja || name_en)
   }
 
   amJoined(){
