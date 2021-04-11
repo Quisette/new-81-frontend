@@ -2980,6 +2980,9 @@ function _generateKIF(){
   lines.push("場所：81Dojo")
   lines.push("持ち時間：" + Math.floor(board.game.total/60) + "分+" + board.game.byoyomi + "秒")
   lines.push("手合割：" + rule)
+  if (!["r", "nr", "hcfixed", "hclance", "hcbishop", "hcrook", "hcrooklance", "hc2p", "hc4p", "hc6p", "hc8p", "hc10p"].includes(board.game.gameType)) {
+    pushInitialPositionLines(lines, board.game.gameType)
+  }
   lines.push("先手：" + board.game.black.name)
   lines.push("後手：" + board.game.white.name)
   lines.push("手数----指手---------消費時間--")

@@ -293,13 +293,46 @@ function openingTypeObject(key, forceJapanese = false){
 }
 
 function gameTypeToKIF(str){
-  if (["r", "nr", "hcfixed", "hclance", "hcbishop", "hcrook", "hcrooklance", "hc2p", "hc4p", "hc6p", "hc8p", "hc10p"].includes(str)) {
-    if (str == "r" || str == "nr" || str == "hcfixed") return "平手"
-    else return HANDICAPS_JA[str]
+  if (str.match(/^va/) || ['hclanced', 'hcbishopd', 'hcrookd', 'hcrooklanced', 'hc4pd', 'hc6pd', 'hc8pd'].includes(str)) return null
+  else if (str == "r" || str == "nr" || str == "hcfixed") return "平手"
+  else return HANDICAPS_JA[str]
+}
 
-  } else {
-    return null
+function pushInitialPositionLines(lines, gameType){
+  if (gameType == 'hcfu3') lines.push('上手の持駒：歩三')
+
+  switch (gameType){
+    //case 'hcbishopd': case 'hcrookd': case 'hc2pd': case 'vaoa': lines.push('|v香v桂v銀v金v玉v金v銀v桂v香|'); break;  // komadoku handicaps and variants(va) are omitted
+    //case 'hclanced': case 'hcrooklanced': lines.push('|v香v桂v銀v金v玉v金v銀v桂 ・|'); break;
+    case 'hcrooksilver': lines.push('|v香v桂v銀v金v玉v金 ・v桂v香|'); break;
+    case 'hc3p': lines.push('|v香v桂v銀v金v玉v金v銀v桂 ・|'); break;
+    //case 'hc4pd': lines.push('| ・v桂v銀v金v玉v金v銀v桂 ・|'); break;
+    case 'hcr5p': lines.push('| ・ ・v銀v金v玉v金v銀v桂 ・|'); break;
+    case 'hcl5p': lines.push('| ・v桂v銀v金v玉v金v銀 ・ ・|'); break;
+    //case 'hc6pd': lines.push('| ・ ・v銀v金v玉v金v銀 ・ ・|'); break;
+    case 'hcr7p': lines.push('| ・ ・ ・v金v玉v金v銀 ・ ・|'); break;
+    case 'hcl7p': lines.push('| ・ ・v銀v金v玉v金 ・ ・ ・|'); break;
+    //case 'hc8pd': lines.push('| ・ ・ ・v金v玉v金 ・ ・ ・|'); break;
+    case 'hcr9p': lines.push('| ・ ・ ・ ・v玉v金 ・ ・ ・|'); break;
+    case 'hcl9p': lines.push('| ・ ・ ・v金v玉 ・ ・ ・ ・|'); break;
+  	case 'hctombonl': lines.push('|v香v桂 ・ ・v玉 ・ ・v桂v香|'); break;
+  	case 'hctombol': lines.push('|v香 ・ ・ ・v玉 ・ ・ ・v香|'); break;
+  	case 'hctombo': case 'hcfu3': case 'hcnaked': lines.push('| ・ ・ ・ ・v玉 ・ ・ ・ ・|'); break;
   }
+
+  if (gameType == 'hcrooksilver') lines.push('| ・ ・ ・ ・ ・ ・ ・v角 ・|')
+  else if (gameType.match(/^hctombo/)) lines.push('| ・v飛 ・ ・ ・ ・ ・v角 ・|')
+  else lines.push('| ・ ・ ・ ・ ・ ・ ・ ・ ・|')
+
+  if (['hcnaked', 'hcfu3'].includes(gameType)) lines.push('| ・ ・ ・ ・ ・ ・ ・ ・ ・|')
+  else lines.push('|v歩v歩v歩v歩v歩v歩v歩v歩v歩|')
+
+  lines.push('| ・ ・ ・ ・ ・ ・ ・ ・ ・|')
+  lines.push('| ・ ・ ・ ・ ・ ・ ・ ・ ・|')
+  lines.push('| ・ ・ ・ ・ ・ ・ ・ ・ ・|')
+  lines.push('| 歩 歩 歩 歩 歩 歩 歩 歩 歩|')
+  lines.push('| ・ 角 ・ ・ ・ ・ ・ 飛 ・|')
+  lines.push('| 香 桂 銀 金 玉 金 銀 桂 香|')
 }
 
 function debugLoop(){
