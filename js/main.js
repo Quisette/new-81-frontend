@@ -1321,25 +1321,25 @@ function _handleRejectChallenge(challenger, declineCode = null){
   sp.buttonClick("CANCEL")
 	client.decline(declineCode)
 	writeUserMessage(EJ("Rejected the challenge from " + challenger.name + ".", challenger.name + "さんからの挑戦をパスしました。"), 1, "#008800", true)
-  if (_declinedList[challenger.name] == false) {
+  if (_declinedList[userNameToKey(challenger.name)] == false) {
     $('#ignoreChallenge').remove()
     $('#lobbyMessageArea').append('<p id="ignoreChallenge">&nbsp;<a href="#" onclick="_ignoreChallenge(\'' + challenger.name + '\')">[' + i18next.t("msg.ask_auto_reject") + ']</a></p>')
   } else {
-    _declinedList[challenger.name] = false // Manually declined so far
+    _declinedList[userNameToKey(challenger.name)] = false // Manually declined so far
   }
 }
 
 function _ignoreChallenge(name){
   $('#ignoreChallenge').remove()
-  _declinedList[name] = true // Decline automatically from now on
+  _declinedList[userNameToKey(name)] = true // Decline automatically from now on
   writeUserMessage(i18next.t("msg.auto_reject"), 1, "#FF0000")
 }
 
 function _resetDeclinedList(){
   $('#ignoreChallenge').remove()
   // If false, delete it. If true, keep it.
-  for (let name in _declinedList){
-    if (_declinedList[name] == false) delete _declinedList[name]
+  for (let key in _declinedList){
+    if (_declinedList[key] == false) delete _declinedList[key]
   }
 }
 
@@ -1495,7 +1495,7 @@ function _playerIgnoreClick(user){
   showAlertDialog("confirm_block", function(){
     if (_ignoreList.indexOf(user.name) < 0) {
       _ignoreList.push(user.name)
-      _declinedList[user.name] = true
+      _declinedList[userNameToKey(user.name)] = true
       writeUserMessage(i18next.t("msg.add_block"), currentLayer == 2 ? 2 : 1, "#FF0000")
     }
   }, true)
@@ -1767,7 +1767,7 @@ function _handleIdleChange(line){
 }
 
 function _handleChallenger(name){
-  if (_declinedList[name] == true) {
+  if (_declinedList[userNameToKey(name)] == true) {
   	client.decline("C000")
     return
   }

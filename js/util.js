@@ -578,3 +578,7 @@ function getRotation(elem){
   let match = elem.css('transform').match(/\((.+)\)/)
   return match ? Math.acos(parseFloat(match[1])) : 0
 }
+
+function userNameToKey(name) {
+  return name.match(/^\d/) ? ('$' + name) : name
+}
