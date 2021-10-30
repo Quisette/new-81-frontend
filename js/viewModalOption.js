@@ -1,4 +1,4 @@
-var skinNames = ['iori(=null)', 'aie', 'urushi', 'oedo', 'asahi', 'momiji', 'kabuki', 'rikyu', 'miyuki', 'shinobi']
+var skinNames = ['iori(=null)', 'aie', 'urushi', 'oedo', 'asahi', 'momiji', 'rikyu', 'kabuki', 'miyuki', 'shinobi']
 function _loadOptionsToDialog(){
   //Checkboxes
   $('div#optionTabs').find('input[type=checkbox]').each(function(){
@@ -42,8 +42,9 @@ function _setOptionsFromDialog(){
 
 function _disableOptionsByPremium(){
   $('input[name=timer_sound_type]:gt(1), input[name=piece_type]:lt(9):gt(3)').prop({'disabled': getPremium() == 0, 'title': getPremium() == 0 ? i18next.t("option.for_premium") : ''})
-  $('input[name=skin]:lt(5):gt(0)').prop({'disabled': getPremium() < 1, 'title': getPremium() < 1 ? i18next.t("option.for_premium") : ''})
-  $('input[name=skin]:lt(5):gt(2)').prop({'disabled': getPremium() < 2, 'title': getPremium() < 2 ? i18next.t("option.for_premium") : ''})
+  $('input[name=skin]:lt(3):gt(0)').prop({'disabled': getPremium() < 1, 'title': getPremium() < 1 ? i18next.t("option.for_premium") : ''})
+  $('input[name=skin]:lt(7):gt(2)').prop({'disabled': getPremium() < 2, 'title': getPremium() < 2 ? i18next.t("option.for_premium") : ''})
+  $('input[name=skin]:lt(10):gt(6)').prop({'disabled': getPremium() < 3, 'title': getPremium() < 3 ? i18next.t("option.for_premium") : ''})
 }
 function _loadPieceDesignToDialog(key, val, checked = false){
   let p = $('<p></p>').css('margin-bottom', '5px')
