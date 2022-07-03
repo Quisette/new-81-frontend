@@ -1,39 +1,5 @@
 "use strict";
 
-function caesar(val, key) {
-  val = encodeURIComponent(val);
-  var result = "";
-  for (var i = 0; i < val.length; i++) {
-    result += String.fromCharCode(val.charCodeAt(i) + key);
-  }
-  return result;
-}
-
-function decaesar(val, key) {
-  var result = "";
-  for (var i = 0; i < val.length; i++) {
-    result += String.fromCharCode(val.charCodeAt(i) - key);
-  }
-  return decodeURIComponent(result) ;
-}
-
-function makePremiumNum(mile, default_class){
-  let prem = 0;
-  if (default_class.match(/[D4]/)) prem = 4; //Diamond
-  else if (default_class.match(/[G3]/)) prem = 3; //Gold
-  else if (default_class.match(/[S2]/)) prem = 2; //Silver
-  else if (default_class.match(/[B1]/)) prem = 1; //Bronze
-  if (mile >= 15000) prem = Math.max(prem, 3);
-  else if (mile >= 7500) prem = Math.max(prem, 2);
-  else if (mile >= 1500) prem = Math.max(prem, 1);
-  return prem;
-}
-
-function makePremiumName(num){
-  if (i18next.language == "ja") return ["レギュラー", "ブロンズ", "シルバー", "ゴールド", "ダイヤモンド"][num]
-  else return ["Regular", "Bronze", "Silver", "Gold", "Diamond"][num]
-}
-
 function EJ(str_en, str_ja){
   if (i18next.language == "ja") return str_ja
   else return str_en
@@ -335,11 +301,6 @@ function pushInitialPositionLines(lines, gameType){
   lines.push('| 香 桂 銀 金 玉 金 銀 桂 香|')
 }
 
-function debugLoop(){
-  window.addEventListener('devtoolschange', function(){while(true) debugger})
-  $(window).keydown(function(e){if (e.keyCode == 123) e.preventDefault()})
-}
-
 function restoreIdleConnections(n){
   return n
   //return n > 30 ? Math.floor(n * 1.07) : n
@@ -615,3 +576,18 @@ function getRotation(elem){
 function userNameToKey(name) {
   return name.match(/^\d/) ? ('$' + name) : name
 }
+
+function debugLoop(){
+  window.addEventListener('devtoolschange', function(){while(true) debugger})
+  $(window).keydown(function(e){if (e.keyCode == 123) e.preventDefault()})
+}
+
+/////////////////////////////////////////////////////////////////////////
+//  Any attempt to communicate with the server by other means than
+//  what is offered by the app user interface is prohibited.
+//  For details see also Section 4.1 at https://81dojo.com/en/terms.html
+//
+//  正規アプリのGUI上で提供している以外の手段でサーバにアクセスを
+//  試みることは禁止されており監視の対象となります
+//　詳しくは右記の4.1項を確認下さい   https://81dojo.com/jp/terms.html
+/////////////////////////////////////////////////////////////////////////

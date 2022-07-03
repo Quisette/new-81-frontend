@@ -68,10 +68,10 @@ function _testFunction(phase){
     _handleServers([
       //{id:1, name:'MERCURY', description_en: 'test', description_ja: 'テスト', enabled: true, population: 0, host: 'shogihub.com', port: 4084}
       //{id:1, name:'EARTH', description_en: 'main', description_ja: 'メイン', enabled: true, population: 0, host: 'shogihub.com', port: 4081}
-      {id:1, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.220.131', port: 4081}
+      {id:1, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.220.147', port: 4081}
     ])
   } else if (phase == 1) { // After servers are loaded
-    _loginButtonClick()
+    //_loginButtonClick()
   } else if (phase == 2) { // After logged in
     //client.send("%%GAME hc2pd_test1-900-30 -")
     //_waitButtonClick()
@@ -331,11 +331,7 @@ $(function(){
 
   // Load localStorage
   if (localStorage.login) $('#usernameInput').val(localStorage.login)
-  if (localStorage.dat) {
-    $('#passwordInput').val(decaesar(decaesar(localStorage.dat, 81), 3))
-    $('#hiddenPass').val(decaesar(decaesar(localStorage.dat, 81), 3))
-    maskPass()
-  }
+  _restoreStoredPassword()
   if (localStorage.dat2) _loginHistory = decaesar(decaesar(localStorage.dat2, 81), 3).split(",")
   if (localStorage.save) $('#loginSave').prop('checked', localStorage.save == 'true')
   $('#languageSelector').val(localStorage.locale || args["locale"] || 'ja')
@@ -633,6 +629,7 @@ function _loginButtonClick(){
 function _reloginButtonClick(){
   $('input#reloginButton').css('display', 'none')
   $('img#entrance-img').prop('src', 'img/entrance_ja.jpg')
+  _restoreStoredPassword()
   _prepareForLogin()
   _fadeInLoginView()
 }
@@ -740,7 +737,7 @@ function writeUserMessage(str, layer, clr = null, bold = false, lineChange = tru
     if (p.length) p.detach()
   }
 	str = str.replace(/</g, "&lt;")
-	str = str.replace(/&lt;sPAn/g, "<span");
+	str = str.replace(/&lt;sPAn(\sonclick="(?:_openPlayerInfo|_enterGameById)\([^;">\(\)]+\)"\sclass="name\-link">)/g, "<span$1");
 	str = str.replace(/&lt;\/SpaN>/g, "</span>");
 	str = str.replace(/(https?\:\/\/[^\"^\s^\\^\)^\(]+)/g, '<a href="$1" target="_blank">$1</a>')
 	str = str.replace(/\n/g, "<br>&emsp;")
@@ -1285,8 +1282,8 @@ function _handleNewGame(){
     } else if (val == 7) {
       client.stopWaiting()
       let ruleType = $("#newGameStudyRuleSelect option:selected").val()
-      let blackName = $("#newGameStudyBlack").val()
-      let whiteName = $("#newGameStudyWhite").val()
+      let blackName = $("#newGameStudyBlack").val().replace(/[<\s\+\-]/g, '')
+      let whiteName = $("#newGameStudyWhite").val().replace(/[<\s\+\-]/g, '')
       client.study(ruleType, blackName, whiteName, password)
     } else if (val == 8) {
       client.stopWaiting()
@@ -1539,12 +1536,16 @@ function _handleLoggedIn(str){
   snowfall.stop()
   sp.stopOpening()
   _setLoginAlert("login.successfull")
+  let pW = 'blank_password' // password to store to localStorage
   if ($('input[name=loginType]:checked').val() == 0 && $('#loginSave').prop('checked')) {
     localStorage.login = $('#usernameInput').val()
-    localStorage.dat = caesar(caesar($('#hiddenPass').val(), 3), 81)
-    localStorage.save = $('#loginSave').prop('checked')
+    pW = $('#hiddenPass').val()
     localStorage.server = client.serverName
   }
+  localStorage.dat = _r2l(pW)
+  $('#hiddenPass').val('')
+  $('#passwordInput').val('')
+  localStorage.save = $('#loginSave').prop('checked')
   $('div#layerLoginContents').animate({opacity: 0}, testMode ? 0 : 1000, function(){
     _switchLayer(1)
     _refreshLobby(true)
@@ -3137,4 +3138,67 @@ function _findGameByUser(user){
     }
   })
   return foundGame
+}
+
+/* ====================================
+    Security related utilities
+===================================== */
+
+function _r2l(str){
+  let hash = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(81)))).substring(0,81)
+  return caesar(hash + caesar(str, 3) + hash, 81)
+}
+
+function _l2r(str){
+  let tmp = decaesar(str, 81)
+  if (tmp.length > 162) {
+    tmp = tmp.substring(81, tmp.length - 81)
+  }
+  return decaesar(tmp, 3)
+}
+
+function _restoreStoredPassword(){
+  if (localStorage.dat) {
+    let pRest = _l2r(localStorage.dat)
+    if (pRest != 'blank_password') {
+      $('#passwordInput').val(pRest)
+      $('#hiddenPass').val(pRest)
+      maskPass()
+    }
+    pRest = null
+  }
+}
+
+function caesar(val, key) {
+  val = encodeURIComponent(val);
+  var result = "";
+  for (var i = 0; i < val.length; i++) {
+    result += String.fromCharCode(val.charCodeAt(i) + key);
+  }
+  return result;
+}
+
+function decaesar(val, key) {
+  var result = "";
+  for (var i = 0; i < val.length; i++) {
+    result += String.fromCharCode(val.charCodeAt(i) - key);
+  }
+  return decodeURIComponent(result) ;
+}
+
+function makePremiumNum(mile, default_class){
+  let prem = 0;
+  if (default_class.match(/[D4]/)) prem = 4; //Diamond
+  else if (default_class.match(/[G3]/)) prem = 3; //Gold
+  else if (default_class.match(/[S2]/)) prem = 2; //Silver
+  else if (default_class.match(/[B1]/)) prem = 1; //Bronze
+  if (mile >= 15000) prem = Math.max(prem, 3);
+  else if (mile >= 7500) prem = Math.max(prem, 2);
+  else if (mile >= 1500) prem = Math.max(prem, 1);
+  return prem;
+}
+
+function makePremiumName(num){
+  if (i18next.language == "ja") return ["レギュラー", "ブロンズ", "シルバー", "ゴールド", "ダイヤモンド"][num]
+  else return ["Regular", "Bronze", "Silver", "Gold", "Diamond"][num]
 }
