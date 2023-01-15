@@ -20,7 +20,17 @@ class WebSocketClient {
   }
 
   connect(){
-    this._socket = new WebSocket("ws://" + this._host + ":" + this._port);
+    try{
+      console.log(this._host)
+      if(this._host == "160.16.213.48")
+        this._socket = new WebSocket("wss://api.quisette.me:/81dojo/4081");
+      else
+      this._socket = new WebSocket("ws://" + this._host + ":" + this._port);
+    }catch(error){
+      // alert(error);
+      alert("由於連線需要，請開啟瀏覽器內\"允許不安全內容\"的設定。");
+      location.href = "unsecurecontent.html";
+    }
     var thisInstance = this;
     this._socket.onopen = function(e){
       thisInstance._handleSocketOpen();

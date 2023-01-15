@@ -67,8 +67,9 @@ function _testFunction(phase){
     }
     _handleServers([
       //{id:1, name:'MERCURY', description_en: 'test', description_ja: 'テスト', enabled: true, population: 0, host: 'shogihub.com', port: 4084}
-      //{id:1, name:'EARTH', description_en: 'main', description_ja: 'メイン', enabled: true, population: 0, host: 'shogihub.com', port: 4081}
-      {id:1, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.220.147', port: 4081}
+      // {id:1, name:'EARTH', description_en: 'main', description_ja: 'メイン', enabled: true, population: 0, host: 'shogihub.com', port: 4081},
+      // {id:1, name:'EARTH', description_en: 'local', description_ja: 'メイン', enabled: true, population: 0, host: '81dojoproxy.quisette.me', port: 4081},
+      // {id:2, name:'MOON', description_en: 'local', description_ja: 'ローカル', enabled: true, population: 0, host: '192.168.220.147', port: 4081}
     ])
   } else if (phase == 1) { // After servers are loaded
     //_loginButtonClick()
@@ -106,7 +107,7 @@ $(function(){
   }
   let xhr1 = new XMLHttpRequest()
   xhr1.addEventListener("load", function(){
-    xhr2.open("get", "http://81dojo.com/dojo/infoData.txt?" + xhr1.responseText)
+    xhr2.open("get", "https://81dojo.com/dojo/infoData.txt?" + xhr1.responseText)
     xhr2.send()
   })
   let xhr2 = new XMLHttpRequest()
@@ -133,7 +134,7 @@ $(function(){
       }
     })
   })
-  xhr1.open("get", "http://81dojo.com/dojo/infoCode.txt?" + Date.now())
+  xhr1.open("get", "https://81dojo.com/dojo/infoCode.txt?" + Date.now())
   if (viewerKifuId == null) xhr1.send()
   // .txt file in 81dojo.com cannot have Access-Control-Allow-Origin header set for some reason. As it has to be .html, a symbolic link infoData.html -> infoData.txt is prepared on 81dojo.com side
 
@@ -145,10 +146,10 @@ $(function(){
   })
 
   // Internationalization
-  i18next.language = localStorage.locale || args["locale"] || "ja"
+  i18next.language = localStorage.locale || args["locale"] || "zh_tw"
   i18next.use(i18nextXHRBackend).init({
-    lng: localStorage.locale || args["locale"] || 'ja',
-    fallbackLng: (args["locale"] == null || args["locale"] == 'ja') ? 'ja' : 'en',
+    lng: localStorage.locale || args["locale"] || 'zh_tw',
+    fallbackLng: (args["locale"] == null || args["locale"] == 'ja'|| args["locale"] == 'zh_tw') ? 'ja' : 'en',
     debug: true,
     backend: {
       loadPath: "locales/{{lng}}.json?" + version
@@ -159,17 +160,18 @@ $(function(){
 
   i18next.on('languageChanged', () => {
     _updateLanguage()
+    console.log(i18next.language)
   })
 
   // Prepare Datatables
   serverGrid = $('#serverGrid').DataTable({
     data: [],
     columns: [
-      {data: "name", width: "35%", className: "dt-body-left", bSortable: false,
+      {data: "name",  className: "dt-body-left", width:"auto", bSortable: false,
         render: function(data){return '<img class="inline" src="img/' + data + '.png"> ' + data}},
-      {width: "35%", bSortable: false,
+      { bSortable: false, width:"auto",
         render: function(data, type, row){return EJ(row.description_en, row.description_ja)}},
-      {data: "population", width: "35%", bSortable: false}
+      {data: "population",   width:"auto", bSortable: false}
     ],
     rowId: "name",
     searching: false, paging: false, info: false,
@@ -182,12 +184,12 @@ $(function(){
   playerGrid = $('#playerGrid').DataTable({
     data: [],
     columns: [
-      {data: "statStr", width: "10%", orderSequence: ['desc']},
-      {data: "titleTag", width: "14%", orderSequence: ['desc']},
-      {data: "rankStr", width: "14%", bSortable: false},
-      {data: {"_": "nameStr", "sort": "nameSortFunc"}, width: "40%", className: "dt-body-left"},
-      {data: "countryStr", width: "12%", className: "dt-body-left"},
-      {data: {"_": "rateStr", "sort": "rateSortFunc"}, width: "10%", className: "dt-body-right", type: "numeric", orderSequence: ['desc', 'asc']}
+      {data: "statStr", width: "10vw", orderSequence: ['desc']},
+      {data: "titleTag", width: "14vw", orderSequence: ['desc']},
+      {data: "rankStr", width: "14vw", bSortable: false},
+      {data: {"_": "nameStr", "sort": "nameSortFunc"}, width: "40vw", className: "dt-body-left"},
+      {data: "countryStr", width: "12vw", className: "dt-body-left"},
+      {data: {"_": "rateStr", "sort": "rateSortFunc"}, width: "10vw", className: "dt-body-right", type: "numeric", orderSequence: ['desc', 'asc']}
     ],
     rowId: "name",
     searching: false, info: false, lengthChange: false,
@@ -318,7 +320,7 @@ $(function(){
   }
 
   // World clocks
-  _generateWorldClocks()
+  // _generateWorldClocks()
 
   // Snowfall
   snowfall = new Snowfall('snowfallCanvas')
@@ -334,7 +336,7 @@ $(function(){
   _restoreStoredPassword()
   if (localStorage.dat2) _loginHistory = decaesar(decaesar(localStorage.dat2, 81), 3).split(",")
   if (localStorage.save) $('#loginSave').prop('checked', localStorage.save == 'true')
-  $('#languageSelector').val(localStorage.locale || args["locale"] || 'ja')
+  $('#languageSelector').val(localStorage.locale || args["locale"] || 'zh_tw')
   if (localStorage.openingMusic) {
     $('#openingMusicCheckBox').prop('checked', localStorage.openingMusic == 'true')
     sp.muteOpening(!(localStorage.openingMusic == 'true'))
@@ -430,7 +432,7 @@ $(function(){
     clearGeneralTimeout("LONG_TAP")
   })
 
-  _resize()
+  // _resize()
 
   // Define default options
   _loadDefaultOptions()
@@ -470,40 +472,40 @@ $(function(){
 ===================================== */
 
 window.onresize = function () {
-  _resize()
+  // _resize()
 }
 
 function _resize(){
-  $("#layerLobby").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 9.5)
-  $("#layerBoard").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 12.5)
-  let clocksInVertical = false
-  $("#worldClocks").removeClass("clocks-reduced")
-	if (window.innerWidth > 1550) {
-    $("#lobbyChatBox").insertAfter($("#playerListBox")).css('flex', 'initial')
-    if (window.innerWidth > 1670) clocksInVertical = true
-	} else {
-    $("#lobbyChatBox").insertAfter($("#gameGridWrapper")).css('flex', '11 11 1px')
-    if (window.innerWidth > 1090) clocksInVertical = true
-    else $("#worldClocks").addClass("clocks-reduced")
-	}
-  if (clocksInVertical) {
-    $("#worldClocks").insertAfter($("#gameListBox")).css({'height':'100%', 'flex-direction':'column', 'justify-content':'space-around'})
-  } else {
-    $("#worldClocks").insertAfter($("#lobbyHBox")).css({'height':'', 'flex-direction':'', 'justify-content':''})
-  }
-	if (window.innerWidth >= board.actualWidth() + 400 && window.innerHeight < board.actualHeight() + 230) {
-    $("#boardChatBox").insertBefore($("#boardRightBottomHBox"))
-    $("#watcherBox").insertAfter($("#kifuBox"))
-	} else {
-    $("#watcherBox").prependTo($("#boardLeftBottomHBox"))
-    $("#boardChatBox").insertAfter($("#watcherBox"))
-	}
-  $("#playerGridWrapper, #waiterGridWrapper, #gameGridWrapper, #watcherGridWrapper, #kifuGridWrapper").each(function(){
-    $(this).find('.dataTables_scrollBody').css('height', $(this).height() - $(this).find($(".dataTables_scrollHead")).height() - $(this).find($(".dataTables_paginate")).height())
-  })
-  $("#lobbyMessageArea").scrollTop($("#lobbyMessageArea")[0].scrollHeight)
-  $("#boardMessageArea").scrollTop($("#boardMessageArea")[0].scrollHeight)
-  snowfall.resize(window.innerWidth, window.innerHeight)
+  // $("#layerLobby").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 9.5)
+  // $("#layerBoard").find("div.menuBar").find("a.button").css('min-width', window.innerWidth / 12.5)
+  // let clocksInVertical = false
+  // $("#worldClocks").removeClass("clocks-reduced")
+	// if (window.innerWidth > 1550) {
+  //   $("#lobbyChatBox").insertAfter($("#playerListBox")).css('flex', 'initial')
+  //   if (window.innerWidth > 1670) clocksInVertical = true
+	// } else {
+  //   $("#lobbyChatBox").insertAfter($("#gameGridWrapper")).css('flex', '11 11 1px')
+  //   if (window.innerWidth > 1090) clocksInVertical = true
+  //   else $("#worldClocks").addClass("clocks-reduced")
+	// }
+  // if (clocksInVertical) {
+  //   $("#worldClocks").insertAfter($("#gameListBox")).css({'height':'100%', 'flex-direction':'column', 'justify-content':'space-around'})
+  // } else {
+  //   $("#worldClocks").insertAfter($("#lobbyHBox")).css({'height':'', 'flex-direction':'', 'justify-content':''})
+  // }
+	// if (window.innerWidth >= board.actualWidth() + 400 && window.innerHeight < board.actualHeight() + 230) {
+  //   $("#boardChatBox").insertBefore($("#boardRightBottomHBox"))
+  //   $("#watcherBox").insertAfter($("#kifuBox"))
+	// } else {
+  //   $("#watcherBox").prependTo($("#boardLeftBottomHBox"))
+  //   $("#boardChatBox").insertAfter($("#watcherBox"))
+	// }
+  // $("#playerGridWrapper, #waiterGridWrapper, #gameGridWrapper, #watcherGridWrapper, #kifuGridWrapper").each(function(){
+  //   $(this).find('.dataTables_scrollBody').css('height', $(this).height() - $(this).find($(".dataTables_scrollHead")).height() - $(this).find($(".dataTables_paginate")).height())
+  // })
+  // $("#lobbyMessageArea").scrollTop($("#lobbyMessageArea")[0].scrollHeight)
+  // $("#boardMessageArea").scrollTop($("#boardMessageArea")[0].scrollHeight)
+  // snowfall.resize(window.innerWidth, window.innerHeight)
 }
 
 /* ====================================
@@ -549,7 +551,7 @@ function _updateLanguage(){
     $(this).attr('title', i18next.t($(this).attr('data-i18n-title')))
   })
   $('#newGameRuleSelect, #newGameStudyRuleSelect').empty()
-  let handicaps = i18next.language == "ja" ? HANDICAPS_JA : HANDICAPS_EN
+  let handicaps = (i18next.language == "ja" || i18next.language == "zh_tw" ) ? HANDICAPS_JA : HANDICAPS_EN
   Object.keys(handicaps).forEach(function(key){
     if (key == "r" || key == "vazoo2") return true
     $('#newGameRuleSelect, #newGameStudyRuleSelect').append($("<option />").val(key).text(handicaps[key]))
@@ -577,7 +579,7 @@ function _secureLoginHelpClick(){
 }
 
 function _loginButtonClick(){
-  $("#passwordInput").tooltip('close')
+  $("#passwordInput").tooltip('hide')
   let server = serverGrid.row({selected: true}).data()
   if (server == null){
     alert('Please select a server.')
@@ -654,7 +656,7 @@ function _setLoginAlert(i18nCode){
 ===================================== */
 
 function _logoutButtonClick(){
-  $('img#entrance-img').prop('src', 'img/81Dojo_bye.jpg')
+  $('img#entrance-img').prop('src', 'img/img_fujimori_bye.png')
   _stopAllTimeouts()
   _backToEntrance()
   _setLoginAlert("login.closed")
@@ -673,7 +675,7 @@ function _waitButtonClick(){
 }
 
 function _navigateToWebSystem(path){
-  window.open('http://system.81dojo.com/' + EJ('en', 'ja') + '/' + path, '_blank')
+  window.open('https://system.81dojo.com/' + EJ('en', 'ja') + '/' + path, '_blank')
 }
 
 function _playerSelected(grid, index){
@@ -934,7 +936,7 @@ function _materialBalanceButtonClick(){
 }
 
 function _KyokumenpediaClick(){
-  if (['r', 'nr', 'hclance', 'hcbishop', 'hcrook', 'hcrooklance', 'hc2p', 'hc4p', 'hc6p'].indexOf(board.game.gameType) >= 0) window.open("http://kyokumen.jp/positions/" + board.position.toSFEN(), "_blank")
+  if (['r', 'nr', 'hclance', 'hcbishop', 'hcrook', 'hcrooklance', 'hc2p', 'hc4p', 'hc6p'].indexOf(board.game.gameType) >= 0) window.open("https://kyokumen.jp/positions/" + board.position.toSFEN(), "_blank")
   else writeUserMessage(EJ('This game variant is not suppported.', 'このルールには非対応です'), 2, "#FF0000")
 }
 
@@ -1500,7 +1502,7 @@ function _playerIgnoreClick(user){
 
 function _playerDetailClick(user){
   if (user.isGuest) return
-  window.open("http://system.81dojo.com/" + EJ('en', 'ja') + "/players/show/" + user.name)
+  window.open("https://system.81dojo.com/" + EJ('en', 'ja') + "/players/show/" + user.name)
 }
 
 function _playerPMClick(e, forcePM = false){

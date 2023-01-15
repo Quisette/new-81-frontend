@@ -52,6 +52,6 @@ $('#modalNewGame').dialog({
   show: 'fade',
   buttons: [
     {text: "OK", click: function(){_handleNewGame()}, 'data-click': 'exec'},
-    {id: "i18n-cancel", click: function(){$(this).dialog('close')}, 'data-click': 'cancel'}
+    {text: "cancel",id: "i18n-cancel", click: function(){$(this).dialog('close')}, 'data-click': 'cancel'}
   ]
 })

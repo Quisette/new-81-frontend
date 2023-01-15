@@ -25,6 +25,7 @@ class Country{
   }
 
   toString(){
+    return this.name_en
     return EJ(this.name_en, this.name_ja)
   }
 }

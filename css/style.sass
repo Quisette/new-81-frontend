@@ -18,17 +18,18 @@ $DataTablesSelected: #c9e695
 // dataTables hover row
 $DataTablesHover: #f3ffd0
 
-$LobbyGap: 7px
-$boardGap: 7px
+$LobbyGap: 1vw
+$boardGap: 1vw
 $MenuBarHeight: 35px
-$PlayerListWidth: 368px
-$GameListWidth: 574px
+$PlayerListWidth: 20vw
+$GameListWidth: 30vw
+
 $BoardBoxWidth: 784px
 $BoardBoxHeight: 476px
 $SelectedSquareColor: rgba(50, 180, 255, 0.2)
 $LastSquareColor: rgba(255, 80, 30, 0.2)
 $LocalKifuColor: #44d
-@import url(https://fonts.googleapis.com/earlyaccess/notosansjp.css)
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;500;600;700&display=swap')
 
 // -------------------------------
 // General rules
@@ -39,9 +40,9 @@ html
 
 body
   height: 100%
-  font-family: 'Noto Sans JP', sans-serif
+  font-family: 'Noto Serif JP', sans-serif
   color: #333
-  font-size: 12px
+  font-size: 14px
   overflow-y: hidden
   margin: 0
 a
@@ -57,9 +58,9 @@ img.inline
   vertical-align: middle
 
 input[type="submit"], input[type="button"], button
-  border-radius: 0!important
+  // border-radius: 0em!important
 input[type="button"]
-  font-size: 12px
+  font-size: 14px
   height: 40px
   padding: 0 8px
 
@@ -95,13 +96,13 @@ div.grid-wrapper
   //background-image: url(../img/grid_header.gif)
   background-repeat: repeat-x
   border: 1px solid #ccc
-  overflow: hidden
+  // overflow: scroll
 
 div.menuBar
   z-index: 1
   background-color: $KeyColor
   text-align: left
-  height: $MenuBarHeight
+  // height: $MenuBarHeight
   > ul
     margin: 0
     padding: 0
@@ -186,9 +187,13 @@ div.automatchBanner
     min-width: 150px
 
 @keyframes AutomatchAnimation
-  0% {background: #d83}
-  50% {background: #a52}
-  100% {background: #d83}
+
+  0%
+    background: #d83
+  50%
+    background: #a52
+  100%
+    background: #d83
 
 //--------------------------------
 // jQuery-UI override
@@ -197,6 +202,7 @@ div.automatchBanner
 .ui-dialog
   border: none!important
   box-shadow: 0px 2px 8px 0px rgba(0,0,0,0.3)
+  overflow: unset !important
   .ui-dialog-titlebar
     border-radius: 0!important
     background: $KeyColor!important
@@ -217,6 +223,7 @@ div.automatchBanner
   background: $AccentColor!important
   border-color: $DarkAccentColor
 .ui-widget
+  border-radius: 10px
   &:active
     outline: none
   &:focus
@@ -228,6 +235,10 @@ div.automatchBanner
   background: none
 .ui-tabs-panel
   border: 1px solid #ddd!important
+.ui-dialog-content
+  overflow: unset !important
+.ui-widget-content
+  overflow: unset !important
 
 // -------------------------------
 // DataTables override
@@ -236,6 +247,8 @@ div.automatchBanner
 table.dataTable thead th, table.dataTable tfoot th
   background-color: $AccentColor
   height: 1.5em
+// .dataTables_scroll
+//   overflow: scroll
 .dataTables_scrollHead
   background: $AccentColor
 table.dataTable thead .sorting_asc
@@ -265,16 +278,20 @@ select#languageSelector
 div#layerLogin
   z-index: 3
   background-color: #f2f2f2
-  background-image: url(../img/login_background.jpg)
+  background-image: url(../img/img_shogisiken.png)
   background-size: cover
   background-position: center center
 div#layerLoginContents
   opacity: 0
+
 input#reloginButton
   display: none
   margin-left: 5px
+  transition: 0.2s
+  // border-radius: 9999em
+  height: 30px
 p#loginAlert
-  font-size: 11px
+  font-size: 14px
   color: rgb(181, 119, 0)
   height: 20px
 span.secure
@@ -293,12 +310,18 @@ span.secure
     content: '\f023'
     margin-right: 1px
 
+img#entrance-img
+  // margin: 0 10vw
+  height: 40vh
+  // width: 60vw
+  border-radius: 60px
+
 table#serverGrid
   background: white
-  width: 300px
+  width: auto !important
 input#usernameInput, input#passwordInput
-  width: 170px
-  height: 15px
+  // width: 170px
+  // height: 15px
 input#passwordInput
   font-size: 10px
 
@@ -337,9 +360,9 @@ input#findUser
   color: #555
 
 div#playerListBox
-  width: $PlayerListWidth
-  display: flex
-  flex-direction: column
+  // width: $PlayerListWidth
+  // display: flex
+  // flex-direction: column
   padding-bottom: $LobbyGap
   cursor: default
 
@@ -377,8 +400,8 @@ div#playerGridWrapper
       border-radius: 0
       line-height: 1.7em
       padding: 0
-    .paginate_button:hover,
-      background: gainsboro
+    .paginate_button:hover
+      background:  gainsboro
       border: 0
       border-right: 1px solid #ddd
       border-radius: 0
@@ -403,27 +426,29 @@ div#playerGridWrapper
       border-right: 0
 
 div#gameListBox
-  width: $GameListWidth + $LobbyGap
-  display: flex
-  flex-direction: column
+  // width: $GameListWidth + $LobbyGap
+  // display: flex
+  // flex-direction: column
   cursor: default
 
 div#gameGridWrapper
-  width: $GameListWidth
-  margin-left: $LobbyGap
-  margin-bottom: $LobbyGap
+  // width: $GameListWidth
+  // margin-left: $LobbyGap
+  // margin-bottom: $LobbyGap
   flex: 9 9 1px
 
 div#lobbyChatBox
   display: flex
-  width: $GameListWidth
-  flex-direction: column
+  // width: $GameListWidth
+  // width: fit-content
+  // flex-direction: column
   padding-bottom: $LobbyGap
   margin-left: $LobbyGap
   flex: 11 11 1px
 
 div#lobbyMessageArea
   text-align: left
+  // width: $GameListWidth
   background-color: white
   overflow-y: scroll
   border: 1px solid #ccc
@@ -489,12 +514,14 @@ div#boardChatBox
   margin-bottom: $boardGap
 div#boardRightVBox
   margin-left: $boardGap
-  max-width: 394px
+  // max-width: 394px
 div#boardBox
   position: relative
   width: $BoardBoxWidth
   height: $BoardBoxHeight
-  background-image: url(../img/tatami.jpg)
+  background: #DFCCA1
+  border-radius: 10px
+  // background-image: url(../img/tatami.jpg)
   > div
     position: absolute
 canvas#boardCanvas
@@ -503,13 +530,16 @@ canvas#boardCanvas
   top : 0
   pointer-events: none
 div#banField
-  background-size: contain
+  background-size: cover
 div#coord
-  background-size: contain
+  background-size: cover
   pointer-events: none
 div.square
   position: absolute
-  background-size: contain
+  background-size: cover
+  background-position: center center
+  transition: 0.2s
+
 div.square-selected
   background-color: $SelectedSquareColor
 div.square-last
@@ -535,51 +565,63 @@ div.picked-piece
   position: absolute
   pointer-events: none
 div.komadai
-  background-size: contain
+  background-size: cover
+  background-image: url("https://www.shogi-extend.com/system/material/board/12.png")
+   box-shadow: 3px 3px 3px 0px #303030
 div.player-info
   height: 186px
   max-width: 160px
   overflow: hidden
   background-image: url(../img/paper.jpg)
   border: solid 2px #ddd
-  text-align: left
+  text-align: center
+  border-radius: 8px
+  box-shadow: 3px 3px 3px 0px #303030
 div.player-info-has-turn
   border: solid 2px #f80
 div.avatar-wrapper
   width: 128px
   height: 128px
+  box-shadow: 2px 2px 3px 0px #aaaaaa
+  border: solid 2px #ddd
+  border-radius: 8px
 span#player-info-mark
   margin-left: 4px
 span#player-info-name
   font-size: 14px
   font-weight: bold
   cursor: default
+  text-align: center
 span.name-winner
-  background-color: yellow
+  background-color: #FFBF00
 span.name-mouse-out
   color: #800
 span.name-left
   color: #aaa
 span#player-info-rate
   margin-left: 4px
+  text-align: center
 div.game-timer
-  border: 1px solid black
+  border: 1px double black
   width: 80px
   height: 30px
+  border-radius: 8px
 div.game-timer-label
   font-size: 19px
-  font-family: 'Arial Black'
+  font-family: "IBM Plex Mono",monospace
   line-height: 29px
 div.game-timer-sub-label
   position: absolute
   padding-right: 2px
-  color: #f80
+  font-family: "IBM Plex Mono",monospace
+
   font-size: 9px
   line-height: 10px
   text-align: right
-  width: 100%
+  width: 95%
   height: 10px
   top: 20px
+  color: 	#0080ff
 
 div#boardMessageArea
   text-align: left
@@ -612,6 +654,11 @@ div#replayButtons
   button
     height: 30px
     width: 42px
+    border-radius: 8px
+    transition: 0.2s !important
+    &:hover
+      scale: scale(0.95) translateY(1px)
+
 
 p#disconnectTimer
   margin: 0
@@ -677,12 +724,12 @@ div#modalNewGame
     margin: 7px 0 0 0
   #tabManual::before
     font-size: 1.3em
-    font-family: FontAwesome
+    // font-family: FontAwesome
     content: '\f1de'
     margin-right: 5px
   #tabAuto::before
     font-size: 1.3em
-    font-family: FontAwesome
+    // font-family: FontAwesome
     content: '\f0e7'
     margin-right: 5px
 
@@ -850,14 +897,14 @@ div#modalChatTemplate
 // -------------------------------
 
 .hbox
-  display: flex
-  justify-content: center
-  align-items: stretch
+  // display: flex
+  // justify-content: center
+  // align-items: stretch
 
 .vbox
-  display: flex
-  flex-direction: column
-  justify-content: flex-start
+  // display: flex
+  // flex-direction: column
+  // justify-content: flex-start
 
 ul#thanksList
   margin: 0
@@ -890,3 +937,17 @@ textarea#clip-board-area
 .font-fa::before
   font-family: FontAwesome
   font-size: 16px
+
+::webkit-scorllbar
+  width: 10px
+
+::-webkit-scrollbar-track
+   border-radius: 10px
+
+
+::-webkit-scrollbar-thumb
+   background: grey
+   border-radius: 5px
+
+#lobbyMessageArea
+ overflow-y: auto

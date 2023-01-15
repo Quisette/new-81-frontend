@@ -1,7 +1,7 @@
 "use strict";
 
 function EJ(str_en, str_ja){
-  if (i18next.language == "ja") return str_ja
+  if (i18next.language == "ja" || i18next.language == "zh_tw" ) return str_ja
   else return str_en
 }
 
@@ -9,12 +9,12 @@ const RANK_NAMES_JA = ['プロ', '七段',
 	'六段', '五段', '四段', '三段', '二段', '初段',
 	'1級', '2級', '3級', '4級', '5級',
 	'6級', '7級', '8級', '9級', '10級',
-	'11級', '12級', '13級', '14級', '15級', '-']
+	'11級', '12級', '13級', '14級', '15級', '']
 const RANK_NAMES_EN = ['PRO', '7-Dan',
 	'6-Dan', '5-Dan', '4-Dan', '3-Dan', '2-Dan', '1-Dan',
 	'1-kyu', '2-kyu', '3-kyu', '4-kyu', '5-kyu',
 	'6-kyu', '7-kyu', '8-kyu', '9-kyu', '10-kyu',
-	'11-kyu', '12-kyu', '13-kyu', '14-kyu', '15-kyu', '-']
+	'11-kyu', '12-kyu', '13-kyu', '14-kyu', '15-kyu', '']
 const RANK_THRESHOLDS = [3500, 2300,
 	2200, 2100, 1950, 1800, 1650, 1500,
 	1425, 1350, 1300, 1250, 1200,
@@ -24,7 +24,7 @@ const RANK_NAMES34 = ['GOD', 'KING', 'MINISTER', 'SENATOR', 'SAGE', 'MASTER', 'P
 const RANK_THRESHOLDS34 = [15000, 10000, 7000, 5000, 3000, 2000, 1000, 500, 200, 100, 50, 20, 5, 0]
 function makeRankFromRating(v, forceJapanese = false){
 	for (let i = 0; i < RANK_THRESHOLDS.length; i++) {
-		if (v >= RANK_THRESHOLDS[i]) return (forceJapanese || i18next.language == "ja" || i18next.language == "zh") ? RANK_NAMES_JA[i] : RANK_NAMES_EN[i]
+		if (v >= RANK_THRESHOLDS[i]) return (forceJapanese || i18next.language == "ja" || i18next.language == "zh_tw") ? RANK_NAMES_JA[i] : RANK_NAMES_EN[i]
 	}
 	return ""
 }
@@ -121,7 +121,7 @@ const HANDICAPS_EN = {
 	hcrooklance: "1.5p Down",
 	hcrooksilver: "1.75p Down",
 	hc2p: "2p Down",
-  hc3p: "3p Down",
+  	hc3p: "3p Down",
 	hc4p: "4p Down",
 	hcl5p: "Left-5p Down",
 	hcr5p: "Right-5p Down",
@@ -311,7 +311,7 @@ function intToColorStyle(v) {
 }
 
 function playingStyleName(i) {
-  if (i18next.language == "ja") {
+  if (i18next.language == "ja" ||i18next.language == "zh_tw" ) {
     return ['棋風 未登録', '居飛車党', '純粋居飛車党', '振り飛車党', '純粋振り飛車党', 'オールラウンダー', '真正オールラウンダー', '対抗形志向', '対抗形マニア', '力戦派', '矢倉マニア', '角換りマニア', '横歩取りマニア', '三間飛車党', '三間飛車マニア', '四間飛車党', '四間飛車マニア', '中飛車党', '中飛車マニア'][i]
   } else {
     return ['Playing style unknown', 'Static Rook Player', 'Pure Static Rook Player', 'Swinging Rook Player', 'Pure Swinging Rook Player', 'All-rounder', 'Genuine All-rounder', 'Opposition Seeker', 'Opposition Enthusiast', 'Free-style Player', 'Yagura Enthusiast', 'Bishop Exchange Enthusiast', 'Side Pawn Picker Enthusiast', '3rd-file Rook Player', '3rd-file Rook Enthusiast', '4th-file Rook Player', '4th-file Rook Enthusiast', 'Central Rook Player', 'Central Rook Enthusiast'][i]

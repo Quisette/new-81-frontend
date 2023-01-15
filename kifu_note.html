@@ -1,1 +1,542 @@
-<!DOCTYPE html><html><head><meta charset="utf-8" /><meta content="IE=edge" http-equiv="X-UA-Compatible" /><title>81Dojo 棋譜ノート</title><link href="favicon.ico" rel="shortcut icon" /><link href="css/kifu_note.min.css" media="all" rel="stylesheet" type="text/css" /><script src="js/jquery-2.2.4.min.js"></script><script src="js/kifu_note.js"></script></head><body><section class="page"><table class="header"><tr><td class="center" id="head1" rowspan="2">対<br>局<br>者</td><td class="center" id="blackRank"></td><td id="blackName"></td><td class="center" id="head2">棋戦</td><td id="tournament"></td><td class="center" id="head3">開始</td><td id="startedAt"></td></tr><tr><td class="center" id="whiteRank"></td><td id="whiteName"></td><td class="center">対局場</td><td id="place"></td><td class="center">終了</td><td id="endedAt"></td></tr><tr><td class="center" colspan="2">手合割</td><td id="gameType"></td><td colspan="2" id="comment" rowspan="3">備<br>考</td><td class="center">手数</td><td id="movesCount"></td></tr><tr><td class="center" colspan="2">持時間</td><td id="thinkingTime"></td><td class="center">結果</td><td id="result"></td></tr><tr><td class="center" colspan="2">消費時間</td><td id="usedTime"></td><td class="center">戦型</td><td id="opening"></td></tr></table><textarea></textarea><div id="movesWrapper"><div><table class="table-moves"><tr><td class="center header-move">☗</td><td class="center header-time">消費/<br>累計</td><td class="center header-move">☖</td><td class="center header-time">消費/<br>累計</td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr></table></div><div><table class="table-moves"><tr><td class="center header-move">☗</td><td class="center header-time">消費/<br>累計</td><td class="center header-move">☖</td><td class="center header-time">消費/<br>累計</td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr></table></div><div><table class="table-moves"><tr><td class="center header-move">☗</td><td class="center header-time">消費/<br>累計</td><td class="center header-move">☖</td><td class="center header-time">消費/<br>累計</td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr><tr><td class="move-box"></td><td class="center time-box"></td><td class="move-box"></td><td class="center time-box"></td></tr></table></div></div></section></body></html>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta content="IE=edge" http-equiv="X-UA-Compatible" />
+    <title>81Dojo 棋譜ノート</title>
+    <link href="favicon.ico" rel="shortcut icon" />
+    <link
+      href="css/kifu_note.min.css"
+      media="all"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="js/jquery-2.2.4.min.js"></script>
+    <script src="js/kifu_note.js"></script>
+  </head>
+  <body>
+    <section class="page">
+      <table class="header">
+        <tr>
+          <td class="center" id="head1" rowspan="2">対<br />局<br />者</td>
+          <td class="center" id="blackRank"></td>
+          <td id="blackName"></td>
+          <td class="center" id="head2">棋戦</td>
+          <td id="tournament"></td>
+          <td class="center" id="head3">開始</td>
+          <td id="startedAt"></td>
+        </tr>
+        <tr>
+          <td class="center" id="whiteRank"></td>
+          <td id="whiteName"></td>
+          <td class="center">対局場</td>
+          <td id="place"></td>
+          <td class="center">終了</td>
+          <td id="endedAt"></td>
+        </tr>
+        <tr>
+          <td class="center" colspan="2">手合割</td>
+          <td id="gameType"></td>
+          <td colspan="2" id="comment" rowspan="3">備<br />考</td>
+          <td class="center">手数</td>
+          <td id="movesCount"></td>
+        </tr>
+        <tr>
+          <td class="center" colspan="2">持時間</td>
+          <td id="thinkingTime"></td>
+          <td class="center">結果</td>
+          <td id="result"></td>
+        </tr>
+        <tr>
+          <td class="center" colspan="2">消費時間</td>
+          <td id="usedTime"></td>
+          <td class="center">戦型</td>
+          <td id="opening"></td>
+        </tr>
+      </table>
+      <textarea></textarea>
+      <div id="movesWrapper">
+        <div>
+          <table class="table-moves">
+            <tr>
+              <td class="center header-move">☗</td>
+              <td class="center header-time">消費/<br />累計</td>
+              <td class="center header-move">☖</td>
+              <td class="center header-time">消費/<br />累計</td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+          </table>
+        </div>
+        <div>
+          <table class="table-moves">
+            <tr>
+              <td class="center header-move">☗</td>
+              <td class="center header-time">消費/<br />累計</td>
+              <td class="center header-move">☖</td>
+              <td class="center header-time">消費/<br />累計</td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+          </table>
+        </div>
+        <div>
+          <table class="table-moves">
+            <tr>
+              <td class="center header-move">☗</td>
+              <td class="center header-time">消費/<br />累計</td>
+              <td class="center header-move">☖</td>
+              <td class="center header-time">消費/<br />累計</td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+            <tr>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+              <td class="move-box"></td>
+              <td class="center time-box"></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

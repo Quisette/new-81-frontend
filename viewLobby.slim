@@ -1,5 +1,5 @@
 div.layer#layerLobby
-  div.vbox style="width:100%;height:100%"
+  div.vbox style="width:100%;height:100% ;overflow:auto"
     div.hbox.menuBar#lobbyMenu
       ul
         li
@@ -11,7 +11,7 @@ div.layer#layerLobby
           a.button href="#" data-i18n-title="lobby.find_player"
             span.fa-stack
               i.fa.fa-search.fa-stack-2x style="top:-2px"
-              i.fa.fa-user.fa-stack-1x style="font-size:0.8em;top:-3px; left:-2px" 
+              i.fa.fa-user.fa-stack-1x style="font-size:0.8em;top:-3px; left:-2px"
             input#findUser type="text" style="margin-left:4px;width:60px"
         li
           a.button href="#" onclick="_optionButtonClick()" data-i18n-title="lobby.options" data-click="normal"
@@ -31,7 +31,7 @@ div.layer#layerLobby
             li
               a href="#" onclick="_navigateToWebSystem('forums')" data-click="normal"
                 i.fa.fa-lg.fa-fw.fa-comments
-                span data-i18n="submenu.bbs" 
+                span data-i18n="submenu.bbs"
             li
               a href="#" onclick="_navigateToWebSystem('tournaments')" data-click="normal"
                 i.fa.fa-lg.fa-fw.fa-sitemap
@@ -86,47 +86,51 @@ div.layer#layerLobby
       input.automatchCancelButton data-i18n-value="automatch.cancel" type="button" onclick="_automatchCancelButtonClick()" data-click="cancel"
       |&emsp;
       i.fa.fa-codepen.fa-spin
-    div.hbox#lobbyHBox style="flex:1;padding-top:7px"
-      div.vbox#playerListBox
-        div.grid-wrapper#playerGridWrapper style="flex: 7 7 1px"
-          table.stripe.hover#playerGrid
-            tr
-              thead
-                th data-i18n="lobby.status_short"
-                th data-i18n="lobby.title"
-                th data-i18n="lobby.rank"
-                th data-i18n="lobby.name"
-                th data-i18n="lobby.country"
-                th data-i18n="lobby.rate"
-              tbody
-        div.grid-wrapper#waiterGridWrapper style="flex: 3 3 1px"
-          table.stripe.hover#waiterGrid
-            tr
-              thead
-                th data-i18n="lobby.waiter"
-                th data-i18n="lobby.rate"
-                th data-i18n="lobby.rule"
-                th data-i18n="lobby.thinking_time"
-              tbody
-      div.vbox#gameListBox
-        div.grid-wrapper#gameGridWrapper
-          table.stripe.hover#gameGrid
-            tr
-              thead
-                th
-                  |☗
-                  span data-i18n="lobby.black"
-                th
-                  |☖
-                  span data-i18n="lobby.white"
-                th data-i18n="lobby.rule"
-                th data-i18n="lobby.game_status"
-                th data-i18n="lobby.monitor"
-                th data-i18n="lobby.opening_short"
-              tbody
-        div#lobbyChatBox
-          div#lobbyMessageArea
-          div.hbox style="margin-top:7px"
-            span.on-background data-i18n="lobby.chat" style="margin-right:5px;white-space:nowrap"
-            input type="text" id="lobbyChatInput" style="flex: 1"
-    div#worldClocks
+    div class="container"
+      div style="flex:1;padding-top:7px" class="row"
+        div.vbox#playerListBox class="col col-md-5"
+          div.container
+            div.grid-wrapper#playerGridWrapper style="flex: 7 7 1px;" class="row h-25 overflow-scroll"
+              table.stripe.hover#playerGrid
+                tr
+                  thead class="sticky-top"
+                    th data-i18n="lobby.status_short"
+                    th data-i18n="lobby.title"
+                    th data-i18n="lobby.rank"
+                    th data-i18n="lobby.name"
+                    th data-i18n="lobby.country"
+                    th data-i18n="lobby.rate"
+                  tbody style="scrollarea"
+            div.grid-wrapper#waiterGridWrapper style="flex: 3 3 1px" class="row overflow-scroll"
+              table.stripe.hover#waiterGrid
+                tr
+                  thead
+                    th data-i18n="lobby.waiter"
+                    th data-i18n="lobby.rate"
+                    th data-i18n="lobby.rule"
+                    th data-i18n="lobby.thinking_time"
+                  tbody
+          / div.vbox#gameListBox class=""
+        div.grid-wrapper#gameGridWrapper class="col col-md-6 "
+          div class="row"
+            table.stripe.hover#gameGrid
+              tr
+                thead
+                  th
+                    |☗
+                    span data-i18n="lobby.black"
+                  th
+                    |☖
+                    span data-i18n="lobby.white"
+                  th data-i18n="lobby.rule"
+                  th data-i18n="lobby.game_status"
+                  th data-i18n="lobby.monitor"
+                  th data-i18n="lobby.opening_short"
+                tbody
+        div class="col col-md-4 "
+          div class="container"
+            div#lobbyMessageArea class="row h-75"
+            div.hbox style="margin-top:7px"
+              span.on-background data-i18n="lobby.chat" style="margin-right:5px;white-space:nowrap"
+              input type="text" id="lobbyChatInput" style="flex: 1"
+        div#worldClocks class="col col-md-1"

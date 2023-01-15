@@ -177,6 +177,8 @@ class Board{
     let koma = this._position.getPieceFromSquare(sq)
     if (koma) {
       sq.css('background-image', 'url(img/themes/' + this._theme + '/' + koma.toImagePath(!this._direction) + ')')
+      sq.css('background-position', 'center')
+      sq.css('background-size', 'cover')
     } else {
       sq.css('background-image', 'none')
     }
@@ -265,7 +267,7 @@ class Board{
   loadPieceDesignOption(){
     let newTheme
     let v = options.piece_type || 0
-    if (v <= 8) newTheme = ['ichiji', 'ninju', 'hidetchi', 'ichiji_ryoko', 'dobutsu', 'kinki', 'ryoko', 'kiyoyasu', 'shogicz'][v]
+    if (v <= 14) newTheme = ['ichiji', 'ninju', 'hidetchi', 'ichiji_ryoko', 'dobutsu', 'kinki', 'ryoko', 'kiyoyasu', 'shogicz',"toast","Portella","Portella_2moji","kifu_style","shogiwars_2moji","shogiwars_1moji"][v]
     else if (v >= 100) newTheme = ['blind_middle', 'blind_hard', 'blind_extreme'][v - 100]
     if (this._theme != newTheme) this._preloadPieceImages(newTheme)
     this._theme = newTheme
@@ -321,8 +323,8 @@ class Board{
     for (let i = 0; i < 2; i++){
       let user = i == 0 ? this.game.black : this.game.white
       this.playerInfos[i].find("img.avatar").attr("src", user.avatarURL())
-      this.playerInfos[i].find("#player-info-name").html(user.name)
-      this.playerInfos[i].find("#player-info-rate").html('R: ' + user.rate + ' (' + makeRankFromRating(user.rate) + ')')
+      this.playerInfos[i].find("#player-info-name").html(user.name + ' '+  makeRankFromRating(user.rate))
+      this.playerInfos[i].find("#player-info-rate").html('R: ' + user.rate )
       if (user.titleName() != "") this.playerInfos[i].find("#player-info-rate").append('<span style="color:white;font-weight:bold;background:crimson;padding:0 0.2em;margin-left:0.3em;cursor:default">' + user.titleTag() + '</span>')
       this._flags[i].html(user.country.flagImgTagMovie())
     }
@@ -537,6 +539,7 @@ class Board{
 
   _pickUpPiece(sq){
     this._pickedPiece.css('background-image', sq.css('background-image'))
+    this._pickedPiece.css('background-size', 'cover')
     this._positionPickedPiece(mouseX, mouseY)
     this._pickedPiece.appendTo(this._div)
     sq.addClass("square-picked-up")

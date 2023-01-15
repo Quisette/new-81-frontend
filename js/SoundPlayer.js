@@ -157,6 +157,7 @@ class SoundPlayer{
 
   _loadChannel(key, file){
     this._channels[key] = new Audio(SoundPlayer.CONST.SOUND_PATH + "/" + file + ".mp3")
+    this._channels[key].preload = "auto"
   }
 
   buttonHover(){

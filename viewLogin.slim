@@ -5,6 +5,7 @@ div.layer#layerLogin
         span style="margin-right:4px" data-i18n="login.language"
         span#languageFlag style="margin-right:4px"
         select#languageSelector onchange="_languageSelected()"
+          option value="zh_tw" data-code="158" 繁體中文
           option value="ja" data-code="392" 日本語
           option value="en" data-code="826" English
           option value="de" data-code="276" Deutsch
@@ -22,48 +23,55 @@ div.layer#layerLogin
           input#openingMusicCheckBox data-i18n-title="login.music" style="margin: 4px 0 0 15px" type="checkbox" checked="true" onclick="_openingMusicCheckBoxClick()"
           i.fa.fa-music.fa-lg data-i18n-title="login.music"
     p.margin-medium
-      img#entrance-img src="img/entrance_ja.jpg"
-    div.hbox
-      div.left style="width:250px"
+      img#entrance-img class="img-fluid" src="img/entrance_ja.jpg"
+    div
+      div
+        div class="container"
+          div class="col-1"
+          div class="input-group col-8"
+            span class="input-group-text" id="basic-addon1" data-i18n="login.loginname"
+            input class="form-control" type="text" id="usernameInput" onkeydown="if (event.keyCode==13) _loginButtonClick()"
+            label class="input-group-text"
+              input id="isGuestCheckBox" type="checkbox" name="loginType" value="1" onchange="_loginTypeChange()"
+              span data-i18n="login.guest"
+          div class="col-1"
+
+        br
+        div class="container"
+          div class="col-1"
+          div class="input-group"
+            span class="input-group-text" id="basic-addon1" data-i18n="login.password"
+            input type="text" id="hiddenPass" style="display:none"
+            input class="form-control" type="text" id="passwordInput" data-i18n-title="msg.password_encrypted" oninput="passChange()" onkeydown="passKey(event)" onpaste="return false" autocomplete="off"
+            label class="input-group-text"
+              input type="checkbox" id="loginSave"
+              span data-i18n="login.save"
+          div class="col-1"
+
         p
-          label
-            input type="radio" name="loginType" value="0" checked="true" onchange="_loginTypeChange()"
-            span data-i18n="login.registered"
-          label
-            input type="radio" name="loginType" value="1" onchange="_loginTypeChange()"
-            span data-i18n="login.guest"
-        p
-          span.small data-i18n="login.loginname"
-          br
-          input type="text" id="usernameInput" onkeydown="if (event.keyCode==13) _loginButtonClick()"
-        p
-          span.small data-i18n="login.password"
-          br
-          input type="text" id="passwordInput" data-i18n-title="msg.password_encrypted" oninput="passChange()" onkeydown="passKey(event)" onpaste="return false" autocomplete="off"
-          br
-          input type="text" id="hiddenPass" style="display:none"
-        p
-          label
-            input type="checkbox" id="loginSave"
-            span data-i18n="login.save"
-        p
-          input id="loginButton" data-i18n-value="login.login" type="button" onclick="_loginButtonClick()" data-click="normal"
-          input id="reloginButton" data-i18n-value="login.relogin" type="button" onclick="_reloginButtonClick()" data-click="normal"
+          input id="loginButton" class="btn btn-primary" data-i18n-value="login.login" type="button" onclick="_loginButtonClick()" data-click="normal"
+
+          input id="reloginButton" class="btn btn-primary" data-i18n-value="login.relogin" type="button" onclick="_reloginButtonClick()" data-click="normal"
           br
           span.secure style="cursor:help" data-i18n="login.secure" onclick="_secureLoginHelpClick()"
 
         p#loginAlert
-      div style="padding-top:10px"
-        table.stripe.hover#serverGrid
-          tr
-            thead
-              th data-i18n="login.server"
-              th data-i18n="login.description"
-              th data-i18n="login.players"
-            tbody
+
+        div class="container"
+          div class="col-1"
+          div style="padding-top:10px col-8"
+            table.stripe.hover#serverGrid
+              tr class="container"
+                thead
+                  th data-i18n="login.server" class="col-3"
+                  th data-i18n="login.description" class="col-4"
+                  th data-i18n="login.players" class="col-3"
+                tbody
+          div class="col-1"
+
     p#versionText ver.
     p
-      |(c) Hidetchi
+      |(c) Hidetchi, UI Improved by Quisette
     p powered by shogi-server, and
     p
       ul#thanksList
