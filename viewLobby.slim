@@ -1,84 +1,75 @@
 div.layer#layerLobby
   div.vbox style="width:100%;height:100% ;overflow:auto"
-    div.hbox.menuBar#lobbyMenu
-      ul
-        li
-          a.button#refreshButton href="#" onclick="_refreshButtonClick()" data-i18n-title="lobby.refresh" data-click="normal"
-            img src="img/icon_refresh.png"
-        li
-          a.button href="#" data-i18n="lobby.wait" onclick="_waitButtonClick()" data-click="normal"
-        li
-          a.button href="#" data-i18n-title="lobby.find_player"
-            span.fa-stack
-              i.fa.fa-search.fa-stack-2x style="top:-2px"
-              i.fa.fa-user.fa-stack-1x style="font-size:0.8em;top:-3px; left:-2px"
-            input#findUser type="text" style="margin-left:4px;width:60px"
-        li
-          a.button href="#" onclick="_optionButtonClick()" data-i18n-title="lobby.options" data-click="normal"
-            img src="img/icon_gear.png"
-        li
-          a.button href="#" data-i18n-title="lobby.websystem"
-            img src="img/icon_web2.png"
-          ul.subMenu
-            li
-              a href="#" onclick="_navigateToWebSystem('ranking')" data-click="normal"
-                i.fa.fa-lg.fa-fw.fa-list-ol
-                span data-i18n="submenu.ranking"
-            li
-              a href="#" onclick="_navigateToWebSystem('kifus/search/form')" data-click="normal"
-                i.fa.fa-lg.fa-fw.fa-search
-                span data-i18n="submenu.kifu_search"
-            li
-              a href="#" onclick="_navigateToWebSystem('forums')" data-click="normal"
-                i.fa.fa-lg.fa-fw.fa-comments
-                span data-i18n="submenu.bbs"
-            li
-              a href="#" onclick="_navigateToWebSystem('tournaments')" data-click="normal"
-                i.fa.fa-lg.fa-fw.fa-sitemap
-                span  data-i18n="submenu.tournament"
-            li
-              a href="#" onclick="_navigateToWebSystem('circles')" data-click="normal"
-                i.fa.fa-lg.fa-fw.fa-users
-                span data-i18n="submenu.club"
-            li
-              a href="#" onclick="_navigateToWebSystem('titles')" data-click="normal"
-                i.fa.fa-lg.fa-fw.fa-trophy
-                span  data-i18n="submenu.titles"
-            li
-              a href="#" onclick="_navigateToWebSystem('players/search/form')" data-click="normal"
-                i.fa.fa-lg.fa-fw.fa-address-book
-                span data-i18n="submenu.player_search"
-            li
-              a href="#" onclick="_navigateToWebSystem('players/favorites')" data-click="normal"
-                i.fa.fa-lg.fa-fw.fa-star
-                span data-i18n="submenu.favorites"
-            li
-              a href="#" onclick="_navigateToWebSystem('certificate')" data-click="normal"
-                i.fa.fa-lg.fa-fw.fa-graduation-cap
-                span data-i18n="submenu.diploma"
-            li#classSurveyButton
-              a href="#" onclick="window.open('http://system.81dojo.com/class_survey')" data-click="normal"
-                i.fa.fa-lg.fa-fw.fa-bar-chart
-                span 棋力対応調査
-            li
-              a href="#" onclick="_navigateToWebSystem('inquiries/new')" data-click="normal"
-                i.fa.fa-lg.fa-fw.fa-question-circle
-                span data-i18n="submenu.inquiry"
-        li
-          a.button href="#" onclick="_logoutButtonClick()" data-i18n-title="lobby.logout" data-click="cancel"
-            i.fa.fa-sign-out.fa-2x
-      div#lobbyHeader
-        img#serverLogo
-        div#headerText
-          span#header-serverName
-          span data-i18n="lobby.lobby"
-          span#header-playersNum
-          br
-          span#header-playerName
-          span#header-rate
-          span#header-mile
-          span#header-premium
-        img src="img/favicon.gif"
+    div class="navbar navbar-expand-lg menubar"
+      div class="container-fluid"
+        a class="navbar-brand" href="#"
+          img src="img/favicon.gif"
+        button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="#navbarSupportedContent" aria-expanded="true" aria-label="Toggle navigation"
+          span class="navbar-toggler-icon"
+        div class="collapse navbar-collapse collapse show" id="navbarSupportedContent"
+          ul class="navbar-nav me-auto mb-2 mb-lg-0"
+            li class="nav-item"
+              a class="nav-link active" aria-current="page" onclick="_refreshButtonClick()" href="#" data-i18n-title="lobby.refresh" data-click="normal"
+                img src="img/icon_refresh.png"
+            li class="nav-item"
+              a.button class="nav-link active" aria-current="page" href="#" data-i18n="lobby.wait" onclick="_waitButtonClick()" data-click="normal"
+            li class="nav-item"
+              a.button class="nav-link active" aria-current="page" href="#" onclick="_optionButtonClick()" data-i18n-title="lobby.options" data-click="normal"
+                img src="img/icon_gear.png"
+            li class="nav-item dropdown"
+              a.button  class="nav-link active" aria-current="page" href="#" data-bs-toggle="dropdown" ari-expanded="false" data-i18n-title="lobby.websystem"
+                img src="img/icon_web2.png"
+              ul class="dropdown-menu"
+                li
+                  a class="dropdown-item" href="#" onclick="_navigateToWebSystem('ranking')" data-click="normal"
+                    i.fa.fa-lg.fa-fw.fa-list-ol
+                    span data-i18n="submenu.ranking"
+                li
+                  a class="dropdown-item" href="#" onclick="_navigateToWebSystem('kifus/search/form')" data-click="normal"
+                    i.fa.fa-lg.fa-fw.fa-search
+                    span data-i18n="submenu.kifu_search"
+                li
+                  a class="dropdown-item" href="#" onclick="_navigateToWebSystem('forums')" data-click="normal"
+                    i.fa.fa-lg.fa-fw.fa-comments
+                    span data-i18n="submenu.bbs"
+                li
+                  a class="dropdown-item" href="#" onclick="_navigateToWebSystem('tournaments')" data-click="normal"
+                    i.fa.fa-lg.fa-fw.fa-sitemap
+                    span  data-i18n="submenu.tournament"
+                li
+                  a class="dropdown-item" href="#" onclick="_navigateToWebSystem('circles')" data-click="normal"
+                    i.fa.fa-lg.fa-fw.fa-users
+                    span data-i18n="submenu.club"
+                li
+                  a class="dropdown-item" href="#" onclick="_navigateToWebSystem('titles')" data-click="normal"
+                    i.fa.fa-lg.fa-fw.fa-trophy
+                    span data-i18n="submenu.titles"
+                li
+                  a  class="dropdown-item" href="#" onclick="_navigateToWebSystem('players/search/form')" data-click="normal"
+                    i.fa.fa-lg.fa-fw.fa-address-book
+                    span data-i18n="submenu.player_search"
+                li
+                  a  class="dropdown-item" href="#" onclick="_navigateToWebSystem('players/favorites')" data-click="normal"
+                    i.fa.fa-lg.fa-fw.fa-star
+                    span data-i18n="submenu.favorites"
+                li
+                  a  class="dropdown-item" href="#" onclick="_navigateToWebSystem('certificate')" data-click="normal"
+                    i.fa.fa-lg.fa-fw.fa-graduation-cap
+                    span data-i18n="submenu.diploma"
+                li
+                  hr class="dropdown-divider"
+                li
+                  a  class="dropdown-item" href="#" onclick="window.open('http://system.81dojo.com/class_survey')" data-click="normal"
+                    i.fa.fa-lg.fa-fw.fa-bar-chart
+                    span 棋力対応調査
+                li
+                  a class="dropdown-item" href="#" onclick="_navigateToWebSystem('inquiries/new')" data-click="normal"
+                    i.fa.fa-lg.fa-fw.fa-question-circle
+                    span data-i18n="submenu.inquiry"
+          form class="d-flex" role="search"
+            input#findUser class="form-control me-2" type="text" placeholder="User IDs" aria-label="Search"
+
+
     div.automatchBanner#lobbyAutomatchBanner
       i.fa.fa-codepen.fa-spin
       |&emsp;
@@ -88,7 +79,7 @@ div.layer#layerLobby
       i.fa.fa-codepen.fa-spin
     div class="container"
       div style="flex:1;padding-top:7px" class="row"
-        div.vbox#playerListBox class="col col-md-5"
+        div.vbox#playerListBox class="col col-md-4"
           div.container
             div.grid-wrapper#playerGridWrapper style="flex: 7 7 1px;" class="row h-25 overflow-scroll"
               table.stripe.hover#playerGrid
@@ -111,7 +102,7 @@ div.layer#layerLobby
                     th data-i18n="lobby.thinking_time"
                   tbody
           / div.vbox#gameListBox class=""
-        div.grid-wrapper#gameGridWrapper class="col col-md-6 "
+        div.grid-wrapper#gameGridWrapper class="col col-md-5 "
           div class="row"
             table.stripe.hover#gameGrid
               tr
@@ -127,7 +118,7 @@ div.layer#layerLobby
                   th data-i18n="lobby.monitor"
                   th data-i18n="lobby.opening_short"
                 tbody
-        div class="col col-md-4 "
+        div class="col col-md-3 "
           div class="container"
             div#lobbyMessageArea class="row h-75"
             div.hbox style="margin-top:7px"

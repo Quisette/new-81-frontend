@@ -74,50 +74,9 @@ div.grid-wrapper {
   border: 1px solid #ccc;
 }
 
-div.menuBar {
+div.menubar {
   z-index: 1;
   background-color: #7ead47;
-  text-align: left;
-}
-div.menuBar > ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-div.menuBar > ul > li {
-  display: inline;
-  margin: 0;
-  padding: 0;
-  float: left;
-  position: relative;
-}
-div.menuBar > ul > li > a.button {
-  min-width: 100px;
-  height: 35px;
-  line-height: 35px;
-  text-align: center;
-  display: inline-block;
-  color: white;
-  font-size: 14px;
-  padding: 0 4px;
-}
-div.menuBar > ul > li > a.button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-div.menuBar > ul > li > a.button:active {
-  background-color: rgba(255, 255, 255, 0.5);
-}
-div.menuBar > ul > li > a.button img {
-  vertical-align: -7px;
-}
-div.menuBar > ul > li > a.button .fa {
-  vertical-align: -4px;
-  padding: 0 3px;
-}
-div.menuBar > ul > li > a.button-disabled {
-  pointer-events: none;
-  background-color: #597132;
-  opacity: 0.7;
 }
 
 ul.subMenu {
@@ -379,13 +338,6 @@ div#lobbyHeader {
 div#headerText {
   font-size: 10px;
   padding: 0 5px;
-}
-
-input#findUser {
-  font-size: 12px;
-  border: 1px solid #ddd;
-  padding: 1px;
-  color: #555;
 }
 
 div#playerListBox {

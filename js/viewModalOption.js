@@ -67,8 +67,6 @@ let piecenames = [["ichiji", 0, true],
 ["blind_middle", 100], ["blind_hard", 101], ["blind_extreme", 102]]
 
 
-
-
 piecenames.forEach(e => {
   try{
     _loadPieceDesignToDialog(e[0], e[1], e[2])
