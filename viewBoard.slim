@@ -1,82 +1,72 @@
 div.layer#layerBoard
-  div.vbox style="width:100%;height:100%"
-    div.hbox.menuBar#boardMenu
-      ul style="flex:1"
-        li
-          a.button.button-disabled#resignButton href="#" data-i18n="board.resign" onclick="_resignButtonClick()"
-        li
-          a.button#impasseButton href="#" data-i18n-title="board.impasse" onclick="_impasseButtonClick()" data-click="normal"
-            i.fa.fa-calculator.fa-2x
-        li
-          a.button#flipButton href="#" onclick="_flipButtonClick()" data-i18n-title="board.flip" data-click="normal"
-            img src="img/icon_flip.png"
-        li
-          a.button#clearArrowsButton href="#" onclick="_clearArrowsButtonClick()" data-i18n-title="board.clear_arrows" data-click="normal"
-            img src="img/icon_eraser.png"
-        li
-          a.button#giveHostButton href="#" onclick="_giveHostButtonClick()" data-i18n-title="board.give_host" data-click="normal"
-            i.fa.fa-graduation-cap.fa-2x
-            i.fa.fa-exchange style="margin-left:-10px"
-        li
-          a.button#rematchButton href="#" onclick="_rematchButtonClick()" data-i18n-title="board.rematch"
-            img src="img/icon_one.png"
-        li
-          a.button#positionMenuButton href="#" data-i18n="board.position" onclick=""
-          ul.subMenu
-            li
-              a href="#" onclick="_materialBalanceButtonClick()" data-click="normal"
-                i.fa.fa-balance-scale.fa-lg.fa-fw
-                span data-i18n="submenu.material_balance"
-            li
-              a href="#" onclick="_KyokumenpediaClick()" data-click="normal"
-                img style="margin: 0 2px" src="img/icon_kyokumenpedia.png"
-                span data-i18n="submenu.kyokumenpedia"
-            li
-              a href="#" onclick="_sharePositionButtonClick('TW')" data-click="normal"
-                i.fa.fa-twitter.fa-lg.fa-fw
-                span data-i18n="submenu.twitter"
-            li
-              a href="#" onclick="_sharePositionButtonClick('FB')" data-click="normal"
-                i.fa.fa-facebook-official.fa-lg.fa-fw
-                span data-i18n="submenu.facebook"
-        li
-          a.button#kifuMenuButton href="#" data-i18n="board.kifu" onclick=""
-          ul.subMenu
-            li
-              a#kifuCopyButton href="#" onclick="_kifuCopyButtonClick()" data-click="normal"
-                i.fa.fa-clipboard.fa-lg.fa-fw
-                span data-i18n="submenu.kifu_copy"
-            li
-              a#kifuDownloadButton href="#" onclick="_kifuDownloadButtonClick()" data-click="normal"
-                i.fa.fa-download.fa-lg.fa-fw
-                span data-i18n="submenu.kifu_download"
-            li
-              a#kifuNoteButton href="#" onclick="_kifuNoteButtonClick()" data-click="normal"
+  div.vbox style="width:100%;height:100%;overflow:auto"
+    div class="navbar sticky-top navbar-expand-lg menubar"
+      div class="container-fluid"
+        a class="navbar-brand" href="#"
+          img src="img/favicon.gif"
+        button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="#navbarSupportedContent" aria-expanded="true" aria-label="Toggle navigation"
+          span class="navbar-toggler-icon"
+        div class="collapse navbar-collapse show" id="navbarSupportedContent"
+          ul class="navbar-nav me-auto mb-2 mb-lg-0"
+            li class="nav-item"
+              a class="nav-link " href='#' data-i18n="board.resign" onclick="_resignButtonClick()"
+            li class="nav-item"
+              a class="nav-link active" href="#" data-i18n-title="board.impasse" onclick="_impasseButtonClick()" data-click="normal"
+                i.fa.fa-calculator.fa-2x
+            li class="nav-item"
+              a class="nav-link active" href="#" onclick="_flipButtonClick()" data-i18n-title="board.flip" data-click="normal"
+                img src="img/icon_flip.png"
+            li class="nav-item"
+              a class="nav-link active" href="#" onclick="_clearArrowsButtonClick()" data-i18n-title="board.clear_arrows" data-click="normal"
+                img src="img/icon_eraser.png"
+            li class="nav-item"
+              a class="nav-link active" href="#" onclick="_giveHostButtonClick()" data-i18n-title="board.give_host" data-click="normal"
+                i.fa.fa-graduation-cap.fa-2x
+                i.fa.fa-exchange style="margin-left:-10px"
+            li class="nav-item"
+              a class="nav-link active" href="#" onclick="_rematchButtonClick()" data-i18n-title="board.rematch"
+                img src="img/icon_one.png"
+            li class="nav-item dropdown"
+              a class="nav-link dropdown-toggle" href="#" data-i18n="board.kifu" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+              ul class="dropdown-menu"
+                li
+                  a class="dropdown-item" href="#" onclick="_kifuCopyButtonClick()" data-click="normal"
+                    i.fa.fa-clipboard.fa-lg.fa-fw
+                    span data-i18n="submenu.kifu_copy"
+                li
+                  a#kifuDownloadButton class="dropdown-item" href="#" onclick="_kifuDownloadButtonClick()" data-click="normal"
+                    i.fa.fa-download.fa-lg.fa-fw
+                    span data-i18n="submenu.kifu_download"
+                li
+                  a#kifuNoteButton class="dropdown-item" href="#" onclick="_kifuNoteButtonClick()" data-click="normal"
+                    i.fa.fa-book.fa-lg.fa-fw
+                    span data-i18n="submenu.kifu_note"
+                li
+                  a#shareKifuTwitterButton class="dropdown-item" href="#" onclick="_shareKifuButtonClick('TW')" data-click="normal"
+                    i.fa.fa-twitter.fa-lg.fa-fw
+                    span data-i18n="submenu.twitter"
+                li
+                  a#shareKifuFacebookButton class="dropdown-item" href="#" onclick="_shareKifuButtonClick('FB')" data-click="normal"
+                    i.fa.fa-facebook-official.fa-lg.fa-fw
+                    span data-i18n="submenu.facebook"
+                li
+                  a#uploadKifuButton class="dropdown-item" href="#" onclick="_uploadKifuButtonClick()" data-click="normal"
+                    i.fa.fa-folder-open.fa-lg.fa-fw
+                    span data-i18n="submenu.kifu_load"
+            li class="nav-item"
+              a class="nav-link active" href="#"  type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling"
                 i.fa.fa-book.fa-lg.fa-fw
-                span data-i18n="submenu.kifu_note"
-            li
-              a#shareKifuTwitterButton href="#" onclick="_shareKifuButtonClick('TW')" data-click="normal"
-                i.fa.fa-twitter.fa-lg.fa-fw
-                span data-i18n="submenu.twitter"
-            li
-              a#shareKifuFacebookButton href="#" onclick="_shareKifuButtonClick('FB')" data-click="normal"
-                i.fa.fa-facebook-official.fa-lg.fa-fw
-                span data-i18n="submenu.facebook"
-            li
-              a#uploadKifuButton href="#" onclick="_uploadKifuButtonClick()" data-click="normal"
-                i.fa.fa-folder-open.fa-lg.fa-fw
-                span data-i18n="submenu.kifu_load"
-        li
-          a.button href="#" onclick="_optionButtonClick()" data-i18n-title="lobby.options" data-click="normal"
-            img src="img/icon_gear.png"
-      ul#boardMenuRight
-        li
-          a.button#checkLobbyButton href="#" onclick="_checkLobbyButtonClick()" data-i18n-title="board.check_lobby" data-click="normal"
-            i.fa.fa-eye.fa-2x
-        li
-          a.button#closeGameButton href="#" onclick="_closeBoard()" data-click="cancel"
-            i.fa.fa-sign-out.fa-2x
-            span data-i18n="board.close_game"
+                span 棋譜瀏覽
+          ul class="navbar-nav justify-content-end"
+            li class="nav-item "
+              a class="nav-link active" href="#" onclick="_checkLobbyButtonClick()" data-i18n-title="board.check_lobby" data-click="normal"
+                i.fa.fa-eye.fa-2x
+
+            li class="nav-item "
+              a class="nav-link active" href="#" onclick="_closeBoard()" data-click="cancel"
+                i.fa.fa-sign-out.fa-2x
+                span data-i18n="board.close_game"
+
     div.automatchBanner#lobbyAutomatchBanner
       i.fa.fa-codepen.fa-spin
       |&emsp;
@@ -110,32 +100,40 @@ div.layer#layerBoard
       div#boardRightVBox.vbox
         div#boardRightBottomHBox.hbox style="flex:1"
           div#kifuBox.vbox
-            div style="text-align:left"
-              p
-                label
-                  input type="radio" name="kifuModeRadio" value="0" onchange="_kifuModeRadioChange()" data-click="normal"
-                  span.local-kifu data-i18n="board.replay"
-              p
-                label
-                  input type="radio" name="kifuModeRadio" value="1" onchange="_kifuModeRadioChange()" data-click="normal"
-                  span data-i18n="board.listen"
-              div#replayButtons
-                button id="replayButtonFirst" data-i18n-title="board.replay_first" type="button" onclick="_replayButtonClick(-2)"
-                  i.fa.fa-step-backward
-                button id="replayButtonBack" data-i18n-title="board.replay_back" type="button" onclick="_replayButtonClick(-1)"
-                  i.fa.fa-chevron-left
-                button id="replayButtonForward" data-i18n-title="board.replay_forward" type="button" onclick="_replayButtonClick(1)"
-                  i.fa.fa-chevron-right
-                button id="replayButtonLast" data-i18n-title="board.replay_last" type="button" onclick="_replayButtonClick(2)"
-                  i.fa.fa-step-forward
+            button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling" OffCanvas Test
+            div class="offcanvas  offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel"
+              div class="offcanvas-header"
+                h5 class="offcanvas-title" id="offcanvasScrollingLabel" data-i18n="board.kifu"
+                button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="close"
+              div class="sticky-top" style="text-align:center; background: #ffffff; "
+                  p
+                    label
+                      input type="radio" name="kifuModeRadio" value="0" onchange="_kifuModeRadioChange()" data-click="normal"
+                      span.local-kifu data-i18n="board.replay"
+                  p
+                    label
+                      input type="radio" name="kifuModeRadio" value="1" onchange="_kifuModeRadioChange()" data-click="normal"
+                      span data-i18n="board.listen"
+                  div#replayButtons
+                    button id="replayButtonFirst" data-i18n-title="board.replay_first" type="button" onclick="_replayButtonClick(-2)"
+                      i.fa.fa-step-backward
+                    button id="replayButtonBack" data-i18n-title="board.replay_back" type="button" onclick="_replayButtonClick(-1)"
+                      i.fa.fa-chevron-left
+                    button id="replayButtonForward" data-i18n-title="board.replay_forward" type="button" onclick="_replayButtonClick(1)"
+                      i.fa.fa-chevron-right
+                    button id="replayButtonLast" data-i18n-title="board.replay_last" type="button" onclick="_replayButtonClick(2)"
+                      i.fa.fa-step-forward
 
-            div.grid-wrapper#kifuGridWrapper style="flex:1 1 1px"
-              table.stripe.hover#kifuGrid
-                tr
-                  thead
-                    th #
-                    th data-i18n="board.move"
-                    th data-i18n="board.move_time"
-                  tbody
+              div class="offcanvas-body" style="padding-color: #ffffff"
+
+                div.grid-wrapper#kifuGridWrapper style="flex:1 1 1px; overflow: auto"
+                  table.stripe.hover#kifuGrid
+                    tr
+                      thead class="sticky-top"
+                        th #
+                        th data-i18n="board.move"
+                        th data-i18n="board.move_time"
+                      tbody
+
 
   include viewModalResult
