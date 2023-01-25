@@ -813,7 +813,7 @@ function _checkLobbyButtonClick(forceDefault = false){
     waiterGrid.draw()
     gameGrid.clear().draw()
     $('#layerLobby').css('display', 'block')
-    $('#layerBoard').addClass("layer-border").animate({'height': '40px'}, 1200, function(){
+    $('#layerBoard').addClass("layer-border").animate({'height': '65px'}, 1200, function(){
       _refreshLobby()
       $('#checkLobbyButton').removeClass("button-disabled")
       $('#checkLobbyButton').html('<i class="fa fa-eye-slash fa-2x"></i>')
@@ -839,7 +839,7 @@ function _rematchButtonClick(){
       }
   		if (_checkGuestGamesExpired()) return
   		client.gameChat("[##REMATCH]")
-      $('#rematchButton').addClass('button-disabled')
+      $('#rematchButton').addAttribute('disabled', true)
     }
   } else {
     let newGameName = ""

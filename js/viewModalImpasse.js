@@ -7,9 +7,9 @@ function _updateImpasseWindow(impasseStatus, myTurn = null){
   $("#modalImpasse").find("td#white-pieces").html(impasseStatus[1].pieces).css('color', impasseStatus[1].pieces >= 10 ? 'red' : '')
   $("#modalImpasse").find("td#white-points").html(impasseStatus[1].points).css('color', impasseStatus[1].points >= 27 ? 'red' : '')
   if (myTurn == null || !impasseStatus[myTurn].entered || impasseStatus[myTurn].pieces < 10 || impasseStatus[myTurn].points < (28 - myTurn)) {
-    $("#modalImpasse").dialog('widget').find(".ui-dialog-buttonpane button:eq(0)").button('disable')
+    $("#i18n-declare")[0].setAttribute('disabled',true)
   } else {
-    $("#modalImpasse").dialog('widget').find(".ui-dialog-buttonpane button:eq(0)").button('enable')
+    $("#i18n-declare")[0].setAttribute('disabled',false)
   }
 }
 
@@ -23,6 +23,6 @@ $('#modalImpasse').dialog({
   },
   show: 'fade',
   buttons: [
-    {id: "i18n-declare", click: function(){_handleImpasseDeclare()}, 'data-click':'normal'}
+    {id: "i18n-declare", click: function(){_handleImpasseDeclare()}, 'data-i18n':"declare" ,'data-click':'normal'}
   ]
 })
