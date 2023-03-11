@@ -1590,9 +1590,9 @@ function _writeWelcomeMessage(){
 }
 
 function _updateLobbyHeader(){
-  $('#header-playerName').text(me.name + " : ")
-  $('#header-rate').text("R" + me.rate + " : ")
-  $('#header-mile').text(mileage + EJ(" D-Miles : ", " Dマイル : "))
+  $('#header-playerName').text(me.name)
+  $('#header-rate').text("R" + me.rate)
+  $('#header-mile').text(mileage + EJ(" D-Miles", " Dマイル"))
   $('#header-premium').text(makePremiumName(premium) + EJ(" class", " クラス"))
 }
 

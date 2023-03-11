@@ -23,7 +23,7 @@ class WebSocketClient {
     try{
       console.log(this._host)
       if(this._host == "160.16.213.48")
-        this._socket = new WebSocket("wss://api.quisette.me:/81dojo/4081");
+        this._socket = new WebSocket("wss://api.quisette.me/81dojo/4081");
       else
       this._socket = new WebSocket("ws://" + this._host + ":" + this._port);
     }catch(error){

@@ -1,12 +1,24 @@
 div.layer#layerLobby
-  div.vbox style="width:100%;height:100% ;overflow:auto"
+  div.vbox style="width:100%;height:100%"
     div class="navbar sticky-top navbar-expand-lg menubar"
       div class="container-fluid"
         a class="navbar-brand" href="#"
           img src="img/favicon.gif"
+        div.text-start#headerText
+          span#header-serverName
+          span data-i18n="lobby.lobby"
+          span#header-playersNum
+          br
+          span#header-playerName
+          span  |
+          span#header-rate
+          br
+          span#header-mile
+          span |
+          span#header-premium
         button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="#navbarSupportedContent" aria-expanded="true" aria-label="Toggle navigation"
           span class="navbar-toggler-icon"
-        div class="collapse navbar-collapse collapse show" id="navbarSupportedContent"
+        div class="collapse navbar-collapse collapse show" id="navbarSupportedContent" style="overflow:hidden"
           ul class="navbar-nav me-auto mb-2 mb-lg-0"
             li class="nav-item"
               a class="nav-link active" aria-current="page" onclick="_refreshButtonClick()" href="#" data-i18n-title="lobby.refresh" data-click="normal"
@@ -16,8 +28,9 @@ div.layer#layerLobby
             li class="nav-item"
               a.button class="nav-link active" aria-current="page" href="#" onclick="_optionButtonClick()" data-i18n-title="lobby.options" data-click="normal"
                 img src="img/icon_gear.png"
-            li class="nav-item dropdown"
-              a.button  class="nav-link active" aria-current="page" href="#" data-bs-toggle="dropdown" ari-expanded="false" data-i18n-title="lobby.websystem"
+
+            li class="nav-item"
+              a.button class="nav-link active" aria-current="page" href="#" data-bs-toggle="dropdown" aria-expanded="false" data-i18n-title="lobby.websystem"
                 img src="img/icon_web2.png"
               ul class="dropdown-menu"
                 li
@@ -66,6 +79,9 @@ div.layer#layerLobby
                   a class="dropdown-item" href="#" onclick="_navigateToWebSystem('inquiries/new')" data-click="normal"
                     i.fa.fa-lg.fa-fw.fa-question-circle
                     span data-i18n="submenu.inquiry"
+            li class="nav-item"
+                a.button class="nav-link active" aria-current="page" href="#" onclick="_logoutButtonClick()" data-i18n-title="lobby.logout" data-click="cancel"
+                  i.fa.fa-sign-out.fa-2x
           form class="d-flex" role="search"
             input#findUser class="form-control me-2" type="text" placeholder="User IDs" aria-label="Search"
 
@@ -77,51 +93,72 @@ div.layer#layerLobby
       input.automatchCancelButton data-i18n-value="automatch.cancel" type="button" onclick="_automatchCancelButtonClick()" data-click="cancel"
       |&emsp;
       i.fa.fa-codepen.fa-spin
-    div class="container"
-      div style="flex:1;padding-top:7px" class="row"
-        div.vbox#playerListBox class="col col-md-4"
-          div.container
-            div.grid-wrapper#playerGridWrapper style="flex: 7 7 1px;" class="row h-25 overflow-scroll"
-              table.stripe.hover#playerGrid
-                tr
-                  thead class="sticky-top"
-                    th data-i18n="lobby.status_short"
-                    th data-i18n="lobby.title"
-                    th data-i18n="lobby.rank"
-                    th data-i18n="lobby.name"
-                    th data-i18n="lobby.country"
-                    th data-i18n="lobby.rate"
-                  tbody style="scrollarea"
-            div.grid-wrapper#waiterGridWrapper style="flex: 3 3 1px" class="row overflow-scroll"
-              table.stripe.hover#waiterGrid
-                tr
-                  thead
-                    th data-i18n="lobby.waiter"
-                    th data-i18n="lobby.rate"
-                    th data-i18n="lobby.rule"
-                    th data-i18n="lobby.thinking_time"
-                  tbody
-          / div.vbox#gameListBox class=""
-        div.grid-wrapper#gameGridWrapper class="col col-md-5 "
-          div class="row"
-            table.stripe.hover#gameGrid
-              tr
-                thead
-                  th
-                    |☗
-                    span data-i18n="lobby.black"
-                  th
-                    |☖
-                    span data-i18n="lobby.white"
-                  th data-i18n="lobby.rule"
-                  th data-i18n="lobby.game_status"
-                  th data-i18n="lobby.monitor"
-                  th data-i18n="lobby.opening_short"
-                tbody
-        div class="col col-md-3 "
-          div class="container"
-            div#lobbyMessageArea class="row h-75"
-            div.hbox style="margin-top:7px"
-              span.on-background data-i18n="lobby.chat" style="margin-right:5px;white-space:nowrap"
-              input type="text" id="lobbyChatInput" style="flex: 1"
-        div#worldClocks class="col col-md-1"
+    div.container
+      div style="flex:1;padding-top:7px; height: 55vh" class="row"
+        div#playerListBox class="col-sm-6"
+          div class="accordion" id="accordionExample"
+            div class="accordion-item"
+              h2 class="accordion-header" id="headingOne"
+                button class="accordion-button " type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne" data-i18n="lobby.players"
+              div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample" style=""
+                div class="accordion-body"
+                  div.grid-wrapper#playerGridWrapper style="flex: 7 7 1px ;height: 40vh" class="row overflow-auto"
+                    table.stripe.hover#playerGrid
+                      thead
+                        tr
+                          th data-i18n="lobby.status_short"
+                          th data-i18n="lobby.title"
+                          th data-i18n="lobby.rank"
+                          th data-i18n="lobby.name"
+                          th data-i18n="lobby.country"
+                          th data-i18n="lobby.rate"
+                      tbody
+            div class="accordion-item"
+              h2 class="accordion-header" id="headingTwo"
+                button class="accordion-button " type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo" data-i18n="lobby.wait"
+              div id="collapseTwo" class="accordion-collapse collapse show" aria-labelledby="headingTwo" data-bs-parent="#accordionExample" style=""
+                div class="accordion-body"
+                  div.grid-wrapper#waiterGridWrapper style="flex: 3 3 1px;height: 40vh; overflow-y: auto" class="row "
+                    table.stripe.hover#waiterGrid
+                      tr
+                        thead
+                          th data-i18n="lobby.waiter"
+                          th data-i18n="lobby.rate"
+                          th data-i18n="lobby.rule"
+                          th data-i18n="lobby.thinking_time"
+                        tbody
+        div class="col-sm-6"
+          div class="accordion" id="accordionGame"
+            div class="accordion-item"
+              h2 class="accordion-header" id="headingGame"
+                button class="accordion-button " type="button" data-bs-toggle="collapse" data-bs-target="#collapseGame" aria-expanded="false" aria-controls="collapseGame" data-i18n="lobby.lobby"
+              div id="collapseGame" class="accordion-collapse collapse show" aria-labelledby="headingGame" data-bs-parent="#accordionGame" style=""
+                div class="accordion-body"
+                  div.grid-wrapper.overflow-auto#gameGridWrapper style="height:45vh"
+                    table.stripe.hover#gameGrid
+                      tr
+                        thead
+                          th
+                            |☗
+                            span data-i18n="lobby.black"
+                          th
+                            |☖
+                            span data-i18n="lobby.white"
+                          th data-i18n="lobby.rule"
+                          th data-i18n="lobby.game_status"
+                          th data-i18n="lobby.monitor"
+                          th data-i18n="lobby.opening_short"
+                        tbody
+      div.row
+        div.col
+          div class="accordion" id="accordionChat"
+            div class="accordion-item"
+              h2 class="accordion-header" id="headingChat"
+                button class="accordion-button " type="button" data-bs-toggle="collapse" data-bs-target="#collapseChat" aria-expanded="false" aria-controls="collapseChat" data-i18n="lobby.chat"
+              div id="collapseChat" class="accordion-collapse collapse " aria-labelledby="headingChat" data-bs-parent="#accordionChat" style=""
+                div class="accordion-body"
+                  div#lobbyMessageArea style="overflow-y: auto; height: 25vh"
+                  div.hbox style="margin-top:7px"
+                    span.on-background data-i18n="lobby.chat" style="margin-right:5px;white-space:nowrap"
+                    input type="text" id="lobbyChatInput" style="flex: 1"
+          / div#worldClocks class="col col-md-1"
